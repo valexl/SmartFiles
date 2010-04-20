@@ -7,8 +7,14 @@ Created on 16.04.2010
 class ProcessingRequest(object):
     
     def __init__(self,user_request): # конструктор класса
-        self.operators = ['or','and','not','()'] # операции языка запроса   
-        self.SQLtables = ['object','objects_tags','fields_tags','fields'] # имена таблиц которые учавствуют в запросе Базе Данных
+        self.operators = ['or','and','not','()'] # операции языка запроса
+        
+        self.table_objs = 'object'
+        self.table_objs_tags = 'objects_tags'
+        self.table_objs_fields = 'objects_fields'
+        self.table_fields = 'fields'   
+        self.SQLtables = [self.table_objs, self.table_objs_tags, self.table_objs_fields, self.table_fields] # имена таблиц которые учавствуют в запросе Базе Данных
+        
         self.index_using_tables = [0]
         self.field_words = ['>', '>=', '<>', '=', ':', '<=', '<'] 
         
@@ -22,11 +28,12 @@ class ProcessingRequest(object):
         
         
         
-        
-    # ========================================
-    # преобразование строки запроса : убираются все 2-е,3-е и тд пробелы.
+   
             
     def cleare_extra_space (self,string):    
+        '''
+        преобразование строки запроса : убираются все 2-е,3-е и тд пробелы.
+        '''
         
         str_lenght = len(string)
         string = string.replace('  ',' ')
@@ -223,6 +230,7 @@ class ProcessingRequest(object):
         
         return atom
     
+    
     def union_operator_and_atom(self,atom,index_operator):
         if self.is_list(atom):
             result = ' ' + self.convert_to_SQL(atom) + ' '
@@ -234,6 +242,7 @@ class ProcessingRequest(object):
             return self.operators[index_operator] + result
         
         
+#    @staticmethod
     def convert_to_SQL(self,request_list):
         index = 0
         operator = request_list[0]
@@ -247,31 +256,33 @@ class ProcessingRequest(object):
         return result_string
         
   
-            
-            
-str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
-#str_request = '(tag1 or tag2) and (tag3 or tag4)'
-#str_request = 'tag1 and tag2 and (tag3 and ((()))tag4) and not (tag5)'
-#str_request = 'not tag1 or not tag2 and not (tag3 or tag4)'
-#str_request = 'tag1 or tag2 or tag3 and tag4 or tag5 and not tag8' 
-#print(str_request.split('bbc'))
-#str_request = 'tag1 or tag2 or and tag5'
-B = ProcessingRequest(str_request)
-
-
-#B.split_tmp_func(str_request)
-#B.split_by_operator(str_request)
-res = B.split_request(str_request)
-#print(res)
-#res = ['or', 'tag1 ', ['and', ' tag2 ', ['()', ['or', 'tag3 ', ' tag4']], ['()', ['or', 'tag5 ', ' tag6']]], ['not', ' tag7']]
-print(B.convert_to_SQL(res))
-
-#print(res)
-
-#res =  '"path"="C:/Windows"'
-#res =  "h='C:/Windows'"
-#res = 'tag1'
-
-#print(B.type_defintion(res))
-
+if __name__=='__main__':
+                
+    str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
+    #str_request = '(tag1 or tag2) and (tag3 or tag4)'
+    #str_request = 'tag1 and tag2 and (tag3 and ((()))tag4) and not (tag5)'
+    #str_request = 'not tag1 or not tag2 and not (tag3 or tag4)'
+    #str_request = 'tag1 or tag2 or tag3 and tag4 or tag5 and not tag8' 
+    #print(str_request.split('bbc'))
+    #str_request = 'tag1 or tag2 or and tag5'
+    B = ProcessingRequest()
+    
+    
+    #B.split_tmp_func(str_request)
+    #B.split_by_operator(str_request)
+    res = B.split_request(str_request)
+    #print(res)
+    #res = ['or', 'tag1 ', ['and', ' tag2 ', ['()', ['or', 'tag3 ', ' tag4']], ['()', ['or', 'tag5 ', ' tag6']]], ['not', ' tag7']]
+    print('sql = ', B.convert_to_SQL(res))
+    
+    
+    B.convert_to_SQL(str_request)
+    #print(res)
+    
+    #res =  '"path"="C:/Windows"'
+    #res =  "h='C:/Windows'"
+    #res = 'tag1'
+    
+    #print(B.type_defintion(res))
+    
 
