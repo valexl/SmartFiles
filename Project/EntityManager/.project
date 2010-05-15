@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Query language</name>
+	<name>EntityManager</name>
 	<comment></comment>
 	<projects>
-		<project>EntityManager</project>
+		<project>RepoManager</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
