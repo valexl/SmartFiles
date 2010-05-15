@@ -6,6 +6,9 @@ Created on 22.04.2010
 import sqlite3 as sqlite
 import os
 
+
+
+#Этот класс объединяем вместе с RepoManager!!!
 class Repository(object):
     '''
     Класс репозиторий

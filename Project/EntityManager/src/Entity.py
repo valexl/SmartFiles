@@ -8,14 +8,16 @@ from Field import Field
 class Entity(object):
     '''
     Класс "Сущность". 
-    '''
+    '''    
 
-
-    def __init__(self,file_path,user_name,list_tags=[],list_fields=[],file_size=0,file_date_modifired=0):
+    def __init__(self, title, entity_type, user_name, list_tags=[], list_fields=[], 
+                 file_path=None, file_size=0, file_date_modifired=None, file_hash=None, 
+                 notes='', date_created=None, id=None):
         '''
         Constructor
         '''
         
+        self.id = id
         self.file_path = file_path
         self.file_size = file_size
         self.file_date_modifired = file_date_modifired

@@ -21,7 +21,7 @@ class Tag(object):
     
     def get_attirbutes(self):
         '''
-            возращает поля обеъкта в виде списка
+            возращает поля объекта в виде списка
         '''
         list_attributes = [self.name,self.user_name,self.description,self.date_create]    
         return list_attributes

@@ -258,8 +258,10 @@ class EntityManager:
         
        # print(file_path)
         
-        cursor.execute("SELECT field.name, field.user_name, t1.value, field.value_type, field.date_create,field.description FROM field "
-                       "INNER JOIN (entity_fields INNER JOIN " 
+        cursor.execute(" SELECT field.name, field.user_name, t1.value, field.value_type, 
+                       " field.date_create,field.description 
+                       " FROM field "
+                       " INNER JOIN (entity_fields INNER JOIN " 
                        " entity ON entity.id = entity_fields.entity_id AND entity.file_path = ? "
                        " AND entity.user_name = entity_fields.user_name) AS t1"
                        " ON t1.user_name = field.user_name AND t1.field_name = field.name ",
@@ -272,7 +274,8 @@ class EntityManager:
 #        print(cursor.fetchall())
         return list_tags
         
-    def load_entity_obj(self,file_path,user_name):
+    #Убарть user_name
+    def load_entity_obj(self,file_path):
         connect = sqlite.connect(self._repo_path)
         cursor = connect.cursor()
         

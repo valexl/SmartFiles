@@ -8,6 +8,7 @@ import os
 from Repository import Repository
 import SystemRepoInfo
 import Entity
+from EntityManager import EntityManager
 #import EntityManager
 #import EntityManager
 
@@ -15,48 +16,72 @@ class RepoManager(object):
     '''
     classdocs
     '''
-
     
-    def __init__(self):
+    
+    def __init__(self, path_to_repo):
         '''
             конструктор.. 
         '''
+        
+        #Открываем хранилище path_to_repo
+        #Проверяем хранилище ли это? Есть ли .metadata
+        #Если нет, то сразу же выкидываем исключение
+        
         #if not os.path.exists(SystemRepoInfo.metadata_dir):
         #    os.mkdir(SystemRepoInfo.metadata_dir)
         self._name_dbfile = os.path.join(SystemRepoInfo.metadata_dir,SystemRepoInfo.metadata_file)
+        self._path_to_repo = path_to_repo
         
         #временно файл с базой будет хранится в корне хранилище, а не в директории .metadata
         self._name_dbfile = SystemRepoInfo.metadata_file
+        
+    def getEntityManager(self):
+        ''' Возвращает экземпляр EntityManager, уже привязанный к данному хранилищу. '''        
+        return EntityManager(self._path_to_repo)    
     
     
     
-    def create_repository(self,repo_path,user_name):
+    @staticmethod
+    def init_repository(path_to_new_repo, user_admin_name):        
+        '''Это СТАТИЧЕСКИЙ метод, который позволяет создать новое пустое хранилище.
+        Если при создании хранилища какие-либо ошибки --- должно вылетать иключение.
+        Возвращает экземпляр RepoManager-а, привязанный к созданному хранилищу. 
         '''
-            создание нового хранилища или возращает существующие.
-        '''
-        path_dbfile = os.path.join(repo_path,self._name_dbfile)
-        if not os.path.exists(path_dbfile):
-            # если файл с базой не существует, то создается новый файл и заново инициализируются таблицы]
-            print('the table disabled')
-            self.__init_repository(path_dbfile,user_name)
-        repo = Repository(path_dbfile)
-        return repo
+        
+        print('init_repository()')
+        
+        RepoManager.__init_repository(path_to_new_repo, user_admin_name)
+        return RepoManager(path_to_new_repo)
     
     
     
-    def __init_repository(self,repo_path,user_name):
+    
+    
+    #Этот метод тоже надо бы сделать СТАТИЧЕСКИМ
+    @staticmethod
+    def __init_repository(repo_path, user_name):
         '''
             создание таблиц и их заполнения необходимой для работы хранилища информацией.
         '''
        # print(repo_path)
-        repoDB = sqlite.connect(repo_path)
+        path_metadata_file = os.path.join(repo_path, SystemRepoInfo.metadata_file)
+        if os.path.exists(repo_path):
+            raise Exception('ыдлвоаолыдвоа')
+        print('path_metadata_file=', path_metadata_file)
+        repoDB = sqlite.connect(path_metadata_file)
         cursor = repoDB.cursor()
-        cursor.execute("CREATE TABLE users("
+        cursor.execute("CREATE TABLE users ("
                 "name VARCHAR2(255) NOT NULL PRIMARY KEY,"
                 "password INTEGER,"
                 "description VARCHAR2(255),"
                 "date_create TIMESTAMP)")
-        self.__init_users_table(cursor, user_name)
+        repoDB.commit()
+        
+        cursor.execute("INSERT INTO users "
+                "(name, description)"
+                "VALUES (?,?)",
+                (user_name,'123123123'))
+        
         
         
         
@@ -67,10 +92,6 @@ class RepoManager(object):
                        "PRIMARY KEY (path,user_name),"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"
                        )
-        list_dirs=[]
-        self.__init_dir_usage_table(cursor, list_dirs, user_name)
-        
-        
         
         cursor.execute("CREATE TABLE entity("
                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
@@ -85,7 +106,7 @@ class RepoManager(object):
                        "date_create TIMESTAMP,"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"       
         )    
-        self.__init_entity_table(cursor,repo_path,user_name)
+        
             
         
         #
@@ -168,28 +189,9 @@ class RepoManager(object):
       
         
        
-    # инициализация таблицы пользователей  
-    def __init_users_table(self,cursor, user_name):
-        '''
-            инициализация таблицы users. ЗАпись в базу информации о пользователе хранилища. 
-        '''
-        cursor.execute("INSERT INTO users"
-                "(name,description)"
-                "VALUES (?,?)",
-                (user_name,'discription'))
-    
-    # конец
-    # инициализация таблицы пользователей
+   
     
     
-    
-    # инициализация таблицы включенных\отключенных директорий
-    def __init_dir_usage_table(self,cursor, list_dirs, user_name):
-        '''
-            инициализация таблицы dir_usage. Заполняется информация о использованных и не использвоанных директориях хранилища.
-        '''
-        #необходима передавать в качестве параметров список директорий пользователя.
-        pass
     
     def __get_list_dirs(self):
         '''
@@ -206,21 +208,21 @@ class RepoManager(object):
     
     
     # инициализация таблицы сущностей
-    def __init_entity_table(self, cursor, fileBD_path,user_name):
-        '''
-            инициализация таблицы entity. заполняется информацией о файлах хранилища 
-        '''
-       
-        subdir_path = os.path.dirname(fileBD_path)
-        list_files = self.__get_subdir_files(subdir_path)
-        # Необходимо для вычисления SHA продублировать записи во временном файле.
-        # Дублирование необходимо, что бы во время вычисления хеша не занималась база данных
-    
-        for file_path in list_files:
-            cursor.execute("INSERT INTO entity"
-                   "(file_path,user_name)"
-                   "VALUES(?,?)",
-                   (file_path,user_name))
+#    def __init_entity_table(self, cursor, fileBD_path,user_name):
+#        '''
+#            инициализация таблицы entity. заполняется информацией о файлах хранилища 
+#        '''
+#       
+#        subdir_path = os.path.dirname(fileBD_path)
+#        list_files = []
+#        # Необходимо для вычисления SHA продублировать записи во временном файле.
+#        # Дублирование необходимо, что бы во время вычисления хеша не занималась база данных
+#    
+#        for file_path in list_files:
+#            cursor.execute("INSERT INTO entity"
+#                   "(file_path,user_name)"
+#                   "VALUES(?,?)",
+#                   (file_path,user_name))
       
         
             
@@ -261,16 +263,17 @@ class RepoManager(object):
         '''
             вспомогательная функция для проверки записывания таблицы entity
         '''
-        repoDB = sqlite.connect(os.path.join(repo_path,self._name_dbfile))
+        repoDB = sqlite.connect(os.path.join(self._path_to_repo,self._name_dbfile))
         cursor = repoDB.cursor()
-        cursor.execute("SELECT id,file_path,user_name FROM entity")
+        #cursor.execute("SELECT id,file_path,user_admin_name FROM entity")
+        cursor.execute("SELECT * FROM users")
         
         list_file_path = cursor.fetchall()
         return list_file_path
         
         
         
-    def add_user_in_repository(self,reposit,user_name):
+    def add_user_in_repository(self,user_name):
         
         '''
             добавляет пользователя в хранилище
@@ -280,7 +283,7 @@ class RepoManager(object):
         #    self.__init_repository(reposit.path,user_name)
         #else:
             
-        repoDB = sqlite.connect(reposit.path)
+        repoDB = sqlite.connect(os.path.join(self._path_to_repo,self._name_dbfile))
         cursor = repoDB.cursor()
                 
         self.__init_users_table(cursor, user_name)
@@ -314,22 +317,30 @@ class RepoManager(object):
     
 if __name__ == '__main__':
     
-    repo_path = '/tmp/tmp/'
     
-    os.remove(os.path.join(repo_path,SystemRepoInfo.metadata_file))
-    user_name = 'valexl'
-    Rep = RepoManager()
-    rep_obj = Rep.create_repository(repo_path,user_name)
-    print('adding new user "vitvlkv"')
-    user_name = 'vitvlkv'
-    rep_obj = Rep.add_user_in_repository(rep_obj, user_name)
-    print(rep_obj.path)
-    print(rep_obj.list_users)
-    print('delete user - ', user_name)
-    Rep.delete_user(rep_obj, user_name)
-    print(Rep.get_repository(repo_path).list_users)
+    repo_path = '/tmp/tmp'
     
-    print(Rep.tmp_show_entity(repo_path))
+    if os.path.exists(os.path.join(repo_path, SystemRepoInfo.metadata_file)):
+        os.remove(os.path.join(repo_path, SystemRepoInfo.metadata_file))
+      
+    if not os.path.exists(repo_path):        
+        os.mkdir(repo_path)
+    
+    
+    user_name = 'valexl'    
+    rep_obj = RepoManager.init_repository(repo_path,user_name)
+    
+    
+#    print('adding new user "vitvlkv"')
+#    user_name = 'vitvlkv'
+#    rep_obj = rep_obj.add_user_in_repository(user_name)
+##    print(rep_obj.path)
+##    print(rep_obj.list_users)
+#    print('delete user - ', user_name)
+##    Rep.delete_user(rep_obj, user_name)
+##    print(Rep.get_repository(repo_path).list_users)
+##    
+    print(rep_obj.tmp_show_entity(repo_path))
 
       
     

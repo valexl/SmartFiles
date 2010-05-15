@@ -10,7 +10,7 @@ class Field(object):
     '''
 
 
-    def __init__(self,field_name,user_name,field_value,value_type,field_date_create,field_description):
+    def __init__(self,field_name,user_name,field_value,value_type,field_date_create,field_description=''):
         '''
         Constructor
         '''
