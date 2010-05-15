@@ -35,25 +35,25 @@
   </database>
  </source-databases>
  <target-database id="ppdb" dbcs-ref="DS0">
-  <table id="TAB7" populated="true" name="object" objectType="TABLE" physicalName="object" remarks="Объект, который хранится в хранилище (Файл, директория или просто мета-информация сама по себе)." >
+  <table id="TAB7" populated="true" name="entity" objectType="TABLE" physicalName="entity" remarks="Объект, который хранится в хранилище (Файл, директория или просто мета-информация сама по себе)." >
    <folder id="FOL8" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL9" populated="true" autoIncrement="false" autoIncrementSequenceName="object_id_seq" defaultValue="" name="id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
-    <column id="COL10" populated="true" autoIncrement="false" autoIncrementSequenceName="object_name_seq" defaultValue="" name="title" nullable="1" physicalName="name" precision="255" referenceCount="1" remarks="Это просто имя объекта, его заголовок. Это НЕ ИМЯ ФАЙЛА! Просто это поле в первую очередь нужно для объектов object_type которых meta.  Конечно, можно было бы создать поле с именем &quot;title&quot;, но наличие колонки title гарантирует, что эта информация будет у каждого объекта (хотя она может и быть равна null)." scale="0" type="12" />
-    <column id="COL11" populated="true" autoIncrement="false" autoIncrementSequenceName="object_notes_seq" defaultValue="" name="notes" nullable="1" physicalName="notes" precision="255" referenceCount="1" remarks="Комментарии/заметки к объекту. Вобщем-то можно создать и поле &quot;notes&quot; прицепить его к файлу и написать туда все, что хочется.  Но эта колонка - она как бы для пометок о файле, которые не зависят от тегов и полей. Поэтому я думаю, колонка в будущем может пригодиться." scale="0" type="12" />
-    <column id="COL12" populated="true" autoIncrement="false" autoIncrementSequenceName="object_type_object_seq" defaultValue="" name="object_type" nullable="0" physicalName="type_object" precision="10" referenceCount="1" remarks="Тип объекта, возможные варианты:  1) file 2) dir 3) meta  Последний тип meta - означает, что объект - это просто метаданные сами по себе." scale="0" type="12" />
-    <column id="COL13" populated="true" autoIncrement="false" autoIncrementSequenceName="object_file_path_seq" defaultValue="" name="file_path" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Это полный путь относительно корня хранилища к файлу. Вместе с именем файла." scale="0" type="4" />
-    <column id="COL14" populated="true" autoIncrement="false" autoIncrementSequenceName="object_hash_seq" defaultValue="" name="file_hash" nullable="1" physicalName="hash" precision="20" referenceCount="1" remarks="sha1 хеш от содержимого файла.  Это поле не является первичным ключом, т.к. пользователь может захотеть добавить два одинаковых файла в одно и то же хранилище (но в разные поддиректории)." scale="0" type="12" />
-    <column id="COL15" populated="true" autoIncrement="false" autoIncrementSequenceName="object_size_seq" defaultValue="" name="file_size" nullable="0" physicalName="size" precision="10" referenceCount="1" remarks="Размер файла в байтах." scale="0" type="4" />
-    <column id="COL16" populated="true" autoIncrement="false" autoIncrementSequenceName="object_date_modified_seq" defaultValue="" name="file_date_modified" nullable="0" physicalName="date_modified" precision="10" referenceCount="1" remarks="Дата последней модификации, которая была у физического файла на диске, когда вычислялся хеш hash." scale="0" type="93" />
+    <column id="COL9" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_id_seq" defaultValue="" name="id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL10" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_name_seq" defaultValue="" name="title" nullable="1" physicalName="name" precision="255" referenceCount="1" remarks="Это просто имя объекта, его заголовок. Это НЕ ИМЯ ФАЙЛА! Просто это поле в первую очередь нужно для объектов object_type которых meta.  Конечно, можно было бы создать поле с именем &quot;title&quot;, но наличие колонки title гарантирует, что эта информация будет у каждого объекта (хотя она может и быть равна null)." scale="0" type="12" />
+    <column id="COL11" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_notes_seq" defaultValue="" name="notes" nullable="1" physicalName="notes" precision="255" referenceCount="1" remarks="Комментарии/заметки к объекту. Вобщем-то можно создать и поле &quot;notes&quot; прицепить его к файлу и написать туда все, что хочется.  Но эта колонка - она как бы для пометок о файле, которые не зависят от тегов и полей. Поэтому я думаю, колонка в будущем может пригодиться." scale="0" type="12" />
+    <column id="COL12" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_type_entity_seq" defaultValue="" name="entity_type" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Тип объекта, возможные варианты:  1) file 2) dir 3) meta  Последний тип meta - означает, что объект - это просто метаданные сами по себе." scale="0" type="12" />
+    <column id="COL13" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_file_path_seq" defaultValue="" name="file_path" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Это полный путь относительно корня хранилища к файлу. Вместе с именем файла." scale="0" type="4" />
+    <column id="COL14" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_hash_seq" defaultValue="" name="file_hash" nullable="1" physicalName="hash" precision="20" referenceCount="1" remarks="sha1 хеш от содержимого файла.  Это поле не является первичным ключом, т.к. пользователь может захотеть добавить два одинаковых файла в одно и то же хранилище (но в разные поддиректории)." scale="0" type="12" />
+    <column id="COL15" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_size_seq" defaultValue="" name="file_size" nullable="0" physicalName="size" precision="10" referenceCount="1" remarks="Размер файла в байтах." scale="0" type="4" />
+    <column id="COL16" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_date_modified_seq" defaultValue="" name="file_date_modified" nullable="0" physicalName="date_modified" precision="10" referenceCount="1" remarks="Дата последней модификации, которая была у физического файла на диске, когда вычислялся хеш hash." scale="0" type="93" />
     <column id="COL17" populated="true" autoIncrement="false" autoIncrementSequenceName="user_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" referenceCount="1" remarks="Пользователь, который добавил файл в хранилище." scale="0" type="12" />
-    <column id="COL18" populated="true" autoIncrement="false" autoIncrementSequenceName="object_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="Дата создания объекта в базе." scale="0" type="93" />
+    <column id="COL18" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="Дата создания объекта в базе." scale="0" type="93" />
    </folder>
    <folder id="FOL19" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
    </folder>
    <folder id="FOL20" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
    </folder>
    <folder id="FOL21" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX22" populated="true" clustered="false" name="object_pk" physicalName="file_pk" primaryKeyIndex="true" unique="true" >
+    <index id="IDX22" populated="true" clustered="false" name="entity_pk" physicalName="file_pk" primaryKeyIndex="true" unique="true" >
      <index-column id="IDC23" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL9" name="id" physicalName="id" />
     </index>
    </folder>
@@ -113,9 +113,9 @@
     </index>
    </folder>
   </table>
-  <table id="TAB61" populated="true" name="objects_tags" objectType="TABLE" physicalName="objects_tags" remarks="" >
+  <table id="TAB61" populated="true" name="entity_tags" objectType="TABLE" physicalName="entity_tags" remarks="" >
    <folder id="FOL62" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL63" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="object_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL63" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
     <column id="COL64" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_tag_name_seq" defaultValue="" name="tag_name" nullable="0" physicalName="tag_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
     <column id="COL65" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
    </folder>
@@ -124,27 +124,27 @@
    <folder id="FOL67" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
    </folder>
    <folder id="FOL68" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX69" populated="true" clustered="false" name="objects_tags_pk" physicalName="files_tags_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC70" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL63" name="object_id" physicalName="file_id" />
+    <index id="IDX69" populated="true" clustered="false" name="entity_tags_pk" physicalName="files_tags_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC70" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL63" name="entity_id" physicalName="file_id" />
      <index-column id="IDC71" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL64" name="tag_name" physicalName="tag_name" />
      <index-column id="IDC72" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL65" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB73" populated="true" name="objects_fields" objectType="TABLE" physicalName="objects_fields" remarks="" >
+  <table id="TAB73" populated="true" name="entity_fields" objectType="TABLE" physicalName="entity_fields" remarks="" >
    <folder id="FOL74" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL75" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="object_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL75" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
     <column id="COL76" populated="true" autoIncrement="false" autoIncrementSequenceName="field_name_seq" defaultValue="" name="field_name" nullable="0" physicalName="name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
     <column id="COL77" populated="true" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL78" populated="true" autoIncrement="false" autoIncrementSequenceName="objects_fields_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="255" referenceCount="1" remarks="Значение поля для конкретного файла.  Хотя тип колонки и строковый, доп. поле data_type определяет как интерпретировать содержимое: как строку или как число." scale="0" type="12" />
+    <column id="COL78" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_fields_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="255" referenceCount="1" remarks="Значение поля для конкретного файла.  Хотя тип колонки и строковый, доп. поле data_type определяет как интерпретировать содержимое: как строку или как число." scale="0" type="12" />
    </folder>
    <folder id="FOL79" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
    </folder>
    <folder id="FOL80" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
    </folder>
    <folder id="FOL81" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX82" populated="true" clustered="false" name="objects_fields_pk" physicalName="files_fields_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC83" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL75" name="object_id" physicalName="file_id" />
+    <index id="IDX82" populated="true" clustered="false" name="entity_fields_pk" physicalName="files_fields_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC83" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL75" name="entity_id" physicalName="file_id" />
      <index-column id="IDC84" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL76" name="field_name" physicalName="field_name" />
      <index-column id="IDC85" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL77" name="user_name" physicalName="user_name" />
     </index>
@@ -207,7 +207,7 @@
    <folder id="FOL122" populated="true" name="Columns" physicalName="Columns" type="1" >
     <column id="COL123" populated="true" autoIncrement="false" autoIncrementSequenceName="dir_usage_id_seq" defaultValue="" name="path" nullable="0" physicalName="id" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
     <column id="COL124" populated="true" autoIncrement="false" autoIncrementSequenceName="user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="Имя (логин) пользователя." scale="0" type="12" />
-    <column id="COL125" populated="true" autoIncrement="false" autoIncrementSequenceName="dir_usage_is_use_seq" defaultValue="" name="usage_status" nullable="0" physicalName="is_use" precision="30" referenceCount="1" remarks="используется папка в хранилище или нет. Лучше сделать строкового типа, чтобы иметь возможность задавать больше значений, чем простое true/false." scale="0" type="12" />
+    <column id="COL125" populated="true" autoIncrement="false" autoIncrementSequenceName="dir_usage_usage_status_seq" defaultValue="" name="usage_status" nullable="0" physicalName="" precision="30" referenceCount="1" remarks="используется папка в хранилище или нет. Лучше сделать строкового типа, чтобы иметь возможность задавать больше значений, чем простое true/false." scale="0" type="12" />
    </folder>
    <folder id="FOL126" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
    </folder>
