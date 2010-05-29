@@ -3,23 +3,54 @@ Created on 10.04.2010
 
 @author: valexl
 '''
-
-class ProcessingRequest(object):
+#@staticmethod
+def cleareExtraSpace (request):    
+        '''
+            убираются все удвоенные и начальные пробелы.
+        '''
+        
+        str_lenght = len(request)
+        request = request.replace('  ',' ')
+        while (str_lenght != len(request)):
+            str_lenght = len(request)
+            request = request.replace('  ',' ')
+         
+        return request.lower().strip() # убираются пробелы с начало и конца строки
     
-    def __init__(self): # конструктор класса
-        '''
-            конструктор класса
-        '''
-        self._operators = ['or','and','not','()'] # операции языка запроса
         
-        self._table_objs = 'object'
-        self._table_objs_tags = 'objects_tags'
-        self._table_objs_fields = 'objects_fields'
-        self._table_fields = 'fields'   
-        self._SQLtables = [self._table_objs, self._table_objs_tags, self._table_objs_fields, self._table_fields] # имена таблиц которые учавствуют в запросе Базе Данных
+    #@staticmethod
+def cleareSpaceAboutOperator(request,operator):     
+        '''
+            убираются пробелы между полем операцией и значением
+        '''
+        str_lenght = 0
+        index=0
+        len_operator=len(operator)
+        while (index>=0):
+            str_lenght = len(request)
+            index = request.find(operator,index+1)
+            if index>0:                
+                if request[index-1]==' ':
+                    request=request[:index-1] + request[index:]
+                    index-=1
+                if request[index+len(operator)]==' ':
+                    request=request[:index+len(operator)] + request[index+len(operator)+1:]
+        return request
+class ProcessingRequest(object):
+    '''
+        преобразование пользовательского запроса в SQL (В данный момент не учтены пользователи, path)
+    '''
+   
+    _operators = ['or','and','not','()'] # операции языка запроса
         
-        self._index_using_tables = [0]
-        self._field_words = ['>', '>=', '<>', '=', ':', '<=', '<'] 
+    _table_objs = 'entity'
+    _table_objs_tags = 'entity_tags'
+    _table_objs_fields = 'entity_fields'
+    _table_fields = 'fields'   
+    _SQLtables = [_table_objs,_table_objs_tags,_table_objs_fields] # имена таблиц которые учавствуют в запросе Базе Данных
+        
+    _index_using_tables = [0]
+    _field_words = ['<>','<=', '>=','>' , '=', ':', '<'] 
         
         #>, >=, <>, =, :, <=, <     - знаки которые указывают поиск по полям
         #path="путь к директории"   - path указывает поиск по директории
@@ -27,75 +58,59 @@ class ProcessingRequest(object):
         #
     
         #self.request = '' 
-        #self.cleare_extra_space(user_request); # строка запроса заданная пользователем 
+        #self.cleareExtraSpace(user_request); # строка запроса заданная пользователем 
                                                               # переведена в один регистр и без двойных пробелов  
         
-        
-        
-   
-            
-    def __cleare_extra_space (self,string):    
-        '''
-        инициализация строки запроса - убираются все лишние пробелы.
-        '''
-        
-        str_lenght = len(string)
-        string = string.replace('  ',' ')
-        while (str_lenght != len(string)):
-            str_lenght = len(string)
-            string = string.replace('  ',' ')
-        return string.lower().strip() # убираются пробелы с начало и конца строки
-        
-   
-        
-        
-    def __starting_split (self, request): 
-        '''
-        
-        поиск в запросе операции с наименьшим проритетом и относительно
-        этой операции запускается функция разбиение
-        
-        '''
-        operator = 0
-        while operator < 3:
-            if request.count(self._operators[operator])>0:
-                flag = 1
-                return self.__split_by_operator(request,operator)
-            operator += 1
-        return request
     
-       
-    def __split_by_operator (self,request,operator_index):
+
+
+        
+    @staticmethod  
+    def __startingSplit ( request): 
+        '''
+        поиск в запросе операции с наименьшим проритетом и относительно
+        этой операции запускается функция разбиение     
+        '''
+        index_operator = 0
+        while index_operator < 3:
+            if request.count(ProcessingRequest._operators[index_operator])>0:
+                flag = 1
+                return ProcessingRequest.__splitByOperator(request,index_operator)
+            index_operator += 1
+        return [request]
+    
+    @staticmethod
+    def __splitByOperator (request,operator_index):
         '''
           для заданной строки отделяются операнды от операций OR/ AND / NOT
                                                     
         '''
-        list_result = self.__get_spliting_list(request,operator_index)
+        list_result = ProcessingRequest.__getSplitingList(request,operator_index)
         operator_index +=1
         while operator_index <3:
             index = 0
             while index<len(list_result):
-                if list_result[index].count(self._operators[operator_index]) > 0:
-                    list_result[index] = self.__split_by_operator(list_result[index], operator_index)
+                if list_result[index].count(ProcessingRequest._operators[operator_index]) > 0:
+                    list_result[index] = ProcessingRequest.__splitByOperator(list_result[index], operator_index)
                     
                 index+=1
             
             operator_index +=1
-        print(list_result)
+        
         return list_result
-
-    def __get_spliting_list (self,request, operator_index):
+    @staticmethod
+    def __getSplitingList (request, operator_index):
         '''
         
         преобразование строки в список из операций и операндов
         
         '''
-        list_result= [self._operators[operator_index]]
+        list_result= [ProcessingRequest._operators[operator_index]]
         if (operator_index == 0) or (operator_index == 1): # для операций AND OR
-            list_result+=request.split(self._operators[operator_index])
+            list_result+=request.split(ProcessingRequest._operators[operator_index])
         #так как операция NOT унарная то она будет отличаться от преобразований AND, OR
         elif (operator_index ==2): # для операции NOT  
-            list_result.append(request.split(self._operators[operator_index])[1])
+            list_result.append(request.split(ProcessingRequest._operators[operator_index])[1])
         return list_result    
         
    
@@ -111,35 +126,34 @@ class ProcessingRequest(object):
     #
     #
     #
-    #            Hеализован 1й способ решения.
+    #            Реализован 1й способ решения.
 
-   
-    def __is_list (self, string_list):
+    @staticmethod
+    def __isList ( atom):
         '''
         проверка элемента является ли он списком или нет
         '''
-        for operator in self._operators:
-            if string_list[0] == operator:
+        for operator in ProcessingRequest._operators:
+            if atom[0] == operator:
                 return 1
         return 0
-        
-    def __union_request (self,list_request,request_into_brackets):
+    
+    @staticmethod    
+    def __unionRequest (list_request,request_into_brackets):
         '''
          объединение результатов в скобках с искомым
         '''
         index = 0
         for node in list_request:
-            if self.__is_list(node):
-                self.__union_request(node,request_into_brackets)
-            elif node.strip() == self._operators[3]: #скобки
+            if ProcessingRequest.__isList(node):
+                ProcessingRequest.__unionRequest(node,request_into_brackets)
+            elif node.strip() == ProcessingRequest._operators[3]: #скобки
                 list_request[index] = ['()',request_into_brackets.pop(0)]
                 #print('union request-----',list_request[index])
             index += 1
-                
         
-        
-         
-    def __split_request (self,request):       
+    @staticmethod        
+    def __splitRequest (request):       
         '''
          представление строкового запроса в виде вспомогательного списка
         '''       
@@ -147,7 +161,7 @@ class ProcessingRequest(object):
         
         index_open_bracket = request.find('(')
         index_closed_bracket = request.find(')',index_open_bracket)
-        modifire_query_string = request[:index_open_bracket] # копирование всего запроса до скобок.
+        modifide_query_string = request[:index_open_bracket] # копирование всего запроса до скобок.
         
                                                             #PS модифицированная строка запроса в процессе выполнение процедурры 
                                                             #получается на основе request путем 
@@ -159,7 +173,7 @@ class ProcessingRequest(object):
         #======================================
         #отделение в запросе выражений в скобках
         if count_brackets > 0:
-            modifire_query_string+='('
+            modifide_query_string+='('
                           
             index = index_open_bracket
             count_brackets-=1
@@ -167,7 +181,7 @@ class ProcessingRequest(object):
                 count_brackets -=1
                 index = request.find('(',index+1)
                 if index > index_closed_bracket:
-                    modifire_query_string+= request[index_closed_bracket:index+1]
+                    modifide_query_string+= request[index_closed_bracket:index+1]
                     list_strings_into_brackets.append(request[index_open_bracket+1:index_closed_bracket])
                     index_open_bracket = index
                     index_closed_bracket = request.find(')',index_open_bracket)
@@ -175,150 +189,153 @@ class ProcessingRequest(object):
                     index_closed_bracket = request.find(')',index_closed_bracket+1)
             list_strings_into_brackets.append(request[index_open_bracket+1:index_closed_bracket])
             for pos in range(len(list_strings_into_brackets)):
-                list_strings_into_brackets[pos] = self.__split_request(list_strings_into_brackets[pos])
+                list_strings_into_brackets[pos] = ProcessingRequest.__splitRequest(list_strings_into_brackets[pos])
                 #print(list_strings_into_brackets[pos])  
         #отделение в запросе выражений в скобках
         #=======================================
         
-        modifire_query_string+= request[index_closed_bracket:]   
-        #print('the result of __split_request is ---- ',modifire_query_string)
-      #  print('the list strings into brackets is -------- ',list_strings_into_brackets)  
-        list_result = self.__starting_split(modifire_query_string)
+        modifide_query_string+= request[index_closed_bracket:]  
+
+        list_result = ProcessingRequest.__startingSplit(modifide_query_string)
+        #print('list_result',list_result)
         
         #for node in list_strings_into_brackets:
-        self.__union_request(list_result,list_strings_into_brackets)
+        ProcessingRequest.__unionRequest(list_result,list_strings_into_brackets)
         #    print('node is----',node)
        
             
-        print(list_result)
+        
         return list_result
-             
-    def get_SQLRequest (self,user_request):
+    #=======================
+
+    @staticmethod
+    def convertToSQL(user_request_list):
+        #index = 0
+        print(user_request_list)
+        item = ProcessingRequest.__isOperator(user_request_list[0])
+        print('operator is',item)
+        
+        result_string =''
+        if item == '()':
+           result_string = ' (' + ProcessingRequest.convertToSQL(user_request_list[1]) +') '
+        elif item == 'and': 
+            index = 2
+            result_string = ProcessingRequest.convertToSQL(user_request_list[1])    
+            while index < len(user_request_list):
+                result_string += ' AND entity.id IN ( ' + ProcessingRequest.startConvertToSQL(user_request_list[index],0) + ')'
+                index+=1
+        elif item=='or':
+            index = 2
+            result_string = ProcessingRequest.convertToSQL(user_request_list[1])
+            while index < len(user_request_list):
+                result_string +=' or ' + ProcessingRequest.convertToSQL(user_request_list[index])
+                index+=1
+                
+ 
+        else:
+            result_string=ProcessingRequest.__typeDefinition(user_request_list)
+           
+#            result_string=ProcessingRequest.__typeDefinition(item)
+        
+        return result_string
+
+    @staticmethod
+    def startConvertToSQL(user_request_list, flag=1, table=''):
+        if flag:
+            result = ' SELECT DISTINCT entity.* FROM entity, entity_fields, entity_tags WHERE '
+        else:
+            result = ' SELECT DISTINCT entity.id FROM entity, entity_fields, entity_tags WHERE '
+        #print(result)
+        
+        result += ProcessingRequest.convertToSQL(user_request_list)
+        #print(result)
+
+        return result
+    #======================
+    @staticmethod         
+    def getSQLRequest (user_request):
         '''
             преобразование пользовательского запроса в SQL запрос
         '''
-        request = self.__cleare_extra_space(user_request); # строка запроса заданная пользователем 
-                                                           # переведена в один регистр и без двойных пробелов  
-        request_list = self.__split_request(request)
-        string_result = "SELECT * FROM " #необходима функция определение таблиц.
+        request = cleareExtraSpace(user_request); # строка запроса заданная пользователем 
+                                                           # переведена в один регистр и без двойных пробелов 
+        for operator in ProcessingRequest._field_words: 
+            request = cleareSpaceAboutOperator(request,operator)
         
-        string = self.__convert_to_SQL(request_list)
-        #сделать проверку на исключение
-        string_result += self._SQLtables[self._index_using_tables.pop(0)]
-        #сделать проверку на исключение
-        while self._index_using_tables:
-            index = self._index_using_tables.pop(0)
-            string_result += ', ' + self._SQLtables[index]
-        string_result += ' WHERE'
-        return string_result + string
-    
-    def __is_operator (self, string_list):
+        request_list = ProcessingRequest.__splitRequest(request)
+        print('the user request list is',request_list)
+        if len(request_list)==1:
+            result_sql_request = ProcessingRequest.startConvertToSQL(request_list[0])
+        else:
+            result_sql_request = ProcessingRequest.startConvertToSQL(request_list)
+        return result_sql_request
+
+    @staticmethod
+    def __isOperator ( atom):
         '''
-            является ли атом оператором
+            является ли атом оператором.
+            возращает 0 в случае неудачи 
+            или оператор в случае успеха
         '''
-        for operator in self._operators:
-            if string_list == operator:
+        for operator in ProcessingRequest._operators:
+            if atom == operator:
+                return operator
+        return 0
+        
+    @staticmethod
+    def __isField (atom):
+        '''
+            проверка является ли атом полем. 
+            Если не поле то возращается 0 индекс оператора +1 
+        '''
+        print('is field? ---- ',atom)
+        for operator in ProcessingRequest._field_words:
+            if atom.find(operator,0)>=0:
                 return operator
         return 0
     
-    def __is_path (self,string):
-        '''
-            проверка является ли поле пользовательским или системным полем path
-        '''
-        index = string.find('path')
-        index_open = string.find('"')
-        if (index_open >=0):
-            index_close = string.find('"',index_open+1) # если не найдется ковычки то -1
-            if (index > index_open) and (index < index_close): 
-                return 1
-        else:
-            index_open = string.find("'") 
-            if (index_open>=0):
-                index_close = string.find("'",index_open+1) # если не найдется ковычки то -1
-                if (index > index_open) and (index < index_close): 
-                    return 1
-        return 0
-            
+
     
-    def __is_field (self,string):
-        '''
-            проверка является ли атом полем
-        '''
-        index=0
-        for operator in self._field_words:
-            if string.find(operator,0)>=0:
-               
-                return index+1
-            index+=1 
-        return 0
-    
-    def __adding_index_using_table(self,index):
-        '''
-            добавление текущей таблицы  таблиц
-        '''
-        print(index)
-        try:
-            self._index_using_tables.index(index) # если элемент не найден то добавялется нвоый элемент
-        except ValueError: 
-            self._index_using_tables.append(index)
-    
-    def __type_definition(self,atom):
+    @staticmethod
+    def __typeDefinition(atom):
         '''
             определение типа атома (тег, поле и т.д.)
         '''
-        index_field_words = self.__is_field(atom) 
-        if index_field_words:
-            index_field_words-=1 # индекс указывающий на ключевое слово для поля был на 1 больше нужного. 
-    #        if self.__is_path(atom): 
-    #            return self._SQLtables[self._index_using_tables[0]] + '.path'+ self._field_words[index_field_words] + "'" + atom[atom.find(self._field_words[index_field_words])+len('path'):]
-    #        else:
-            self.__adding_index_using_table(2)
-            self.__adding_index_using_table(3)
-            return  ' '+ self._table_objs_fields + '.name = поле AND '+ self._table_fields + '.value ' + self._field_words[index_field_words] + ' значение '
+        field_operator = ProcessingRequest.__isField(atom) 
+        if field_operator:
+            field_name, field_value = atom.split(field_operator)
+            field_name = field_name.strip()
+            return  ' '+ ProcessingRequest._table_objs_fields + ".field_name = '" + field_name + "' AND "+ ProcessingRequest._table_objs_fields + '.value ' + field_operator + " '" + field_value + "'" + ' AND ' + ProcessingRequest._table_objs +".id=" + ProcessingRequest._table_objs_fields + ".entity_id"
         else:
-            self.__adding_index_using_table(1)
-            return ' '+ self._table_objs_tags + ".tag_name = '" + atom + "'"        
-        #return atom
+            atom = atom.strip()
+            return ' '+ ProcessingRequest._table_objs_tags + ".tag_name = '" + atom + "'" + ' AND ' + ProcessingRequest._table_objs +".id=" + ProcessingRequest._table_objs_tags + ".entity_id"        
+
     
-    
-    def __union_operator_and_atom(self,atom,index_operator):
-        '''
-            объединение операторов с атомами (операндами)
-        '''
-        if self.__is_list(atom):
-            result = ' ' + self.__convert_to_SQL(atom) + ' '
-        else:
-            result = ' ' + self.__type_definition(atom) + ' '
-        if (index_operator == 0)or(index_operator == 1):
-            return  result + self._operators[index_operator]
-        elif (index_operator == 2):
-            return self._operators[index_operator] + result
-        
-        
-#    @staticmethod
-    def __convert_to_SQL(self,request_list):
-        '''
-            преобразование вспомагательного списока в sql запрос
-        '''
-        index = 0
-        operator = request_list[0]
-        result_string =''
-        if operator == '()':
-           result_string = ' (' + self.__convert_to_SQL(request_list[1]) +') '
-        else:               
-            for index in range(1,len(request_list)):
-                result_string += self.__union_operator_and_atom(request_list[index], self._operators.index(operator))
-            result_string = ' ' + self.__cleare_extra_space(result_string).rstrip(operator)
-        return result_string
-        
+
   
 if __name__=='__main__':
                 
     str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
-  
-    B = ProcessingRequest()
+    str_request = 'суперполе>суперзначение and tag1' 
+    str_request = 'field   <>    a  or g>d   and ( f            =               a or s        <>          d ) or                e            =           3'
+    str_request = 'aa and (bb and (cc or ee))'
     
-    print(B.get_SQLRequest(str_request))
+    str_request = 'aa'
+  #  str_request = 'field       <> s' 
+#    str_request = '      tag   =                 "asdfasdf" tag tag tag field=       "asdfasd"     field2    =      "asdfas"'
+#    str_request ="п1=з1 and п2=  з2 or п3  =з3 and п4  =  з4"
+    
+    per=ProcessingRequest.getSQLRequest(str_request)
+    print('the result is ----')
+    print(per)
+    
+   
+
+#    
+#    per=ProcessingRequest.getSQLRequest(str_request)
+#    print('the result is ----')
+#    print(per)
+     
     
   
     

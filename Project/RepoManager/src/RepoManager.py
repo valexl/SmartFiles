@@ -5,86 +5,198 @@ Created on 20.04.2010
 '''
 import sqlite3 as sqlite
 import os
-from Repository import Repository
-import SystemRepoInfo
+from User import User
+import SystemInfo
 import Entity
 from EntityManager import EntityManager
+#from EntityManager import EntityManager
 #import EntityManager
 #import EntityManager
-
+ 
 class RepoManager(object):
     '''
     classdocs
     '''
+    class RepoException(Exception):
+        pass
+    class ExceptionUserNotFound(RepoException):
+        pass
+    class ExceptionUserExist(RepoException):
+        pass
+    class ExceptionUserGuest(RepoException):
+        pass
+    class ExceptionRepoIsExist(RepoException):
+        pass
+    class ExceptionRepoIsNull(RepoException):
+        pass
     
+     
     
     def __init__(self, path_to_repo):
         '''
             конструктор.. 
         '''
         
-        #Открываем хранилище path_to_repo
-        #Проверяем хранилище ли это? Есть ли .metadata
-        #Если нет, то сразу же выкидываем исключение
-        
-        #if not os.path.exists(SystemRepoInfo.metadata_dir):
-        #    os.mkdir(SystemRepoInfo.metadata_dir)
-        self._name_dbfile = os.path.join(SystemRepoInfo.metadata_dir,SystemRepoInfo.metadata_file)
         self._path_to_repo = path_to_repo
         
+        
+        self._list_users=[]
+        
         #временно файл с базой будет хранится в корне хранилище, а не в директории .metadata
-        self._name_dbfile = SystemRepoInfo.metadata_file
+        #self._name_dbfile = SystemInfo.metadata_file
+        
+    
+        
+    
+        
         
     def getEntityManager(self):
         ''' Возвращает экземпляр EntityManager, уже привязанный к данному хранилищу. '''        
-        return EntityManager(self._path_to_repo)    
-    
-    
+        return EntityManager(self._path_to_repo)
+        
     
     @staticmethod
-    def init_repository(path_to_new_repo, user_admin_name):        
+    def initRepository(path_to_new_repo, user_admin):        
         '''Это СТАТИЧЕСКИЙ метод, который позволяет создать новое пустое хранилище.
         Если при создании хранилища какие-либо ошибки --- должно вылетать иключение.
         Возвращает экземпляр RepoManager-а, привязанный к созданному хранилищу. 
         '''
         
-        print('init_repository()')
+       # print('initRepository()')
+        path_metadata_dir = os.path.join(path_to_new_repo,SystemInfo.metadata_dir_name)
+        if not os.path.exists(path_metadata_dir):#если директории нет, то создается новая
+            os.mkdir(path_metadata_dir)
+        else:
+            raise RepoManager.ExceptionRepoIsExist('initRepository. директория ' + path_metadata_dir +' существует')
         
-        RepoManager.__init_repository(path_to_new_repo, user_admin_name)
-        return RepoManager(path_to_new_repo)
+        path_metadata_file = os.path.join(path_to_new_repo, SystemInfo.metadata_file_name )
+        if os.path.exists(path_metadata_file):
+            raise RepoManager.ExceptionRepoIsExist('initRepository. файл с метаданными' + path_metadata_file + 'не найден')
+        connect = sqlite.connect(path_metadata_file)
+        cursor = connect.cursor()
+        
+        
+        RepoManager.__initRepository(cursor,user_admin.name)
+       
+        
+        connect.commit()
+        repository = RepoManager(path_to_new_repo)
+        print(os.path.join(repository._path_to_repo, SystemInfo.metadata_file_name))
+        repository.addUserRepo(user_admin)
+        return repository
     
     
-    
-    
-    
-    #Этот метод тоже надо бы сделать СТАТИЧЕСКИМ
+    def deleteFilesInfo(self,file_path):
+        '''
+            удаление информации о файле
+        '''
+        repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
+        if os.path.exists(repo_metadata_file):
+            connect = sqlite.connect(repo_metadata_file)
+            cursor = connect.cursor()
+            cursor.execute("DELETE FROM files_info "
+                           " WHERE path = ? ",
+                           (file_path,) 
+                           )
+            connect.commit()
+        else:
+            raise RepoManager.ExceptionRepoIsNull('deleteFileInfo. Не найден файл ' + 
+                                                  repo_metadata_file + 
+                                                  ' с метаданными' )
+        
     @staticmethod
-    def __init_repository(repo_path, user_name):
+    def __insertFileInfoIntoBD(cursor,file_name):
+        '''
+            запись информации о файлах в базу данных
+        '''
+        cursor.execute( "INSERT INTO files_info "
+                            " (path) "
+                            " VALUES (?) ",
+                            (file_name,)
+                           )
+        
+        
+            
+    def addFileInfo(self,file_name):
+        '''
+            добавление инфомрации о файлах, которые находятся в хранилище 
+            и еще не проиндексированы
+        '''
+        
+        repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
+        if os.path.exists(repo_metadata_file):
+            connect = sqlite.connect(repo_metadata_file)
+            cursor = connect.cursor()
+            RepoManager.__insertFileInfoIntoBD(cursor, file_name)
+            connect.commit()
+        else:
+            raise RepoManager.ExceptionRepoIsNull('addFileInfo. Не найден файл ' + 
+                                                  repo_metadata_file + 
+                                                  ' с метаданными' )
+
+         
+    
+    def fillRepoFiles(self):
+        '''
+            заполнение базы информацией о файлах хранилища
+        '''
+        path_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name )
+        if not os.path.exists(path_metadata_file):
+            raise RepoManager.ExceptionRepoIsExist('fillRepoFiles. файл с метаданными' + path_metadata_file + 'не найден')
+        connect = sqlite.connect(path_metadata_file)
+        cursor = connect.cursor()
+        
+        list_files = RepoManager.__get_subdir_files(self._path_to_repo)
+        for file_name in list_files:
+            RepoManager.__insertFileInfoIntoBD(cursor, file_name)
+        connect.commit()
+        #RepoManager.addFileInfo(repo_file_info, list_files)
+        
+        
+    @staticmethod
+    def __get_subdir_files(repodir_path,subdir_path=''):
+        '''
+            возращает список файлов всего хранилища, с учетом поддиректорий
+        '''
+        list_result = []
+        
+#        print('the path of subdir is',os.path.join(repodir_path,subdir_path))
+        
+        list_object = os.listdir(os.path.join(repodir_path,subdir_path))
+        for obj_path in list_object:
+            if obj_path[0]!= '.':
+                obj_path=os.path.join(subdir_path,obj_path)
+                
+                if os.path.isfile(os.path.join(repodir_path,obj_path)):
+                    list_result.append(obj_path)
+                else:
+                    list_result+=RepoManager.__get_subdir_files(repodir_path,obj_path)
+        
+        return list_result        
+        
+        
+    @staticmethod
+    def __initRepository(cursor, user_name):
         '''
             создание таблиц и их заполнения необходимой для работы хранилища информацией.
         '''
-       # print(repo_path)
-        path_metadata_file = os.path.join(repo_path, SystemRepoInfo.metadata_file)
-        if os.path.exists(repo_path):
-            raise Exception('ыдлвоаолыдвоа')
-        print('path_metadata_file=', path_metadata_file)
-        repoDB = sqlite.connect(path_metadata_file)
-        cursor = repoDB.cursor()
+        #
+        #Создание пустых таблиц с метаинформацией хранилища 
+        #
+        
+        #таблица с файлами хранилища
+        cursor.execute("CREATE TABLE files_info ("
+                       " path VARCHAR2(255) PRIMARY KEY )"
+                       )
+        #таблица пользователей
         cursor.execute("CREATE TABLE users ("
                 "name VARCHAR2(255) NOT NULL PRIMARY KEY,"
                 "password INTEGER,"
+                "user_type VARCHAR2(10) NOT NULL, "
                 "description VARCHAR2(255),"
                 "date_create TIMESTAMP)")
-        repoDB.commit()
-        
-        cursor.execute("INSERT INTO users "
-                "(name, description)"
-                "VALUES (?,?)",
-                (user_name,'123123123'))
-        
-        
-        
-        
+                
+        #таблица подключенных/отключенных директорий
         cursor.execute("CREATE TABLE dir_usage("
                        "path VARCHAR2(255) NOT NULL,"
                        "user_name VARCHAR2(255) NOT NULL ,"
@@ -92,7 +204,7 @@ class RepoManager(object):
                        "PRIMARY KEY (path,user_name),"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"
                        )
-        
+        #таблица сущности
         cursor.execute("CREATE TABLE entity("
                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
                        "title VARCHAR2(255),"
@@ -106,12 +218,7 @@ class RepoManager(object):
                        "date_create TIMESTAMP,"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"       
         )    
-        
-            
-        
-        #
-        #Создание пустых таблиц с метаинформацией хранилища 
-        #
+        #таблица тегов
         cursor.execute("CREATE TABLE tag ( "
                        "name VARCHAR2(255) NOT NULL,"
                        "user_name VARCHAR2(255) NOT NULL,"
@@ -121,6 +228,7 @@ class RepoManager(object):
                        "FOREIGN KEY (user_name) REFERENCES users(name))"
                       
                        )
+        #таблица связи тегов с сущностью
         cursor.execute("CREATE TABLE entity_tags ("
                        "entity_id INTEGER NOT NULL,"
                        "tag_name VARCHAR2(255) NOT NULL,"
@@ -132,6 +240,7 @@ class RepoManager(object):
                        "FOREIGN KEY (user_name) REFERENCES entity(user_name),"
                        "FOREIGN KEY (tag_name) REFERENCES tag(name))"
                        )
+        #таблица полей
         cursor.execute("CREATE TABLE field ("
                        "name VARCHAR2(255) NOT NULL,"
                        "user_name VARCHAR2(255) NOT NULL,"
@@ -141,6 +250,7 @@ class RepoManager(object):
                        "PRIMARY KEY (name,user_name),"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"
                        )
+        #таблица связей сущностей с полями
         cursor.execute("CREATE TABLE entity_fields("
                        "entity_id INTEGER NOT NULL,"
                        "field_name VARCHAR2(255) NOT NULL,"
@@ -153,6 +263,7 @@ class RepoManager(object):
                        "FOREIGN KEY (user_name) REFERENCES field(user_name),"
                        "FOREIGN KEY (field_name) REFERENCES field(name))"
                        )
+        #таблица группы
         cursor.execute("CREATE TABLE groups("
                        "name VARCHAR2(255) NOT NULL,"
                        "user_name VARCHAR2(255) NOT NULL,"
@@ -161,6 +272,7 @@ class RepoManager(object):
                        "PRIMARY KEY (name,user_name),"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"
                        )
+        #таблица группировки тегов
         cursor.execute("CREATE TABLE groups_tags("
                        "group_name VARCHAR2(255) NOT NULL,"
                        "tag_name VARCHAR2(255) NOT NULL,"
@@ -172,6 +284,7 @@ class RepoManager(object):
                        "FOREIGN KEY(user_name) REFERENCES tag(name))"
                        
                        )
+        #таблица группировки полей
         cursor.execute("CREATE TABLE groups_fields("
                        "group_name VARCHAR2(255) NOT NULL,"
                        "field_name VARCHAR2(255) NOT NULL,"
@@ -185,167 +298,182 @@ class RepoManager(object):
         #
         #Создание пустых таблиц с метаинформацией хранилища 
         #  
-        repoDB.commit()
       
         
        
-   
     
-    
-    
-    def __get_list_dirs(self):
+    @staticmethod
+    def __addUser(cursor,user_repo):
         '''
-            получить список использованных пользователем директорий.
+            сохраняет инфу о  пользователе в указанную базу. 
+            Необходим для добавление как в домашнюю директорию пользователя, 
+            так и в директорию .metadata хранилища.
         '''
-        # возможно лучше сделать через дополнительный параметр при создании хранилища.
-        list_dirs = []
-        
-        return list_dirs
-    # конец
-    # инициализация таблицы включенных\отключенных директорий
-    
-    
-    
-    
-    # инициализация таблицы сущностей
-#    def __init_entity_table(self, cursor, fileBD_path,user_name):
-#        '''
-#            инициализация таблицы entity. заполняется информацией о файлах хранилища 
-#        '''
-#       
-#        subdir_path = os.path.dirname(fileBD_path)
-#        list_files = []
-#        # Необходимо для вычисления SHA продублировать записи во временном файле.
-#        # Дублирование необходимо, что бы во время вычисления хеша не занималась база данных
-#    
-#        for file_path in list_files:
-#            cursor.execute("INSERT INTO entity"
-#                   "(file_path,user_name)"
-#                   "VALUES(?,?)",
-#                   (file_path,user_name))
-      
-        
-            
-            
-        # нужна функция добавления сущности в базу... либо добавление через EntityManager либо здесь отдельной функцией...
-        # так как лучше всего что бы RepoManager работал со всем хранилищем, а не  отдельными элементами, 
-        # то добалвение одногой или небольшого количества объектов хранилщища будет делать EntityManager..
-         
-        
+        cursor.execute("INSERT INTO users "
+                    " (name, password, user_type, description) "
+                    " VALUES (?,?,?,?) ",
+                    (user_repo.name,user_repo.password, user_repo.type,user_repo.description))
         
         
 
-    def __get_subdir_files(self,repodir_path,subdir_path=''):
-        '''
-            возращает список файлов всего хранилища, с учетом поддиректорий
-        '''
-        list_result = []
-        
-        print('the path of subdir is',os.path.join(repodir_path,subdir_path))
-        
-        list_object = os.listdir(os.path.join(repodir_path,subdir_path))
-        for obj_path in list_object:
-            if obj_path[0]!= '.':
-                obj_path=os.path.join(subdir_path,obj_path)
-                
-                if os.path.isfile(os.path.join(repodir_path,obj_path)):
-                    list_result.append(obj_path)
-                else:
-                    list_result+=self.__get_subdir_files(repodir_path,obj_path)
-        
-        return list_result
-    # конец    
-    # инициализация таблицы сущностей
-
-    
-        
-    def tmp_show_entity (self,repo_path):
-        '''
-            вспомогательная функция для проверки записывания таблицы entity
-        '''
-        repoDB = sqlite.connect(os.path.join(self._path_to_repo,self._name_dbfile))
-        cursor = repoDB.cursor()
-        #cursor.execute("SELECT id,file_path,user_admin_name FROM entity")
-        cursor.execute("SELECT * FROM users")
-        
-        list_file_path = cursor.fetchall()
-        return list_file_path
-        
-        
-        
-    def add_user_in_repository(self,user_name):
-        
+    def addUserRepo(self,user_repo):
         '''
             добавляет пользователя в хранилище
+        '''    
+        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
+        if os.path.exists(path_metadata_file):
+            connect = sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+            RepoManager.__addUser(cursor, user_repo)
+            connect.commit()
+            self._list_users.append(user_repo)
+        else:
+            raise RepoManager.ExceptionRepoIsNull('__addUser. не найден файл ' + 
+                                                  path_metadata_file +
+                                                ' с метаданными' )
+        
+        
+    def updateUser(self,user_repo):
         '''
-        #if not os.path.exists(reposit.path):
-            # если файл с базой не существует, то создается новый файл и заново инициализируются таблицы
-        #    self.__init_repository(reposit.path,user_name)
-        #else:
-            
-        repoDB = sqlite.connect(os.path.join(self._path_to_repo,self._name_dbfile))
-        cursor = repoDB.cursor()
+            модификаия пользователя хранилщиа
+        '''
+        path_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name )
+        if os.path.exists(path_metadata_file):
+            connect = sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
                 
-        self.__init_users_table(cursor, user_name)
-        repoDB.commit() 
-        reposit.list_users.append(user_name)
+            cursor.execute(" UPDATE  users "
+                    " SET password=?, description=? "
+                    " WHERE name=? ",
+                    (user_repo.password, user_repo.description,user_repo.name))
+            connect.commit() 
+            self._list_users.append(user_repo)
+        else:
+            raise RepoManager.ExceptionRepoIsNull('udateUser. не найден файл ' + 
+                                                  path_metadata_file +
+                                                   ' с метаданными' )
+    @staticmethod
+    def __purgeUser(cursor,user_name):
+        '''
+            освобождение всех записией в БД от удаляемого пользователя
+        '''
+        cursor.execute("SELECT file_path FROM entity "
+                       " WHERE entity.object_type = ? AND "
+                       " entity.user_name = ?",
+                       (SystemInfo.entity_file_type,user_name)
+                       )
+        files = cursor.fetchall()
+        for file_path in files:
+            RepoManager.__insertFileInfoIntoBD(cursor, file_path[0])
         
-        return reposit
-    
-    
-    
-    def delete_user(self,reposit,user_name):
+        cursor.execute(" DELETE FROM entity_fields WHERE user_name = ? ",
+                           (user_name,)
+                           )
+        cursor.execute(" DELETE FROM entity_tags WHERE user_name = ? ",
+                           (user_name,)
+                           )
+        cursor.execute(" DELETE FROM tag WHERE user_name = ? ",
+                           (user_name,)
+                           )
+        cursor.execute(" DELETE FROM field WHERE user_name = ? ",
+                           (user_name,)
+                           )
+        cursor.execute(" DELETE FROM entity WHERE user_name = ? ",
+                           (user_name,)
+                           )
+       
+           
+    def deleteUser(self,user):
         '''
+            удаление пользователя
         '''
-        repoDB = sqlite.connect(reposit.path)
-        cursor = repoDB.cursor()
+#        connect = sqlite.connect(os.path.join(self._path_to_repo,os.path.join(SystemInfo.metadata_dir,SystemInfo.metadata_file)))
+        path_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name )
         
-        cursor.execute("DELETE FROM users WHERE name=?",
-                (user_name,))
-#        cursor.execute('SELECT COUNT(name) FROM users')
-#        count = cursor.fetchone()
-        repoDB.commit()
-        return 0
+        if os.path.exists(path_metadata_file):
+
+            connect = sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+            RepoManager.__purgeUser(cursor,user.name)
+#            cursor.execute("DELETE FROM users WHERE name=?",
+#                    (user.name,))
+            connect.commit()
+        else:
+            raise RepoManager.ExceptionRepoIsNull('delete_user. не найден файл ' + 
+                                                  path_metadata_file +
+                                                   ' с метаданными' )
+
     
-    def get_repository(self,repo_path):
+    @staticmethod    
+    def __getRepoUsers(repo_path):
         '''
+            получение списка пользователей в данном хранилище
         '''
-        repo = Repository(os.path.join(repo_path,self._name_dbfile))
-        return repo
+        #connect = sqlite.connect(os.path.join(repo_path,os.path.join(SystemInfo.metadata_dir,SystemInfo.metadata_file)))
+        path_metadata_file = os.path.join(repo_path, SystemInfo.metadata_file_name )
+        if os.path.exists(path_metadata_file):
         
+            connect = sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+                
+            cursor.execute("SELECT name,password FROM users")
+            users = cursor.fetchall()
+            if len(users)>0:
+                return users
+            else:
+                raise Exception('в хранилище нет пользователей')
+        else:
+            raise RepoManager.ExceptionRepoIsNull('_getRepoUsers. Не найден файл ' + 
+                                                  path_metadata_file + 
+                                                  ' с метаданными' )
+
+    def identificationUser(self,user_repo):
+        '''
+            идентификация пользователя в хранилище. если успех то возращает 1.
+            иначе вызывается исключение RepoManager.ExceptionUserGuest
+        '''
+        for user in self._list_users:
+            if (user[0]==user_repo.name)and(int(user_repo.password)==int(user[1])):
+                return 1
+        raise RepoManager.ExceptionUserGuest("openRepository.не правильный логин или пароль")
     
+    
+    @staticmethod    
+    def openRepository(repo_path):
+        '''
+            открывание пользователем хранилища
+        '''
+        list_users = RepoManager.__getRepoUsers(repo_path)
+        repository = RepoManager(repo_path)
+        repository._list_users=list_users
+        return repository        
+        
+        
+        
+        
+#    def save_repository(self):    
+#        _save
+    @staticmethod
+    def deleteRepository(repo_path):
+        if repo_path == None:
+            raise RepoManager.ExceptionRepoIsNull('не найдено хранилщие')
+        dir_name = os.path.join(repo_path,SystemInfo.metadata_dir_name)
+        file_name = os.path.join(repo_path,SystemInfo.metadata_file_name)
+        if os.path.exists(dir_name):
+            os.remove(file_name)
+            os.rmdir(dir_name)
+        else:
+            raise RepoManager.ExceptionRepoIsNull('deleteRepository. не найден каталог с метаданными ' + repo_path)
+        
+        
+
+
     
 if __name__ == '__main__':
     
     
     repo_path = '/tmp/tmp'
     
-    if os.path.exists(os.path.join(repo_path, SystemRepoInfo.metadata_file)):
-        os.remove(os.path.join(repo_path, SystemRepoInfo.metadata_file))
-      
-    if not os.path.exists(repo_path):        
-        os.mkdir(repo_path)
-    
-    
-    user_name = 'valexl'    
-    rep_obj = RepoManager.init_repository(repo_path,user_name)
-    
-    
-#    print('adding new user "vitvlkv"')
-#    user_name = 'vitvlkv'
-#    rep_obj = rep_obj.add_user_in_repository(user_name)
-##    print(rep_obj.path)
-##    print(rep_obj.list_users)
-#    print('delete user - ', user_name)
-##    Rep.delete_user(rep_obj, user_name)
-##    print(Rep.get_repository(repo_path).list_users)
-##    
-    print(rep_obj.tmp_show_entity(repo_path))
+    RepoManager.deleteRepository(repo_path)
 
       
-    
-    
-    
-#    Rep = RepoManager()
-#    print(Rep.tmp_show_entity(repo_path))
-#      

@@ -3,6 +3,7 @@ Created on 20.04.2010
 
 @author: valexl
 '''
+import SystemInfo
 
 class Field(object):
     '''
@@ -10,7 +11,7 @@ class Field(object):
     '''
 
 
-    def __init__(self,field_name,user_name,field_value,value_type,field_date_create,field_description=''):
+    def __init__(self,field_name,user_name,field_value=None,value_type=SystemInfo.field_type_str,field_date_create=None,field_description=''):
         '''
         Constructor
         '''
@@ -23,7 +24,7 @@ class Field(object):
         
         self.value = field_value
     
-    def get_attributes (self):
+    def getAttributes (self):
         '''
             возращает поля объекта в виде двойного списка. где 1й список это атрибуты для таблицы field, а второй список для таблицы entity_fields
         '''
@@ -32,13 +33,3 @@ class Field(object):
         return list_attributes
     
         
-        
-#    cursor.execute("CREATE TABLE field ("
-#                       "name VARCHAR2(255),"
-#                       "user_name VARCHAR2(255),"
-#                       "description VARCHAR2(255),"
-#                       "value_type VARCHAR2(10),"
-#                       "date_create TIMESTAMP,"
-#                       "PRIMARY KEY (name,user_name),"
-#                       "FOREIGN KEY (user_name) REFERENCES users)"
-#                       )    

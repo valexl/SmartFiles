@@ -10,38 +10,39 @@ class Entity(object):
     Класс "Сущность". 
     '''    
 
-    def __init__(self, title, entity_type, user_name, list_tags=[], list_fields=[], 
-                 file_path=None, file_size=0, file_date_modifired=None, file_hash=None, 
+    def __init__(self, title, entity_type, user_name, file_path=None, list_tags=[], list_fields=[], 
+                file_size=0, file_date_modifired=None, file_hash=None, 
                  notes='', date_created=None, id=None):
         '''
         Constructor
         '''
         
         self.id = id
+        
+        self.title = title
+        self.object_type = entity_type
+        self.user_name = user_name
+        
         self.file_path = file_path
         self.file_size = file_size
+        self.file_hash = file_hash
         self.file_date_modifired = file_date_modifired
         
+        self.date_create = date_created
+        self.notes = notes
+     
         self.list_tags = list_tags
         self.list_fields = list_fields
-        self.user_name = user_name
-   
         
-#    def add_tag (self,tag_name,tag_date_created='NONE',tag_description=''):
-#        '''
-#            пометка сущности новым тегом
-#        '''
-#        
-#        new_tag = Tag(tag_name,self.user_name,tag_date_created,tag_description)
-#        self.list_tags.append(new_tag)
-#        
-    def add_tag (self,tag):
+           
+    def addTag (self,tag):
         '''
             пометка сущности тегом
         '''
         self.list_tags.append(tag)
 
-    def delete_tag(self,tag_name):
+
+    def deleteTag(self,tag_name):
         '''
             тег отделяется от объекта entity
         '''
@@ -52,10 +53,9 @@ class Entity(object):
             index+=1
         if index <= len(self.list_tags):
             self.list_tags.pop(index)
-                
-        
-        
-    def is_tag_exist(self,tag_name):
+
+                  
+    def isTagExist(self,tag_name):
         '''
             помечен ли данным тегом объект entity
         '''
@@ -63,20 +63,16 @@ class Entity(object):
             if tag.name == tag_name:
                 return 1
         return 0 
+
     
-    
-#    def add_field (self, field_name,field_value,type_value,field_date_create='NONE',field_description=''):
-#        '''
-#            пометка полем сущности
-#        '''
-#        new_field = Field(field_name,self.user_name,field_value,type_value,field_date_create,field_description)
-#        self.list_fields.append(new_field)
-    def add_field(self,field):
+    def addField(self,field):
         '''
             пометка полем сущности
         '''
         self.list_fields.append(field)
-    def delete_field(self,field_name):
+
+        
+    def deleteField(self,field_name):
         '''
             особождает объект entity от данного поля
         '''
@@ -87,8 +83,9 @@ class Entity(object):
             index+=1
         if index <= len(self.list_fields):
             self.list_fields.pop(index)
+
         
-    def is_field_exist(self,field_name):
+    def isFieldExist(self,field_name):
         '''
             помечен ли данным полем объект entity
         '''
@@ -98,61 +95,23 @@ class Entity(object):
         return 0
 
     
-    def get_tag_attributes(self):
+    def getTagAttributes(self):
         '''
             возращает список списков атрибутов тегов, помечающих данный объект entity
         '''
         result_list = []
         for tag in self.list_tags:
-            #print(tag)
-            result_list.append(tag.get_attirbutes())
+            print(tag)
+            result_list.append(tag.getAttributes())
         return result_list
         
         
-    def get_field_attributes(self):
+    def getFieldAttributes(self):
         '''
             возращает список списоков атрибутов полей, помечающих данный объект entity
         '''
         result_list = []
         for field in self.list_fields:
-            result_list.append(field.get_attributes())
+            result_list.append(field.getAttributes())
         return result_list
-    
-    
-    
         
-#if __name__ == "__main__":
-#    
-#    tags = []
-#    fields = []
-#    users = 'user1'
-#    name = 'entity_by_user'
-#    
-#    
-#    #Ent = Entity(name,tags,fields,users)
-#    Ent=''
-#    Ent = Entity(name,users,tags,fields)
-#    Ent.add_field('field1', 'value1','type1')
-#    Ent.add_tag('tag1')
-#    Ent.add_field('field2', 'value2','type2')
-#    Ent.add_tag('tag2')
-#    Ent.add_field('field3', 'value3','type3')
-#    Ent.add_tag('tag3')
-#    
-#    print('the field attributes is -')
-#    Ent.get_field_attributes()
-#    
-#    print('the tags attributes is - ')
-#    Ent.get_tag_attributes()
-#    
-
-    
-#    
-#    print('ent.name=',Ent.file_path)
-#    print('ent_tag=',Ent.list_tags)
-#    print('ent_tag[2].tag_name=',Ent.list_tags[2].tag_name)
-#    print('ent_tag[2].tag_user=',Ent.list_tags[2].tag_user_name)
-#    print('ent_fields=',Ent.list_fields)
-#    print('ent_users=',Ent.user_name)
-#    
-    
