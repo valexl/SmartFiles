@@ -5,17 +5,21 @@ Created on 20.04.2010
 '''
 import sqlite3 as sqlite
 import os
-import SystemInfo
-from Entity import Entity,Tag,Field
-#from Tag import Tag
+from RepoManager.SystemInfo import SystemInfo
+from EntityManager.Entity import Entity
+from EntityManager.Tag import Tag
+from EntityManager.Field import Field
 
-class EntityManager:
+
+class EntityManager(object):
     '''
         Класс управление сущностью.
     '''
     class ExceptionEntityManager(Exception):
         pass
     class ExceptionNotFoundFileBD(ExceptionEntityManager):
+        pass
+    class ExceptionEntityIsExist(ExceptionEntityManager):
         pass
     
     def __init__(self,repo_path):
@@ -55,8 +59,13 @@ class EntityManager:
         
    
         if entity.id == None:
-            print((entity.title, entity.object_type, entity.user_name,
-                          entity.file_path,entity.file_size, entity.file_hash,entity.date_create))
+            if not entity.file_path == None:
+                cursor.execute(' SELECT COUNT (*) FROM entity WHERE '
+                               ' file_path = ? ',
+                               (entity.file_path,) 
+                               )
+                if cursor.fetchone()[0]>0:
+                    raise EntityManager.ExceptionEntityIsExist('косарезик. такой файл уже присвоин кому то')
             cursor.execute("INSERT INTO entity"
                            "(title, object_type, user_name, file_path, file_size, file_hash, date_create,notes )"
                            "VALUES(?,?,?,?,?,?,?,?)",

@@ -3,9 +3,6 @@
 	<name>SmartFiles</name>
 	<comment></comment>
 	<projects>
-		<project>EntityManager</project>
-		<project>Query language</project>
-		<project>RepoManager</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

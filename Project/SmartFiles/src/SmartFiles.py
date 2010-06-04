@@ -7,13 +7,25 @@ import sys
 import os
 from PyQt4 import QtGui,QtCore,QtSql
 
-import SystemInfo
-from RepoManager import RepoManager
-from User import User
+#import NeuralNetwork.NeuralNetwork
+
+
+#from NeuralNetwork import NeuralNetwork
+from RepoManager.SystemInfo import SystemInfo
+from RepoManager.User import User
+from RepoManager.InstallUser import InstallUser
+from EntityManager.Field import Field
+from EntityManager.Tag import Tag
+from EntityManager.Entity import Entity
+from EntityManager.EntityManager import EntityManager
+from RepoManager.RepoManager import RepoManager
+
+from ProcessingRequest.ProcessingRequest import ProcessingRequest
+
+
 from EditWindow import EditEntityWindow,EditUserWindow,BrowseFilesWindow,BrowseMetadataWindow
-from ProcessingRequest import ProcessingRequest
-from EntityManager import EntityManager
-from InstallUser import InstallUser
+
+#import MainForm
 
 
 height = 500
@@ -66,19 +78,20 @@ class MainMenu(QtGui.QMainWindow):
         #меню 
         menubar = self.menuBar()
         
-        repo_menu = menubar.addMenu('&Хранилище')
+        file_menu = menubar.addMenu('&Файл')
         #создание/октрытие хранилщиа
+        repo_menu = file_menu.addMenu("Хранилище")
         repo_menu.addAction(self.create_repo)
         repo_menu.addAction(self.open_repo)
         repo_menu.addAction(self.delete_repo)
         #работа с пользователями хранилища
-        users_menu = repo_menu.addMenu("Пользователь")
+        users_menu = file_menu.addMenu("Пользователь")
         users_menu.addAction(self.add_user)
         users_menu.addAction(self.switch_user)
         users_menu.addAction(self.update_user)
         users_menu.addAction(self.delete_user)
         #выход из программы
-        repo_menu.addAction(self.quit_programm)
+        file_menu.addAction(self.quit_programm)
         
         object_menu = menubar.addMenu('&Объект')
         create_menu = object_menu.addMenu("Добавить")
@@ -93,6 +106,7 @@ class MainMenu(QtGui.QMainWindow):
         release_metadata_menu.addAction(self.release_tag)
         release_metadata_menu.addAction(self.release_field)
         
+        metadatat_menu = menubar.addMenu('Метаданные')
         
         object_menu.addAction(self.save_entity)
         object_menu.addAction(self.delete_entity)
@@ -222,7 +236,10 @@ class MainWindow(QtGui.QWidget):
         главное окно программы
     '''
     def __init__(self,user_connect,parent = None):
+        
+        
         QtGui.QWidget.__init__(self,parent)
+         
         self._user_repo=user_connect
         self._path_to_repo = None
         self._repo_manager = None
@@ -232,6 +249,7 @@ class MainWindow(QtGui.QWidget):
         self.setWindowTitle('SmartFiles')
                 
         vbox_layout = QtGui.QVBoxLayout()
+        
         
         self._menu = MainMenu()
         #для работы с хранилищем
@@ -384,10 +402,10 @@ class MainWindow(QtGui.QWidget):
             print('не удается создать хранилище.')
             print(' Хранилище уже созданно')
             print(error)
-        except Exception as error:
-            print('создание хранилища')
-            print('какие то не учтеные траблы в RepoManager')
-            print(error) 
+#        except Exception as error:
+#            print('создание хранилища')
+#            print('какие то не учтеные траблы в RepoManager')
+#            print(error) 
         
         
     def __connnectBD(self):
@@ -843,8 +861,9 @@ if __name__ == '__main__':
     
     app = QtGui.QApplication(sys.argv)
     user = User('valexl',111,SystemInfo.user_type_admin)
+    
     main = MainWindow(user)
-    main =  StartWindow()
+    #main =  StartWindow()
     main.show()
     sys.exit(app.exec_())
     main._db.close()

@@ -3,7 +3,7 @@ Created on 20.04.2010
 
 @author: valexl
 '''
-import SystemInfo
+from RepoManager.SystemInfo import SystemInfo
 
 class Field(object):
     '''

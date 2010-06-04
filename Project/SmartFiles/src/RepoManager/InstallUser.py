@@ -4,10 +4,10 @@ Created on 27.05.2010
 @author: valexl
 '''
 import os
-
-import SystemInfo
 import sqlite3 as sqlite
-from User import User
+
+from RepoManager.SystemInfo import SystemInfo
+from RepoManager import User
 
 class InstallUser(object):
     '''

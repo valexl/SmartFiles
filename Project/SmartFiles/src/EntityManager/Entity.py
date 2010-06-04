@@ -3,8 +3,8 @@ Created on 20.04.2010
 
 @author: valexl
 '''
-from Tag import Tag
-from Field import Field
+from EntityManager.Tag import Tag
+from EntityManager.Field import Field
 class Entity(object):
     '''
     Класс "Сущность". 

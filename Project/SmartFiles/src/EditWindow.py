@@ -7,50 +7,71 @@ import sys
 import os
 import shutil
 from PyQt4 import QtGui,QtCore,QtSql
-from ProcessingRequest import cleareExtraSpace, cleareSpaceAboutOperator 
 
-from EntityManager import EntityManager
-from User import User
-from Field import Field
-from Tag import Tag
-import SystemInfo
-from RepoManager import RepoManager
-#from SmartFiles import MainMenu
 
-#    def __create(self):
-#        pass
-#    def __delete(self):
-#        pass
-#    def __update(self):
-#        pass
-#    
-#    def __pressButtonOk(self):
-#        '''
-#            выполнить действие (создание/удаление/модификация)
-#        '''
-#        print('кажись хурма получилась')
-#        if self._status == 'create':
-#            print('create Entity')
-#            self.__create()
-#        elif self._status == 'delete':
-#            self.__delete()
-#        else:
-#            self.__update()
-#       # pass
+from ProcessingRequest.ProcessingRequest import cleareExtraSpace, cleareSpaceAboutOperator 
+from RepoManager.SystemInfo import SystemInfo
+from  EntityManager.EntityManager import EntityManager
+from RepoManager.User import User
+from EntityManager.Field import Field
+from EntityManager.Tag import Tag
+from RepoManager.RepoManager import RepoManager
 
-class EditEntityWindow(QtGui.QWidget):
-    def __init__(self, path_repo, user_name, object_type, status='create', file_path=None,id=None, parent=None):
-                
-        QtGui.QWidget.__init__(self,parent)
-        self._object_type = object_type
-        self._path_to_repo = path_repo
-        self._user_name = user_name
-        self._file_path = file_path
-        self._status = status
-        self._entity_id=id
-         
+
+class ProgressBarWindow(QtGui.QDialog):
+    def __init__(self,parent=None):
+        QtGui.QDialog.__init__(self,parent)
+    
         vbox_layout = QtGui.QVBoxLayout()
+    
+        self.progress_bar = QtGui.QProgressBar(self)
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setRange(0,100)
+        #self.progress_bar.show(self)
+        vbox_layout.addWidget(self.progress_bar)
         
+        self.button_ok = QtGui.QPushButton('Ок',self)
+        self.button_ok.setEnabled(0)
+        self.button_cancel = QtGui.QPushButton('Отмена',self)
+        hbox_layout = QtGui.QHBoxLayout()
+        hbox_layout.addWidget(self.button_ok)
+        hbox_layout.addWidget(self.button_cancel)
+        vbox_layout.addLayout(hbox_layout)
+        
+        self.setLayout(vbox_layout)
+        
+        
+        self.connect(self.button_ok,QtCore.SIGNAL('clicked()'),self.__pressOk)
+        self.connect(self.button_cancel,QtCore.SIGNAL('clicked()'),self.__pressCancel)
+        
+        
+    def __pressOk(self):
+        print('ok')
+        self.emit(QtCore.SIGNAL('progressOk()'))
+        
+        
+    def __pressCancel(self):
+        print('cancel')
+        self.emit(QtCore.SIGNAL('progressCancel()'))
+        
+        
+    def setValue(self,value):
+        self.progress_bar.setValue(int(value))
+        if int(value)==100:
+            self.button_ok.setEnabled(1)
+            self.button_cancel.setEnabled(0)
+        
+        
+class EditEntityWindow(QtGui.QDialog):
+    def __init__(self,path_to_repo, user_repo,object_type,entity=None,parent=None):
+        QtGui.QDialog.__init__(self,parent)
+        self._object_type = object_type
+        self._user_repo = user_repo
+        self._path_to_repo = path_to_repo
+        self._entity = entity
+        vbox_layout = QtGui.QVBoxLayout()
+        self._list_files_names = []
         #создание виджетов и их расположение на layout
         label = QtGui.QLabel('Заголовок',self)
         self._edit_title = QtGui.QLineEdit(self)
@@ -62,7 +83,19 @@ class EditEntityWindow(QtGui.QWidget):
             self._edit_URL = QtGui.QLineEdit(self)
             vbox_layout.addWidget(label)
             vbox_layout.addWidget(self._edit_URL)
-        
+        else:
+            label = QtGui.QLabel('Путь к файлу',self)
+            self._edit_path = QtGui.QLineEdit(self)
+            button_browse = QtGui.QPushButton('...',self)
+            
+            vbox_layout.addWidget(label)
+            hbox_layout = QtGui.QHBoxLayout()
+            hbox_layout.addWidget(self._edit_path)
+            hbox_layout.addWidget(button_browse)
+            vbox_layout.addLayout(hbox_layout)
+            
+            self.connect(button_browse,QtCore.SIGNAL('clicked()'),self.__browseFile)
+            
         label = QtGui.QLabel('Теги',self)
         self._edit_tags = QtGui.QLineEdit(self)
         vbox_layout.addWidget(label)
@@ -86,11 +119,26 @@ class EditEntityWindow(QtGui.QWidget):
         hbox_layout.addWidget(button_cancel)
         vbox_layout.addLayout(hbox_layout)
         #помещение layout на форму
+        
+       
+        
         self.setLayout(vbox_layout)
         
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__canceled)
         self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__pressButtonOk)
-                
+        
+        
+
+    def __browseFile(self):
+        '''
+            выбор файла для сохранения в хранилище
+        '''
+        file_dialog = QtGui.QFileDialog(self)
+        file_dialog.setFileMode(QtGui.QFileDialog.ExistingFiles)
+        
+        
+        self._list_files_names = file_dialog.getOpenFileNames(self,'выберити файлы для добавления',self._path_to_repo)
+        print(self._list_files_names)
         
     def __canceled(self):
         '''
@@ -104,11 +152,11 @@ class EditEntityWindow(QtGui.QWidget):
         '''
             выполнить действие (создание/удаление/модификация)
         '''
-        if self._status == 'create':
+        if self._entity == None:
             print('create Entity')
             self.__create()
-        elif self._status == 'delete':
-            self.__delete()
+#        elif self._status == 'delete':
+#            self.__delete()
         else:
             self.__update()
             
@@ -133,7 +181,7 @@ class EditEntityWindow(QtGui.QWidget):
             #создавания объектов Field
             for field in fields:
                 field_name,field_value = field.split('=')
-                list_fields.append(Field(field_name,self._user_name,field_value)) #тип поля по умолчанию стринг
+                list_fields.append(Field(field_name,self._user_repo.name,field_value)) #тип поля по умолчанию стринг
         return list_fields
     
     
@@ -146,7 +194,7 @@ class EditEntityWindow(QtGui.QWidget):
         if not tags=="":
             tags = tags.split(' ')
             for tag_name in tags:
-                list_tags.append(Tag(tag_name,self._user_name))
+                list_tags.append(Tag(tag_name,self._user_repo.name))
         return list_tags
     
     def __create(self):
@@ -156,21 +204,34 @@ class EditEntityWindow(QtGui.QWidget):
         #обработка полей
         list_fields = self.__getFields()
         #обработка тегов
-        list_tags = self.__getTags()        
+        list_tags = self.__getTags()  
+        list_entityes = []      
         if self._object_type == SystemInfo.entity_link_type:
-            entity = EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_name,
+            list_entityes.append(EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_repo.name,
                                             list_tags=list_tags,list_fields=list_fields,
-                                            notes=self._edit_description.text()) #добавить дату создания
+                                            notes=self._edit_description.text())) #добавить дату создания
         else:
-            entity = EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_name,
+            count_files = len(self._list_files_names)
+            
+            
+            self.setDisabled(1)
+            progress_window = ProgressBarWindow()
+            progress_window.show()
+            d_progress = 100/count_files
+            progress = 0
+            for file_path in self._list_files_names:
+                print(file_path)
+                list_entityes.append(EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_repo.name,
                                             list_tags=list_tags,list_fields=list_fields,
-                                            notes=self._edit_description.text(),file_path=self._file_path)
-        self.emit(QtCore.SIGNAL('createEntity(entity)'),entity)
+                                            notes=self._edit_description.text(),file_path=file_path))
+                progress+=d_progress
+                progress_window.setValue(progress)
+            self.setEnabled(1)
+            del(progress_window)
+        print('the lenght outputting signal is -',len(list_entityes))
+        self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
         self.__canceled()
-        
-        
-        
-        
+     
     def __update(self):
         '''
             модификация сущности.
@@ -192,23 +253,33 @@ class EditEntityWindow(QtGui.QWidget):
         
     
 class EditUserWindow(QtGui.QWidget):
-    def __init__(self,status='create',user_name='',parent=None):
+    def __init__(self,status='create',user=None,parent=None):
         
         QtGui.QWidget.__init__(self,parent)
         self._status = status
-        
+        self._user = user
         vbox_layout = QtGui.QVBoxLayout()
         
         
         label = QtGui.QLabel('Имя пользователя',self)
         self._edit_user_name = QtGui.QLineEdit(self)
-        self._edit_user_name.setText(user_name)
-        
+        if self._status == 'create':
+            self._edit_user_name.setText(user.name)
         vbox_layout.addWidget(label)
         vbox_layout.addWidget(self._edit_user_name)
         
-        label = QtGui.QLabel('Пароль',self)
+        if self._status == 'update':
+            label = QtGui.QLabel('введите новый пароль',self)
+            self._edit_old_password = QtGui.QLineEdit(self)
+            self._edit_old_password.setEchoMode(2)
+            vbox_layout.addWidget(label)
+            vbox_layout.addWidget(self._edit_old_password)
+            label = QtGui.QLabel('введите старый пароль',self)
+        else:
+            label = QtGui.QLabel('Пароль',self)
+            
         self._edit_password = QtGui.QLineEdit(self)
+        self._edit_password.setEchoMode(2)
         vbox_layout.addWidget(label)
         vbox_layout.addWidget(self._edit_password)
         
@@ -257,9 +328,14 @@ class EditUserWindow(QtGui.QWidget):
     
     
     def __updateUser(self):
-        user = User(user_name=self._edit_user_name.text(),password=self._edit_password.text(),description=self._edit_description.text())
-        self.emit(QtCore.SIGNAL('updateUser(user)'),user)
-        self.__canceled()
+        if self._edit_password.text()==str(self._user.password):
+            user = User(user_name=self._edit_user_name.text(),password=self._edit_password.text(),description=self._edit_description.text())
+            self.emit(QtCore.SIGNAL('updateUser(user)'),user)
+            self.__canceled()
+        else:
+            print(self._edit_password.text())
+            print(self._user.password)
+            raise RepoManager.ExceptionErrorPasswordUser('не правильный пароль')
     
     def __deleteUser(self):
         user = User(self._edit_user_name.text())
@@ -641,9 +717,9 @@ class BrowseFilesWindow(QtGui.QWidget):
         self._path_to_repo = path_to_repo
         
         vbox_layout = QtGui.QVBoxLayout()
-        button_indexing = QtGui.QPushButton('Проиндексировать',self)
-        button_add = QtGui.QPushButton('Добавить в хранилище',self)
-        button_delete = QtGui.QPushButton('Удалить',self)
+        button_indexing = QtGui.QPushButton('Присвоить себе',self)
+        button_add = QtGui.QPushButton('Скопировать в хранилище',self)
+        button_delete = QtGui.QPushButton('Удалить из хранилища',self)
         button_cancel = QtGui.QPushButton('Выход',self)
         
         vbox_layout.addWidget(button_indexing)
@@ -794,16 +870,19 @@ def splitDirPath(parent_dir,file_path):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     window=[]
+    user_repo = User('valex', 123)
 #    window.append(EditEntityWindow('valex','/tmp/',object_type=SystemInfo.entity_link_type))
 #    window.append(EditUserWindow())
 #    window.append(EditMetadataWindow('valexl','tag'))
 #    window.append(EditMetadataWindow('valexl','field'))
 #    window.append(EditFilesWindow('/tmp/tmp'))
 #    window.append(BrowseFilesWindow('valex','/tmp/tmp'))
-    window.append( BrowseMetadataWindow('valex','/tmp/tmp',type_metadata='tag'))
+#    window.append( BrowseMetadataWindow('valex','/tmp/tmp',type_metadata='tag'))
 #    window = EditMetadataWindow('valexl','field',status='add_value',field_type=SystemInfo.field_type_int)
 #    window = EditFilesWindow('/tmp/tmp/')
-#    window.append(EditEntityWindow('/tmp/','valexl',object_type=SystemInfo.entity_link_type))
+    window.append(EditEntityWindow(user_repo,SystemInfo.entity_file_type))
+    window.append(ProgressBarWindow())
+#    window.append(EditEntityWindow(user_repo,SystemInfo.entity_link_type))
     for win in window:
         win.show()
     sys.exit(app.exec_())

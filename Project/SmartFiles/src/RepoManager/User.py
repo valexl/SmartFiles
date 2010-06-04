@@ -5,7 +5,8 @@ Created on 22.04.2010
 '''
 import sqlite3 as sqlite
 import os
-import SystemInfo
+from RepoManager.SystemInfo import SystemInfo 
+
 
 
 

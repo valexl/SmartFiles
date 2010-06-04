@@ -5,10 +5,10 @@ Created on 20.04.2010
 '''
 import sqlite3 as sqlite
 import os
-from User import User
-import SystemInfo
-import Entity
-from EntityManager import EntityManager
+#import User.User
+from  RepoManager.SystemInfo import SystemInfo
+#import Entity
+from EntityManager.EntityManager import EntityManager 
 #from EntityManager import EntityManager
 #import EntityManager
 #import EntityManager
@@ -19,11 +19,13 @@ class RepoManager(object):
     '''
     class RepoException(Exception):
         pass
-    class ExceptionUserNotFound(RepoException):
+    class ExceptionErrorPasswordUser(RepoException):
         pass
     class ExceptionUserExist(RepoException):
         pass
-    class ExceptionUserGuest(RepoException):
+    class ExceptionUserNotFound(RepoException):
+        pass
+    class ExceptionUserGuest(ExceptionUserNotFound):
         pass
     class ExceptionRepoIsExist(RepoException):
         pass
@@ -309,12 +311,19 @@ class RepoManager(object):
             Необходим для добавление как в домашнюю директорию пользователя, 
             так и в директорию .metadata хранилища.
         '''
+       
         cursor.execute("INSERT INTO users "
                     " (name, password, user_type, description) "
                     " VALUES (?,?,?,?) ",
                     (user_repo.name,user_repo.password, user_repo.type,user_repo.description))
-        
-        
+#        except:
+#            cursor.execute(" SELECT COUNT (*) FROM USERS WHERE name = ? ",
+#                              (user_repo.name,)
+#                              )
+#            if cursor.fetchone()[0]>0:
+#                raise RepoManager.ExceptionUserExist('не верный пароль')
+#            else:
+#                raise RepoManager.ExceptionUserGuest('текущий пользователь не зарегистрирован в хранилище')
 
     def addUserRepo(self,user_repo):
         '''
@@ -433,9 +442,13 @@ class RepoManager(object):
             иначе вызывается исключение RepoManager.ExceptionUserGuest
         '''
         for user in self._list_users:
-            if (user[0]==user_repo.name)and(int(user_repo.password)==int(user[1])):
-                return 1
-        raise RepoManager.ExceptionUserGuest("openRepository.не правильный логин или пароль")
+            if (user[0]==user_repo.name):
+                flag = 0
+                if (int(user_repo.password)==int(user[1])):
+                    return 1
+                else:
+                    RepoManager.ExceptionUserExist('не верный пароль пользователя')            
+        raise RepoManager.ExceptionUserGuest("Текущий пользователь не зарегестирован в хранилище")
     
     
     @staticmethod    
