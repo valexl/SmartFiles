@@ -315,20 +315,23 @@ class ProcessingRequest(object):
   
 if __name__=='__main__':
                 
-    str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
-    str_request = 'суперполе>суперзначение and tag1' 
-    str_request = 'field   <>    a  or g>d   and ( f            =               a or s        <>          d ) or                e            =           3'
-    str_request = 'aa and (bb and (cc or ee))'
-    
-    str_request = 'aa'
-  #  str_request = 'field       <> s' 
-#    str_request = '      tag   =                 "asdfasdf" tag tag tag field=       "asdfasd"     field2    =      "asdfas"'
-#    str_request ="п1=з1 and п2=  з2 or п3  =з3 and п4  =  з4"
-    
-    per=ProcessingRequest.getSQLRequest(str_request)
-    print('the result is ----')
-    print(per)
-    
+#    str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
+#    str_request = 'суперполе>суперзначение and tag1' 
+#    str_request = 'field   <>    a  or g>d   and ( f            =               a or s        <>          d ) or                e            =           3'
+#    str_request = 'aa and (bb and (cc or ee))'
+#    
+#    str_request = 'aa'
+#  #  str_request = 'field       <> s' 
+##    str_request = '      tag   =                 "asdfasdf" tag tag tag field=       "asdfasd"     field2    =      "asdfas"'
+##    str_request ="п1=з1 and п2=  з2 or п3  =з3 and п4  =  з4"
+#    
+#    per=ProcessingRequest.getSQLRequest(str_request)
+#    print('the result is ----')
+#    print(per)
+    string='           asdfasdfasd asdf asdf asdf a          asdf adsf        '
+    res= cleareExtraSpace(string)
+    res = ' ' + res
+    print(res.split(' '))
    
 
 #    

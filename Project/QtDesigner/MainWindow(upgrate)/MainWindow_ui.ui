@@ -34,6 +34,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="radioButton_neural_net">
+           <property name="text">
+            <string>включить нейросеть</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLineEdit" name="lineEdit_search"/>
          </item>
         </layout>
@@ -136,9 +143,9 @@
       <string>&amp;Пользователь</string>
      </property>
      <addaction name="action_update_user"/>
-     <addaction name="action_switch_user"/>
-     <addaction name="separator"/>
      <addaction name="action_delete_user_from_repo"/>
+     <addaction name="separator"/>
+     <addaction name="action_switch_user"/>
     </widget>
     <addaction name="menu_repo"/>
     <addaction name="menu_users"/>
@@ -169,15 +176,20 @@
     <addaction name="action_change_entity"/>
     <addaction name="action_delete_entity"/>
     <addaction name="separator"/>
-    <addaction name="action_search"/>
-    <addaction name="separator"/>
     <addaction name="action_repo_files"/>
    </widget>
    <widget class="QMenu" name="menu_metadata">
     <property name="title">
      <string>&amp;Метаданные</string>
     </property>
-    <addaction name="action_metadata_setting"/>
+    <widget class="QMenu" name="menu">
+     <property name="title">
+      <string>&amp;Управление</string>
+     </property>
+     <addaction name="action_setting_tags"/>
+     <addaction name="action_setting_fields"/>
+    </widget>
+    <addaction name="menu"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_objects"/>
@@ -265,14 +277,19 @@
     <string>Найти</string>
    </property>
   </action>
-  <action name="action_metadata_setting">
-   <property name="text">
-    <string>Управление</string>
-   </property>
-  </action>
   <action name="action_repo_files">
    <property name="text">
     <string>Файлы хранилища</string>
+   </property>
+  </action>
+  <action name="action_setting_tags">
+   <property name="text">
+    <string>Тегами</string>
+   </property>
+  </action>
+  <action name="action_setting_fields">
+   <property name="text">
+    <string>Полями</string>
    </property>
   </action>
  </widget>

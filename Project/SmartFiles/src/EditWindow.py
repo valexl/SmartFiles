@@ -11,57 +11,14 @@ from PyQt4 import QtGui,QtCore,QtSql
 
 from ProcessingRequest.ProcessingRequest import cleareExtraSpace, cleareSpaceAboutOperator 
 from RepoManager.SystemInfo import SystemInfo
-from  EntityManager.EntityManager import EntityManager
+from EntityManager.EntityManager import EntityManager
 from RepoManager.User import User
 from EntityManager.Field import Field
 from EntityManager.Tag import Tag
 from RepoManager.RepoManager import RepoManager
 
 
-class ProgressBarWindow(QtGui.QDialog):
-    def __init__(self,parent=None):
-        QtGui.QDialog.__init__(self,parent)
-    
-        vbox_layout = QtGui.QVBoxLayout()
-    
-        self.progress_bar = QtGui.QProgressBar(self)
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setRange(0,100)
-        #self.progress_bar.show(self)
-        vbox_layout.addWidget(self.progress_bar)
-        
-        self.button_ok = QtGui.QPushButton('Ок',self)
-        self.button_ok.setEnabled(0)
-        self.button_cancel = QtGui.QPushButton('Отмена',self)
-        hbox_layout = QtGui.QHBoxLayout()
-        hbox_layout.addWidget(self.button_ok)
-        hbox_layout.addWidget(self.button_cancel)
-        vbox_layout.addLayout(hbox_layout)
-        
-        self.setLayout(vbox_layout)
-        
-        
-        self.connect(self.button_ok,QtCore.SIGNAL('clicked()'),self.__pressOk)
-        self.connect(self.button_cancel,QtCore.SIGNAL('clicked()'),self.__pressCancel)
-        
-        
-    def __pressOk(self):
-        print('ok')
-        self.emit(QtCore.SIGNAL('progressOk()'))
-        
-        
-    def __pressCancel(self):
-        print('cancel')
-        self.emit(QtCore.SIGNAL('progressCancel()'))
-        
-        
-    def setValue(self,value):
-        self.progress_bar.setValue(int(value))
-        if int(value)==100:
-            self.button_ok.setEnabled(1)
-            self.button_cancel.setEnabled(0)
-        
+
         
 class EditEntityWindow(QtGui.QDialog):
     def __init__(self,path_to_repo, user_repo,object_type,entity=None,parent=None):
@@ -70,8 +27,11 @@ class EditEntityWindow(QtGui.QDialog):
         self._user_repo = user_repo
         self._path_to_repo = path_to_repo
         self._entity = entity
+        
+        
+        
         vbox_layout = QtGui.QVBoxLayout()
-        self._list_files_names = []
+        
         #создание виджетов и их расположение на layout
         label = QtGui.QLabel('Заголовок',self)
         self._edit_title = QtGui.QLineEdit(self)
@@ -81,6 +41,15 @@ class EditEntityWindow(QtGui.QDialog):
         if self._object_type == SystemInfo.entity_link_type:
             label = QtGui.QLabel('URL',self)
             self._edit_URL = QtGui.QLineEdit(self)
+            if not self._entity == None:
+                URL_data=''
+                for field in self._entity.getFieldAttributes():
+                    if field[0][0]=='url':
+                        URL_data=field[1][0] #запись данных из поля URL
+                        break
+                if URL_data=='':
+                    raise EntityManager.ExceptionNotFoundEntityData('не найден URL ссылка для объекта ' + entity.title)
+                self._edit_URL.setText(URL_data)
             vbox_layout.addWidget(label)
             vbox_layout.addWidget(self._edit_URL)
         else:
@@ -88,6 +57,10 @@ class EditEntityWindow(QtGui.QDialog):
             self._edit_path = QtGui.QLineEdit(self)
             button_browse = QtGui.QPushButton('...',self)
             
+            if not self._entity == None:
+                self._edit_path.setText(self._entity.file_path)
+                self._edit_path.setDisabled(1)
+                button_browse.setDisabled(1)
             vbox_layout.addWidget(label)
             hbox_layout = QtGui.QHBoxLayout()
             hbox_layout.addWidget(self._edit_path)
@@ -110,6 +83,21 @@ class EditEntityWindow(QtGui.QDialog):
         self._edit_description = QtGui.QLineEdit(self)
         vbox_layout.addWidget(label)
         vbox_layout.addWidget(self._edit_description)
+                    
+                    
+        if not self._entity == None:
+            self._edit_title.setText(self._entity.title)
+            self._edit_description.setText(self._entity.notes)
+            tag_names=''
+            for tag in self._entity.list_tags:
+                tag_names += tag.name + ' '
+            self._edit_tags.setText(tag_names)
+            fields=''
+            for field in self._entity.list_fields:
+                if field.name =='url':
+                    continue
+                fields+= ' ' + field.name+'='+field.value
+            self._edit_fields.setText(fields)
                     
         button_ok = QtGui.QPushButton('Ок',self)
         button_cancel = QtGui.QPushButton('Отмена',self)
@@ -137,8 +125,19 @@ class EditEntityWindow(QtGui.QDialog):
         file_dialog.setFileMode(QtGui.QFileDialog.ExistingFiles)
         
         
-        self._list_files_names = file_dialog.getOpenFileNames(self,'выберити файлы для добавления',self._path_to_repo)
-        print(self._list_files_names)
+        list_files_names = file_dialog.getOpenFileNames(self,'выберити файлы для добавления',self._path_to_repo)
+        files=self._edit_path.text()
+        files=files.strip()
+        
+        if not files=='':
+            if not files[-1]==';':
+                files+=';'
+                
+        for file_name in list_files_names:
+            files= files +  file_name + ';'
+        files=files[0:-1]
+        self._edit_path.setText(str(files))
+        
         
     def __canceled(self):
         '''
@@ -150,15 +149,20 @@ class EditEntityWindow(QtGui.QDialog):
 
     def __pressButtonOk(self):
         '''
-            выполнить действие (создание/удаление/модификация)
+            выполнить действие (создание/модификация)
         '''
-        if self._entity == None:
-            print('create Entity')
-            self.__create()
-#        elif self._status == 'delete':
-#            self.__delete()
+        if not self._edit_path.text()=='':
+            if self._entity == None:
+                    print('create Entity')
+                    self.__create()
+            else:
+                if self._entity.id ==None:
+                    print('create Entity')
+                    self.__create()
+                else:
+                    self.__update()
         else:
-            self.__update()
+            print('хм.. наглец однако.. ну ни чего.. файл выберишь, исправишься:)')
             
             
     def __getFields(self):
@@ -197,10 +201,42 @@ class EditEntityWindow(QtGui.QDialog):
                 list_tags.append(Tag(tag_name,self._user_repo.name))
         return list_tags
     
+    
+    def __splitFileByRepo(self,file_path):        
+        '''
+            отделение от пути файла путь к хранилищу. Если файл не принадлежит хранилищу, то копируется в корень хранилища.
+        '''
+        print('splitFileByRepo')
+        part_dirs, file_name = os.path.split(file_path)
+        part_dirs = part_dirs.split(os.path.sep)
+        print(part_dirs)
+        repo_path_dirs = self._path_to_repo.split(os.path.sep)
+        print(repo_path_dirs)
+        index = 0
+        for dir_name in repo_path_dirs:
+            print('dir_name=',dir_name)
+            print('part_dirs[',index,']=',part_dirs[index])
+            if not dir_name == part_dirs[index]:
+                    shutil.copyfile(file_path, self._path_to_repo + os.path.sep + file_name)
+                    return file_name                
+            index+=1 
+        result_path = ''
+     
+        for pos in range(index,len(part_dirs)):
+            result_path+= os.path.sep + part_dirs[pos]
+            
+        result_path = result_path + os.path.sep + file_name
+        result_path = result_path[1:]
+        print('aaaaaaaaaaaaaaaaaaaaa-',result_path)
+        return result_path 
+    
+    
+    
     def __create(self):
         '''
             создание нового объекта. Передает с сигналом только что созданный объект Entity
         '''
+        
         #обработка полей
         list_fields = self.__getFields()
         #обработка тегов
@@ -211,27 +247,50 @@ class EditEntityWindow(QtGui.QDialog):
                                             list_tags=list_tags,list_fields=list_fields,
                                             notes=self._edit_description.text())) #добавить дату создания
         else:
-            count_files = len(self._list_files_names)
+            files_names = self._edit_path.text()
+            print(files_names)
+            #files_names = cleareExtraSpace(files_names)
+            list_files = files_names.split(';')
+            list_files_names=[]
+            for file_name in list_files: # убираются лишнии пробелы в начале и конце строки. Если пользователь вводил файлы вручную
+                list_files_names.append(file_name.strip())
+
+            count_files = len(list_files_names)
             
             
-            self.setDisabled(1)
-            progress_window = ProgressBarWindow()
+#            self.setDisabled(1)
+            progress_window = QtGui.QProgressDialog(self)
+#            progress_window.setWindowModality(1)
+            progress_window.setMinimum(0)
+            progress_window.setMaximum(100)
             progress_window.show()
+            self.connect(progress_window,QtCore.SIGNAL('canceled()'),self.__stoped)
             d_progress = 100/count_files
             progress = 0
-            for file_path in self._list_files_names:
-                print(file_path)
+            for file_path in list_files_names:
+                progress_window.setValue(progress)
+                QtGui.QApplication.processEvents()
+                file_repo_path = self.__splitFileByRepo(file_path)
+                print(self._path_to_repo)
+                print('file_repo_path',file_repo_path)
                 list_entityes.append(EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_repo.name,
                                             list_tags=list_tags,list_fields=list_fields,
-                                            notes=self._edit_description.text(),file_path=file_path))
+                                            notes=self._edit_description.text(),file_path=file_repo_path))
+                print('progress---',progress)
+                print('dprogress---',d_progress)
+                
                 progress+=d_progress
                 progress_window.setValue(progress)
-            self.setEnabled(1)
+                QtGui.QApplication.processEvents()
+#            progress_window.setWindowModality(0)    
+            print('deleting progress window')
             del(progress_window)
         print('the lenght outputting signal is -',len(list_entityes))
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
-        self.__canceled()
-     
+#        self.__canceled()
+    def __stoped(self):
+        pass
+        print('процесс копирования не выполнен до конца')
     def __update(self):
         '''
             модификация сущности.
@@ -239,12 +298,12 @@ class EditEntityWindow(QtGui.QDialog):
         list_fields= self.__getFields()
         list_tags= self.__getTags()
         
-        entity = EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,
-                                            user_name=self._user_name,file_path=self._file_path, 
+        entity = EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._entity.object_type,
+                                            user_name=self._user_repo.name,file_path=self._entity.file_path, 
                                             list_tags=list_tags,list_fields=list_fields,
-                                            id=self._entity_id)
+                                            id=self._entity.id)
 
-        self.emit(QtCore.SIGNAL('updateEntity(entity)'),entity)    
+        self.emit(QtCore.SIGNAL('updateEntity(list_entityes)'),(self._entity,entity))    
         self.__canceled()     
     
 
@@ -358,16 +417,17 @@ class EditUserWindow(QtGui.QWidget):
 #        QtGui.QWidget.__init__(self,parent)
 #        
         
+
         
 class EditMetadataWindow(QtGui.QWidget):
     #переделать окно поотдельности. одно для тегов, другое для полей. Сделать базовое окно редактирования и от 
     #него наследуясь переделать окна. (это если такого плана дизайн будет не временным, а постоянным).
-    def __init__(self,user_name,type_metadata='tag',status='create',metadata_name='',
+    def __init__(self,user_repo,entity_id,type_metadata='tag',
                  field_type=SystemInfo.field_type_str,parent=None):
         QtGui.QWidget.__init__(self,parent)
         self._type_metadata=type_metadata
-        self._user_name = user_name
-        self._status = status
+        self._user_repo = user_repo
+        self._entity_id = entity_id
         
         vbox_layout = QtGui.QVBoxLayout()
         
@@ -383,7 +443,7 @@ class EditMetadataWindow(QtGui.QWidget):
             label.setText('Имя тега ')
         else:
             label.setText('Имя поля ')
-            self._metadata_name.setText(metadata_name)
+            #self._metadata_name.setText(metadata_name)
             
             
             hbox_layout = QtGui.QHBoxLayout()
@@ -401,25 +461,14 @@ class EditMetadataWindow(QtGui.QWidget):
             hbox_layout.addWidget(label)
             hbox_layout.addWidget(self._type_field)
             vbox_layout.addLayout(hbox_layout)
-            #если создается новое поле, тогда вывод необходимых для создания поля атрибутов
-            if status=="add_value":
-                self._type_field.setDisabled(1)
-                self._metadata_name.setDisabled(1)
-                if field_type==SystemInfo.field_type_int:
-                    self._type_field.setCurrentIndex(1)
-                else:
-                    self._type_field.setCurrentIndex(0)
-                
-                
-             
-        if status=="create":
-            hbox_layout = QtGui.QHBoxLayout()
+
+        hbox_layout = QtGui.QHBoxLayout()
                     
-            label = QtGui.QLabel('Описание',self)
-            self._description = QtGui.QLineEdit(self)
-            hbox_layout.addWidget(label)
-            hbox_layout.addWidget(self._description)
-            vbox_layout.addLayout(hbox_layout)
+        label = QtGui.QLabel('Описание',self)
+        self._description = QtGui.QLineEdit(self)
+        hbox_layout.addWidget(label)
+        hbox_layout.addWidget(self._description)
+        vbox_layout.addLayout(hbox_layout)
             
         
         hbox_layout = QtGui.QHBoxLayout()
@@ -436,20 +485,28 @@ class EditMetadataWindow(QtGui.QWidget):
     
     
     def __create(self):
-        if self._type_metadata=='tag':
-            new_tag = Tag(self._metadata_name.text(),self._user_name,description=self._description.text())
-            self.emit(QtCore.SIGNAL('mark(metadata_obj)'),new_tag)
-        elif self._type_metadata=='field':
-            if self._status=='create':
-                new_field = Field(self._metadata_name.text(),self._user_name,self._field_value.text(),
-                             self._type_field.currentText(),self._description.text())
-            else:
-                new_field = Field(self._metadata_name.text(),self._user_name,self._field_value.text(),
-                             self._type_field.currentText())
-            self.emit(QtCore.SIGNAL('mark(metadata_obj)'),new_field)
+        if not self._metadata_name.text()=='':
+            if self._type_metadata=='tag':
+                new_tag = Tag(tag_name=self._metadata_name.text(),
+                              user_name=self._user_repo.name,
+                              description=self._description.text())
+                self.emit(QtCore.SIGNAL('mark(entity_id,metadata_obj)'),self._entity_id, new_tag)
+                self.__canceled()
+            elif self._type_metadata=='field':
+                if not self._field_value.text()=='':
+                    new_field = Field(field_name=self._metadata_name.text(),
+                                      user_name=self._user_repo.name,
+                                      field_value=self._field_value.text(),
+                                      value_type= self._type_field.currentText(),
+                                      field_description=self._description.text())
+                    self.emit(QtCore.SIGNAL('mark(entity_id,metadata_obj)'),self._entity_id,new_field)
+                    self.__canceled()
+                else:
+                    print('введите значение для поля')
+            
         else:
-            raise Exception('траблы при передачи сигнала из EditMetadataWindow')
-        self.__canceled()
+            print('поле с именем ' + self._type_metadata + ' пустое')
+        
         
         
     def __canceled(self):
@@ -461,81 +518,45 @@ class EditMetadataWindow(QtGui.QWidget):
     
         
 class BrowseMetadataWindow(QtGui.QWidget):
-    def __init__ (self, entity_id, user_name,type_metadata='tag',status='mark', parent=None):
+    def __init__ (self,user_repo,type_metadata='tag',parent=None):
         
         QtGui.QWidget.__init__(self,parent)
-        self._user_name = user_name
-        self._entity_id = entity_id
+        self._user_repo = user_repo
+        self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata
         self._type_metadata = type_metadata
-        self._status = status
+        
         
         vbox_layout = QtGui.QVBoxLayout()
-        if status=='mark':
-            self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata
-            
         
-            button_add = QtGui.QPushButton('Пометить',self)
-            button_create = QtGui.QPushButton('Создать и пометить',self)
-            button_delete = QtGui.QPushButton('Удалить',self)
-           # button_cancel = QtGui.QPushButton('Отмена',self)
-            
-            
-            vbox_layout.addWidget(button_add)
-            vbox_layout.addWidget(button_create)
-            vbox_layout.addWidget(button_delete)
-            
-            
-            self.connect(button_add,QtCore.SIGNAL('clicked()'),self.__add)
-            self.connect(button_create,QtCore.SIGNAL('clicked()'),self.__create)    
-            self.connect(button_delete,QtCore.SIGNAL('clicked()'),self.__delete)
-        else:                           # SELECT     tag.*            FROM    tag,                     entity_tags             WHERE  name =          tag_name        AND 
-            self._str_request_select = "SELECT " + type_metadata +".* FROM " + type_metadata + ", entity_" + type_metadata + "s WHERE name = " + type_metadata + "_name AND entity_id = " + str(self._entity_id)
-            print(self._str_request_select)
-            button_delete = QtGui.QPushButton('Открепить от файла',self)
-            vbox_layout.addWidget(button_delete)
-            self.connect(button_delete,QtCore.SIGNAL('clicked()'),self.__release)
-            
-            
+        button_delete = QtGui.QPushButton('Удалить',self)   
+        vbox_layout.addWidget(button_delete)
+        
         button_cancel = QtGui.QPushButton('Завершить',self)
         vbox_layout.addWidget(button_cancel)
         
+        
         hbox_layout = QtGui.QHBoxLayout()
+        
         self._table = QtGui.QTableView(self)
         hbox_layout.addWidget(self._table)
-        
         hbox_layout.addLayout(vbox_layout)
-        
         vbox_layout = QtGui.QVBoxLayout()
         vbox_layout.addLayout(hbox_layout)
         self.setLayout(vbox_layout)
-        self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
-
         self.refresh()
         
+        self.connect(button_delete,QtCore.SIGNAL('clicked()'),self.__delete)
+        self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
+        
+        
     def __cancel(self):
+        '''
+            завершение работы с окном 
+        '''
         self.close()
         del(self)
         
         
-    def __create(self):
-        
-        self._edit_window = EditMetadataWindow(self._user_name,self._type_metadata)
-        self._edit_window.show()
-        self.connect(self._edit_window,QtCore.SIGNAL('mark(metadata_obj)'),self.__pushSignal)
-        
-        
-    def __pushSignal(self,metadata_obj):
-
-        if self._type_metadata=='tag':
-            print('push markTag signal')
-            self.emit(QtCore.SIGNAL('markTag(entity_id,tag)'),self._entity_id,metadata_obj)
-        elif self._type_metadata=='field':
-            print('push markField signal')    
-            self.emit(QtCore.SIGNAL('markField(entity_id,field)'),self._entity_id,metadata_obj)
-        else:
-            raise Exception('траблы с типом создаваемого объекта (ни tag и ни field) не правильно указан параметр')
-        
-        #self.__cancel()
         
 
     def __getSelectingData(self,type_metadata='tag'):
@@ -546,34 +567,13 @@ class BrowseMetadataWindow(QtGui.QWidget):
         index=self._table.model().index(row,0)
         metadata_name = self._table.model().data(index)
         if metadata_name==None:
-            raise Exception('не выбрана запись для действия')
+            print('не выбрана запись для действия')
         if type_metadata=='field':
             index = self._table.model().index(row,3)
             field_type=self._table.model().data(index)
             return (metadata_name,field_type)
         return metadata_name
             
-    def __add(self):
-        '''
-            добавление нового тега или поля
-        '''
-        print('addMetadata')
-            
-
-        if self._type_metadata=='tag':
-            metadata_name=self.__getSelectingData()
-            print('tag')
-            adding_obj = Tag(metadata_name,self._user_name)
-            self.__pushSignal(adding_obj)
-        else:
-            print('field')
-            metadata_name, field_type = self.__getSelectingData('field')
-            print(field_type)
-            self._edit_window = EditMetadataWindow(self._user_name,self._type_metadata,
-                                                       metadata_name = metadata_name,status='add_value',
-                                                       field_type=field_type)
-            self._edit_window.show()
-            self.connect(self._edit_window,QtCore.SIGNAL('mark(metadata_obj)'),self.__pushSignal)
             
         
     def __delete(self):
@@ -581,33 +581,34 @@ class BrowseMetadataWindow(QtGui.QWidget):
             удаление тега или поля
         '''    
         print('deleteTag')
-        metadata_name=self.__getSelectingData()
+        metadata_name=self.__getSelectingData(self._type_metadata)
         if self._type_metadata=='tag':
-            deleting_metadata_obj = Tag(metadata_name,self._user_name)
+            deleting_metadata_obj = Tag(metadata_name,self._user_repo.name)
             self.emit(QtCore.SIGNAL('deleteTag(tag)'),deleting_metadata_obj)
         else:
             print('start deleting field')
-            deleting_metadata_obj = Field(metadata_name,self._user_name)
+            field_name, field_type = metadata_name
+            deleting_metadata_obj = Field(field_name=field_name,user_name=self._user_repo.name,value_type=field_type)
             self.emit(QtCore.SIGNAL('deleteField(field)'),deleting_metadata_obj)
         self.refresh()
         
-    def __release(self):
-        '''
-            освобождение entity от тега или поля
-        '''
-        print('releaseMetadata')
-        
-        if self._type_metadata=='tag':
-            metadata_name=self.__getSelectingData()
-            print('start releasing tag')
-            deleting_metadata_obj = Tag(metadata_name,self._user_name)
-            self.emit(QtCore.SIGNAL('releaseTag(entity_id,tag)'),self._entity_id,deleting_metadata_obj)
-        else:
-            print('start releasing field')
-            metadata_name, field_type=self.__getSelectingData('field')
-            deleting_metadata_obj = Field(metadata_name,self._user_name,field_type)
-            self.emit(QtCore.SIGNAL('releaseField(entity_id,field)'),self._entity_id,deleting_metadata_obj)
-        self.refresh()
+#    def __release(self):
+#        '''
+#            освобождение entity от тега или поля
+#        '''
+#        print('releaseMetadata')
+#        
+#        if self._type_metadata=='tag':
+#            metadata_name=self.__getSelectingData()
+#            print('start releasing tag')
+#            deleting_metadata_obj = Tag(metadata_name,self._user_repo)
+#            self.emit(QtCore.SIGNAL('releaseTag(entity_id,tag)'),self._entity_id,deleting_metadata_obj)
+#        else:
+#            print('start releasing field')
+#            metadata_name, field_type=self.__getSelectingData('field')
+#            deleting_metadata_obj = Field(metadata_name,self._user_repo,field_type)
+#            self.emit(QtCore.SIGNAL('releaseField(entity_id,field)'),self._entity_id,deleting_metadata_obj)
+#        self.refresh()
         
     def refresh(self):
         '''
@@ -643,6 +644,7 @@ class EditFilesWindow(QtGui.QWidget):
         
         self._file_path_copy = QtGui.QLineEdit(self)
         self._dir_path_recive = QtGui.QLineEdit(self)
+        self._dir_path_recive.setText(repo_path)
         vbox_layout = QtGui.QVBoxLayout()
         
         label = QtGui.QLabel('Копируемый файл')
@@ -676,13 +678,36 @@ class EditFilesWindow(QtGui.QWidget):
         
         self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__saveFile)
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
-        
+    
+    def __isRepo(self,dir_path):
+        list_dir_path = dir_path.split(os.path.sep)
+        index=0
+        for repo_dir in self._path_to_repo.split(os.path.sep):
+            if not repo_dir==list_dir_path[index]:
+                return False
+            index+=1                
+        return True
     def __saveFile(self):
         '''
             сохранения инфомрации о копировании и передача ее в окно BrowseFilesWindow
         '''
-        self.emit(QtCore.SIGNAL('copyFileInRepo(copy_info)'),(self._file_path_copy.text(),self._dir_path_recive.text()))
-        self.close()
+        dir_path = self._dir_path_recive.text()
+        if self.__isRepo(dir_path):
+            if not self._file_path_copy.text()=='':
+                files_names= self._file_path_copy.text()
+                list_files = files_names.split(';')
+                list_files_names=[]
+                for file_name in list_files: # убираются лишнии пробелы в начале и конце строки. Если пользователь вводил файлы вручную
+                    list_files_names.append(file_name.strip())
+                 
+                print('list_files_names-',list_files_names)
+                print('dir_path',dir_path)
+                self.emit(QtCore.SIGNAL('copyFileInRepo(copy_info)'),(list_files_names,dir_path))
+                self.close()
+            else:
+                print('епт.. файл выбери!')
+        else:
+            print('косарезик... директория куда собираешься сохранять - не хранилище то')
         
         
     def __cancel(self):
@@ -697,7 +722,24 @@ class EditFilesWindow(QtGui.QWidget):
         '''
             сбор информации о файле коипрования
         '''
-        self._file_path_copy.setText(QtGui.QFileDialog.getOpenFileName(self,'Выберите файл для копирования', '/'))
+        
+        file_dialog = QtGui.QFileDialog(self)
+        file_dialog.setFileMode(QtGui.QFileDialog.ExistingFiles)
+        
+        
+        list_files_names = file_dialog.getOpenFileNames(self,'выберити файлы для добавления',self._path_to_repo)
+        files=self._file_path_copy.text()
+        files=files.strip()
+        
+        if not files=='':
+            if not files[-1]==';':
+                files+=';'
+                
+        for file_name in list_files_names:
+            files= files +  file_name + ';'
+        files=files[0:-1]
+        self._file_path_copy.setText(str(files))
+        
         
         
     def __selectDir(self):
@@ -711,9 +753,9 @@ class BrowseFilesWindow(QtGui.QWidget):
     '''
         окно для работы с файлами хранилища (добавление новых файлов, удаление существующих, пометка метаинформацией)
     '''
-    def __init__(self,user_name, path_to_repo, parent=None):
+    def __init__(self, path_to_repo,user_repo, parent=None):
         QtGui.QWidget.__init__(self,parent)
-        self._user_name = user_name
+        self._user_repo = user_repo
         self._path_to_repo = path_to_repo
         
         vbox_layout = QtGui.QVBoxLayout()
@@ -783,13 +825,27 @@ class BrowseFilesWindow(QtGui.QWidget):
             сохранение файла в хранилщие  
         '''
         
-        file_name = os.path.split(copy_info[0])[1] 
-        file_path = os.path.join(copy_info[1],file_name)
-        shutil.copyfile(copy_info[0], file_path)
-        
-        file_path_to_BD = self.__splitDirPath(file_path)
-        self.emit(QtCore.SIGNAL('saveFileInfo(file_path)'),file_path_to_BD)
-        self.refresh()
+        list_file_name = copy_info[0] 
+        progress_dialog = QtGui.QProgressDialog(self)
+        progress_dialog.setWindowModality(1)
+        d_progress = 100/len(list_file_name)
+        progress = 0
+        for copy_file_path in list_file_name:
+            #file_name = os.path.split(file_name[0])[1]
+            QtGui.QApplication.processEvents()
+            print('copy_file_path',copy_file_path)
+            file_name = os.path.split(copy_file_path)[1]
+            print('file_name-',file_name)
+            print('dir_name',copy_info[1]) 
+            file_path = os.path.join(copy_info[1],file_name)
+            print('file_path-',file_path)
+            shutil.copyfile(copy_file_path, file_path)
+            file_path_to_BD = self.__splitDirPath(file_path)
+            self.emit(QtCore.SIGNAL('saveFileInfo(file_path)'),file_path_to_BD)
+            progress+=d_progress
+            progress_dialog.setValue(int(progress))
+            QtGui.QApplication.processEvents()
+        #self.refresh()
         
         
     def __indexingFile(self):
@@ -801,14 +857,14 @@ class BrowseFilesWindow(QtGui.QWidget):
         index = self._table.model().index(row,0)
         file_path = self._table.model().data(index)
         if not file_path==None:
-            self.emit(QtCore.SIGNAL('indexingFile(file_path)'),file_path)
+            file_path = self._path_to_repo + os.path.sep + file_path 
+            entity = EntityManager.createEntity(entity_type=SystemInfo.entity_file_type, user_name=self._user_repo, file_path=file_path)
+            self.emit(QtCore.SIGNAL('indexingFile(entity)'),entity)
+        else:
+            print('не забываем выбирать файл')
         #self.__cancel()
             
         
-    def __saveFileEntity(self):
-            self.edit_window = EditEntityWindow(self._user_name,self._path_to_repo,SystemInfo.entity_file_type,file_path)
-            self.edit_window.show()
-            self.connect(self.edit_window,QtCore.SIGNAL('createEntity(entity)'),self.__pushSignal)
     def __pushSignal(self,entity):
         '''
             отправляет сигнал на создания объекта entity
@@ -875,16 +931,20 @@ if __name__ == '__main__':
 #    window.append(EditUserWindow())
 #    window.append(EditMetadataWindow('valexl','tag'))
 #    window.append(EditMetadataWindow('valexl','field'))
+#    window.append(EditMetadataWindow('valexl','tag'))
 #    window.append(EditFilesWindow('/tmp/tmp'))
-#    window.append(BrowseFilesWindow('valex','/tmp/tmp'))
-#    window.append( BrowseMetadataWindow('valex','/tmp/tmp',type_metadata='tag'))
-#    window = EditMetadataWindow('valexl','field',status='add_value',field_type=SystemInfo.field_type_int)
-#    window = EditFilesWindow('/tmp/tmp/')
-    window.append(EditEntityWindow(user_repo,SystemInfo.entity_file_type))
-    window.append(ProgressBarWindow())
-#    window.append(EditEntityWindow(user_repo,SystemInfo.entity_link_type))
+#    window.append(BrowseFilesWindow(path_to_repo='/tmp/tmp',user_repo='valex'))
+    window.append( BrowseMetadataWindow(user_name='valex',type_metadata='tag'))
+
+#    window .append(EditFilesWindow('/tmp/tmp'))
+#    window.append(EditEntityWindow('/tmp/tmp',user_repo,SystemInfo.entity_file_type))
+    
+    
+
     for win in window:
         win.show()
+        #print(win.__splitFileByRepo('/tmp/tmp2/tmpfile'))
+        
     sys.exit(app.exec_())
 
 

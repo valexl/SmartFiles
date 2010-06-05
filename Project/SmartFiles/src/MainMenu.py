@@ -19,7 +19,7 @@ from EntityManager.EntityManager import EntityManager
 from RepoManager.RepoManager import RepoManager
 from ProcessingRequest.ProcessingRequest import ProcessingRequest
 
-from EditWindow import EditEntityWindow,EditUserWindow,BrowseFilesWindow,BrowseMetadataWindow
+from EditWindow import EditEntityWindow,EditUserWindow,BrowseFilesWindow,BrowseMetadataWindow,EditMetadataWindow
 SQLRequest = "SELECT entity.* FROM entity "
 class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     '''
@@ -31,6 +31,10 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         super(SmartFilesMainWindow,self).__init__(parent)
         self.setupUi(self)
         
+#        label = QtGui.
+#        self._scaning_tables = QtGui.QLineEdit(self)
+        
+        
         self._user_repo=user_connect
         self._path_to_repo = None
         self._repo_manager = None
@@ -40,6 +44,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self._is_open_repo = False
         
         self.browse_window =None
+        
+         
         #для работы с хранилищем
         
         self.connect(self.action_open_repo,QtCore.SIGNAL("triggered()"),self.__openRepository)
@@ -58,16 +64,19 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
          
         self.connect(self.action_add_file,QtCore.SIGNAL("triggered()"),self.__addFile)
         self.connect(self.action_add_URL,QtCore.SIGNAL("triggered()"),self.__addURL)
-        self.connect(self.action_mark_tag,QtCore.SIGNAL("triggered()"),self.__workWithTag)
-        self.connect(self.action_mark_field,QtCore.SIGNAL("triggered()"),self.__workWithField)
+        self.connect(self.action_mark_tag,QtCore.SIGNAL("triggered()"),self.__markTag)
+        self.connect(self.action_mark_field,QtCore.SIGNAL("triggered()"),self.__markField)
         self.connect(self.action_change_entity,QtCore.SIGNAL("triggered()"),self.__updateEntity)
         self.connect(self.action_delete_entity,QtCore.SIGNAL("triggered()"),self.__deleteEntity)
-        self.connect(self.action_search,QtCore.SIGNAL('triggered()'),self.__complexSearch)
+        #self.connect(self.action_search,QtCore.SIGNAL('triggered()'),self.__complexSearch)
         self.connect(self.action_repo_files,QtCore.SIGNAL('triggered()'),self.__workingRepoFiles)
         #для работы с метаданными
-        self.connect(self.action_metadata_setting,QtCore.SIGNAL('triggered()'),self.__settingMetadata)
+        self.connect(self.action_setting_tags,QtCore.SIGNAL('triggered()'),self.__settingTag)
+        self.connect(self.action_setting_fields,QtCore.SIGNAL('triggered()'),self.__settingField)
+        #поиск
+        self.connect(self.pushButton_search,QtCore.SIGNAL('clicked()'),self.__searchEntity)
 
-        #переключение таблиц                       currentChanged 
+        #переключение таблиц                       
         self.connect(self.tabWidget,QtCore.SIGNAL('currentChanged (int)'),self.__switchTab)
        # self.tabWidget.setCurrentIndex(0)
         self._table = self.tableView_entity
@@ -272,8 +281,34 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         self.__disconnectBD()
         sys.exit()
+    def __searchByNeuralNet(self):
+        '''
+            поиск с помощью нейросети
+        '''
+        print('neural net')
+    def __searchByQueryLanguage(self):
+        '''
+            поис с помощью языка запроса
+        '''
+        print('query languages finding')
+        if self.lineEdit_search.text()=="":
+            self._string_request = SQLRequest # "SELECT * FROM entity"
+        else:
+            self._string_request = self.lineEdit_search.text()
+        print('SQL SEARCH',self._string_request)
+        self.__settingModel()
         
-        
+    def __searchEntity(self):
+        '''
+            начала поиск объекта
+        '''
+        if self.radioButton_neural_net.isChecked():
+            self.__searchByNeuralNet()
+        else:
+            self.__searchByQueryLanguage()
+    
+    
+    
     def __addFile(self):
         '''
             добавление файла в хранилщие
@@ -291,13 +326,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             print('__addURL')
             print(error)
     
-    def __indexingFile(self,file_path):
+    def __indexingFile(self,entity):
         '''
             индексирование файла(отправляется на запись в БД и удаляется из таблицы не проиндексированных файлов)
         '''
         #entity = EntityManager.createEntity(entity_type=SystemInfo.entity_file_type, user_name=self._user_repo.name, file_path=file_path)
 #        self.emit('sendEntity(entity)',entity)
-        self.edit_window = EditEntityWindow(self._path_to_repo,self._user_repo.name,SystemInfo.entity_file_type,file_path=file_path,status='create')
+        self.edit_window = EditEntityWindow(path_to_repo=self._path_to_repo,user_repo=self._user_repo,
+                                            object_type=SystemInfo.entity_file_type,entity=entity)
         self.edit_window.show()
         self.connect(self.edit_window,QtCore.SIGNAL('createEntity(list_entityes)'),self.__addingEntity)
         
@@ -331,6 +367,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 print('adding entity-',entity)
                 self._entity_manager.saveEntity(entity)
                 if not entity.file_path == None:
+                    print('file_info.file_path=',entity.file_path)
                     self._repo_manager.deleteFilesInfo(entity.file_path)
         
                 self.__settingModel()
@@ -350,9 +387,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             if self._is_open_repo:
-                self.browse_window = BrowseFilesWindow(path_to_repo=self._path_to_repo,user_name=self._user_repo)
+                self.browse_window = BrowseFilesWindow(path_to_repo=self._path_to_repo,user_repo=self._user_repo)
                 self.browse_window.show()
-                self.connect(self.browse_window,QtCore.SIGNAL("indexingFile(file_path)"),self.__indexingFile)
+                self.connect(self.browse_window,QtCore.SIGNAL("indexingFile(entity)"),self.__indexingFile)
                 self.connect(self.browse_window,QtCore.SIGNAL('deleteFileInfo(file_path)'),self._repo_manager.deleteFilesInfo)
                 self.connect(self.browse_window,QtCore.SIGNAL('saveFileInfo(file_path)'),self._repo_manager.addFileInfo)
             else:
@@ -364,7 +401,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 
 
 
-    def __workWithTag(self):
+    def __markTag(self):
         '''
             подкотовка для работы с тегами 
         '''
@@ -375,13 +412,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             entity_id = self._table.model().data(index)
             if not entity_id == None:
                 try:
-                    
-                    self.browse_window = BrowseMetadataWindow(entity_id = entity_id, user_name= self._user_repo.name)
-                    self.browse_window.show()
-                    self.connect(self.browse_window,QtCore.SIGNAL("markTag(entity_id,tag)"),self.__markingTag)
-                    self.connect(self.browse_window,QtCore.SIGNAL('deleteTag(tag)'),self.__deletingTag)
+
+                    self.edit_window = EditMetadataWindow(entity_id=entity_id,user_repo=self._user_repo, type_metadata='tag') 
+                    self.edit_window.show()
+                    self.connect(self.edit_window,QtCore.SIGNAL("mark(entity_id,metadata_obj)"),self.__markingTag)
                 except Exception as error:
-                    print('__workWithTag')
+                    print('__markTag')
                     print(error)
     
             else:
@@ -399,14 +435,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             entity = self._entity_manager.loadEntityObj(entity_id)
             self._entity_manager.markTag(entity, marking_tag)
-            self.browse_window.refresh()
+#            self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             print(error)
 #        except Exception as error:
 #            print(error)
 
 
-    def __workWithField(self):
+    def __markField(self):
         '''
             поготовка работы с полями
         '''
@@ -416,12 +452,11 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             entity_id = self._table.model().data(index)
             if not entity_id==None:
                 try:
-                    self.browse_window = BrowseMetadataWindow(entity_id=entity_id,user_name=self._user_repo.name,type_metadata='field')
-                    self.browse_window.show()
-                    self.connect(self.browse_window,QtCore.SIGNAL('markField(entity_id,field)'),self.__markingField)
-                    self.connect(self.browse_window,QtCore.SIGNAL('deleteField(field)'),self.__deletingField)
+                    self.edit_window = EditMetadataWindow(entity_id=entity_id,user_repo=self._user_repo, type_metadata='field') 
+                    self.edit_window.show()
+                    self.connect(self.edit_window,QtCore.SIGNAL("mark(entity_id,metadata_obj)"),self.__markingField)
                 except Exception as error:
-                    print('__workWithTag')
+                    print('__markTag')
             else:
                 print('кто будет Entity выбирать для добавления поля')
         else:
@@ -435,7 +470,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             entity = self._entity_manager.loadEntityObj(entity_id)
             self._entity_manager.addField(entity,marking_field)
-            self.browse_window.refresh()
+            #self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             print(error)
 #        except Exception as error:
@@ -443,59 +478,89 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     
     
     def __updateEntity(self):
-        '''
-            подготовка к модификации сущности
-        '''
+#        '''
+#            подготовка к модификации сущности
+#        '''
         
-        try:
+#        try:
             if self._is_open_repo:
                 row=self._table.currentIndex().row()
                 index = self._table.model().index(row,0)
                 entity_id = self._table.model().data(index)
                 if not entity_id==None:
-                    index = self._table.model().index(row,3) # тип обеъкта
+                    #index = self._table.model().index(row,3) # тип обеъкта
                     #замечание. еще необходима передавать дату создания, так как ее модификация не нужна.
-                    object_type=self._table.model().data(index)
-                    self.edit_window = EditEntityWindow(user_name=self._user_repo.name,path_repo=self._path_to_repo,object_type=object_type,id=entity_id,status='update')
+                    #object_type=self._table.model().data(index)
+                    
+                    entity = self._entity_manager.loadEntityObj(entity_id)
+#                    for tag in entity.list_tags:
+#                        print(tag.name)
+#                    for field in entity.list_fields:
+#                        print(field.name+'='+field.value)
+                    self.edit_window = EditEntityWindow(path_to_repo = self._path_to_repo,user_repo=self._user_repo,object_type=entity.object_type,entity=entity)
                     self.edit_window.show()
-                    self.connect(self.edit_window,QtCore.SIGNAL("updateEntity(entity)"),self.__updatingEntity)
+                    self.connect(self.edit_window,QtCore.SIGNAL("updateEntity(list_entityes)"),self.__updatingEntity)
+                else:
+                    print('товарищ, а какой собственно объект изменять!?')
             else:
                 print('не забываем открывать хранилище!')
-        except Exception as error:
-            print('__updateEntity')
-            print(error)
+#        except Exception as error:
+#            print('__updateEntity')
+#            print(error)
     
     
-    def __updatingEntity(self,entity):
+    def __updatingEntity(self,list_entityes):
         '''
             модификация сущности
         '''
-        if self._is_open_repo:
-            try:
-                self._entity_manager.saveEntity(entity)
-                self.__settingModel()
-            except EntityManager.ExceptionNotFoundFileBD as error:
-                print('__updatingEntity проблемы:')
-                print(error)
-            except Exception as error:
-                print('__updatingEntity')
-                print(error)
-            self.disconnect(self.edit_window,QtCore.SIGNAL('"updateEntity(entity)'),self.__updatingEntity)
-        else:
-            print('ёпт.. открой хранилище')
+        #if self._is_open_repo:
+        try:
+            old_entity,new_entity = list_entityes
+            #поиск удаленных тегов
+            for old_tag in old_entity.list_tags:
+                is_delete=True
+                for new_tag in new_entity.list_tags:
+                    if old_tag.name == new_tag.name:
+                        is_delete=False
+                        break
+                if is_delete:
+                    self._entity_manager.releaseEntityFromTag(new_entity, old_tag)
+            #поиск удаленных полей
+            for old_field in old_entity.list_fields:
+                is_delete=True
+                for new_field in new_entity.list_fields:
+                    if old_field.name == new_field.name:
+                        is_delete=False
+                        break
+                if is_delete:
+                    self._entity_manager.releaseEntityFromTag(new_entity, old_tag)
+                    
+                    
+            self._entity_manager.saveEntity(new_entity)
+            self.__settingModel()
+        except EntityManager.ExceptionNotFoundFileBD as error:
+            print('__updatingEntity проблемы:')
+            print(error)
+#        except Exception as error:
+#            print('__updatingEntity')
+#            print(error)
+        self.disconnect(self.edit_window,QtCore.SIGNAL('"updateEntity(entity)'),self.__updatingEntity)
+        
    
     def __deleteEntity(self):
         '''
             подготовка к удалению объекта сущности
         '''
         if self._is_open_repo:
-            print('__deleteEntity')
+#            print('__deleteEntity')
             row=self._table.currentIndex().row()
             index = self._table.model().index(row,0)
             id = self._table.model().data(index)
             if not id == None: #если объект выбран
                 #print(id)
                 self.__deletingEntity(id)
+            else:
+                print('не забываем выбирать объект удаления')
         else:
             print('а хо хо не ху ху? открывай давай хранилщие')
             
@@ -523,15 +588,34 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #       
 
     def __complexSearch(self):
+        '''
+            какой нибудь крутой поиск. типа в конкретной директориии.
+        '''
         pass
-        print('поиск на языке запросов')
-    def __settingMetadata(self):
-        pass
-        print('управление метаданными')
         
         
+    def __settingTag(self):
+        '''
+            управление тегами
+        '''
+        if self._is_open_repo:
+            self.browse_window = BrowseMetadataWindow(self._user_repo, 'tag')
+            self.browse_window.show()
+            self.connect(self.browse_window,QtCore.SIGNAL('deleteTag(tag)'),self._entity_manager.deleteTag)
+        else:
+            print('Вася.. хранилище отрой!')
         
         
+    def __settingField(self):
+        '''
+            управление полями
+        '''
+        if self._is_open_repo:
+            self.browse_window = BrowseMetadataWindow(self._user_repo, 'field')
+            self.browse_window.show()
+            self.connect(self.browse_window,QtCore.SIGNAL('deleteField(field)'),self._entity_manager.deleteField)
+        else:
+            print('Вася.. хранилище отрой!')
         
         
         
@@ -544,3 +628,4 @@ if __name__=='__main__':
 #    myclass.mylabel.setText("Hello World!")
     myclass.show()
     app.exec_()
+#    print(os.path.split('tmp/tmp/aastelper.completions'))

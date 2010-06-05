@@ -21,6 +21,8 @@ class EntityManager(object):
         pass
     class ExceptionEntityIsExist(ExceptionEntityManager):
         pass
+    class ExceptionNotFoundEntityData(ExceptionEntityManager):
+        pass
     
     def __init__(self,repo_path):
         '''
@@ -74,6 +76,8 @@ class EntityManager(object):
             entity.id = cursor.lastrowid
         #если объект существует, то его модификация  
         else:
+           print("entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id") 
+           print((entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id))
            cursor.execute(" UPDATE  entity "
                           " SET title = ?, object_type = ?, user_name = ?,  file_size = ?, file_hash =?, notes = ?"
                           " WHERE id= ?",
@@ -127,11 +131,15 @@ class EntityManager(object):
     
     @staticmethod
     def __saveField(cursor,entity_id,field_attributes):
-
+        '''
+            сохранения поля. если поле с таким именем существует,
+            то считается что нужно обновить значение поля.
+        '''
         print('__saveField')
+        field_name,user_name = field_attributes[0][0],field_attributes[0][1] 
         cursor.execute("SELECT COUNT(*) FROM field "
                        " WHERE name = ? AND user_name = ? ",
-                       (field_attributes[0][0],field_attributes[0][1])
+                       (field_name,user_name)
                        )
         count = cursor.fetchone()[0]
         print('count of field is - ',count)
@@ -147,15 +155,28 @@ class EntityManager(object):
         
         else: #модификация
             print('field is exist')
-            print('do nothing')
+            print('updating field_value')
+            field_value = field_attributes[1][0]
+            EntityManager.__updateFieldValue(cursor, entity_id, field_name, user_name, field_value)
         
-            
+        
+    @staticmethod
+    def __updateFieldValue(cursor,entity_id,field_name,user_name,value):
+        '''
+            обновления поля value в таблице entity_fields
+        '''
+        cursor.execute(" UPDATE entity_fields "
+                       " SET value = ? "
+                       " WHERE entity_id= ? AND user_name= ? AND field_name = ?",
+                       (value, entity_id, user_name, field_name)
+                       )
+  
+               
     @staticmethod
     def __saveEntityFields(cursor,entity_id,field_name,user_name,value):
         '''
             запись в entity_fields
         '''
-        print('YESSSSSSSSSSSSSS __saveENTITYFIELds!!!!!!!!!!!!!!!!!11')
         cursor.execute("SELECT COUNT(*) FROM entity_fields "
                        " WHERE field_name = ? AND user_name = ? AND entity_id = ? ",
                        (field_name,user_name ,entity_id)
@@ -260,13 +281,17 @@ class EntityManager(object):
                            " WHERE id = ? ",
                            (entity_id,)
                            )
-            entity_record = cursor.fetchone()
-            print('loadEntityObj', entity_record)
-            tags = EntityManager.__getListTags(cursor,entity_id, entity_record[2])
-            fields = EntityManager.__getListFields(cursor, entity_id, entity_record[2])
-            print('loadEntityObj',entity_id)
+            entity_title,entity_type_object,entity_user_name,entity_file_path = cursor.fetchone()
+            print('loadEntityObj')
+            print('title=',entity_title,', type_object=',entity_type_object,' user_name=',entity_user_name,
+                  'file_path=',entity_file_path)
+            tags = EntityManager.__getListTags(cursor,entity_id, entity_user_name)
+            fields = EntityManager.__getListFields(cursor, entity_id, entity_user_name)
+            #print('loadEntityObj',entity_id)
             
-            entity = Entity(entity_record[0], entity_record[1],entity_record[2], entity_record[3], tags, fields, id = entity_id)     
+            entity = Entity(title=entity_title,entity_type=entity_type_object,
+                             user_name=entity_user_name,file_path=entity_file_path,
+                             list_tags=tags,list_fields = fields, id = entity_id)     
             return entity
         else:
             raise EntityManager.ExceptionNotFoundFileBD('loadEntityObj не найден файл с метаданными '+ path_metadata_file)    
@@ -332,6 +357,8 @@ class EntityManager(object):
         if os.path.exists(path_metadata_file):
             connect=sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
+            print('field_name=',field.name)
+            print('field.user_name =',field.user_name)
             EntityManager.__deleteField(cursor, field.name, field.user_name)
             cursor.execute(" SELECT entity_id FROM entity_fields "
                            " WHERE field_name = ? AND user_name = ? ",
