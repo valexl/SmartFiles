@@ -40,7 +40,7 @@ class EditEntityWindow(QtGui.QDialog):
         
         if self._object_type == SystemInfo.entity_link_type:
             label = QtGui.QLabel('URL',self)
-            self._edit_URL = QtGui.QLineEdit(self)
+            self._edit_path = QtGui.QLineEdit(self)
             if not self._entity == None:
                 URL_data=''
                 for field in self._entity.getFieldAttributes():
@@ -49,9 +49,9 @@ class EditEntityWindow(QtGui.QDialog):
                         break
                 if URL_data=='':
                     raise EntityManager.ExceptionNotFoundEntityData('не найден URL ссылка для объекта ' + entity.title)
-                self._edit_URL.setText(URL_data)
+                self._edit_path.setText(URL_data)
             vbox_layout.addWidget(label)
-            vbox_layout.addWidget(self._edit_URL)
+            vbox_layout.addWidget(self._edit_path)
         else:
             label = QtGui.QLabel('Путь к файлу',self)
             self._edit_path = QtGui.QLineEdit(self)
@@ -151,6 +151,7 @@ class EditEntityWindow(QtGui.QDialog):
         '''
             выполнить действие (создание/модификация)
         '''
+        #if self._object_type =='
         if not self._edit_path.text()=='':
             if self._entity == None:
                     print('create Entity')
@@ -172,8 +173,8 @@ class EditEntityWindow(QtGui.QDialog):
         list_fields=[]
         fields = self._edit_fields.text()
         if self._object_type == SystemInfo.entity_link_type:
-            if len(self._edit_URL.text())>0:
-                fields += ' URL=' + self._edit_URL.text( )
+            if len(self._edit_path.text())>0:
+                fields += ' URL=' + self._edit_path.text( )
             else:
                 raise Exception('Заполнить поле URL')
         fields = cleareExtraSpace(fields)
@@ -287,7 +288,7 @@ class EditEntityWindow(QtGui.QDialog):
             del(progress_window)
         print('the lenght outputting signal is -',len(list_entityes))
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
-#        self.__canceled()
+        self.__canceled()
     def __stoped(self):
         pass
         print('процесс копирования не выполнен до конца')
@@ -678,6 +679,12 @@ class EditFilesWindow(QtGui.QWidget):
         
         self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__saveFile)
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
+        #self.closeEvent()
+        self.connect(self,QtCore.SIGNAL('closeEvent(QCloseEvent*))'),self.tmp)
+    def closeEvent(self,event):
+        print('asdfa')
+        pass
+        
     
     def __isRepo(self,dir_path):
         list_dir_path = dir_path.split(os.path.sep)
@@ -934,9 +941,9 @@ if __name__ == '__main__':
 #    window.append(EditMetadataWindow('valexl','tag'))
 #    window.append(EditFilesWindow('/tmp/tmp'))
 #    window.append(BrowseFilesWindow(path_to_repo='/tmp/tmp',user_repo='valex'))
-    window.append( BrowseMetadataWindow(user_name='valex',type_metadata='tag'))
+#    window.append( BrowseMetadataWindow(user_name='valex',type_metadata='tag'))
 
-#    window .append(EditFilesWindow('/tmp/tmp'))
+    window .append(EditFilesWindow('/tmp/tmp'))
 #    window.append(EditEntityWindow('/tmp/tmp',user_repo,SystemInfo.entity_file_type))
     
     

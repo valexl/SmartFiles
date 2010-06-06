@@ -17,10 +17,13 @@ from EntityManager.Tag import Tag
 from EntityManager.Entity import Entity
 from EntityManager.EntityManager import EntityManager
 from RepoManager.RepoManager import RepoManager
-from ProcessingRequest.ProcessingRequest import ProcessingRequest
+from ProcessingRequest.ProcessingRequest import ProcessingRequest,\
+    cleareExtraSpace
 
 from EditWindow import EditEntityWindow,EditUserWindow,BrowseFilesWindow,BrowseMetadataWindow,EditMetadataWindow
-SQLRequest = "SELECT entity.* FROM entity "
+from NeuralNet.NeuralNetwork import NeuralNetwork
+import pickle
+SQLRequest = "SELECT entity.* FROM entity"
 class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     '''
     главное окно программы
@@ -44,7 +47,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self._is_open_repo = False
         
         self.browse_window =None
-        
+        self._select_list_tags=[]
          
         #для работы с хранилищем
         
@@ -68,21 +71,43 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.connect(self.action_mark_field,QtCore.SIGNAL("triggered()"),self.__markField)
         self.connect(self.action_change_entity,QtCore.SIGNAL("triggered()"),self.__updateEntity)
         self.connect(self.action_delete_entity,QtCore.SIGNAL("triggered()"),self.__deleteEntity)
-        #self.connect(self.action_search,QtCore.SIGNAL('triggered()'),self.__complexSearch)
+        self.connect(self.tableView_entity,QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.__selectEntity)
         self.connect(self.action_repo_files,QtCore.SIGNAL('triggered()'),self.__workingRepoFiles)
         #для работы с метаданными
         self.connect(self.action_setting_tags,QtCore.SIGNAL('triggered()'),self.__settingTag)
         self.connect(self.action_setting_fields,QtCore.SIGNAL('triggered()'),self.__settingField)
         #поиск
         self.connect(self.pushButton_search,QtCore.SIGNAL('clicked()'),self.__searchEntity)
-
+        
         #переключение таблиц                       
         self.connect(self.tabWidget,QtCore.SIGNAL('currentChanged (int)'),self.__switchTab)
        # self.tabWidget.setCurrentIndex(0)
         self._table = self.tableView_entity
         
         self._db = QtSql.QSqlDatabase.addDatabase("QSQLITE")
+    
+    def __selectEntity(self,index):
+        print('попался')
         
+        entity_id = self._table.model().data(index)
+        if self.radioButton_neural_net.isChecked():
+            if len(self._select_list_tags)>0:
+                self._entity_manager.learningNeuralNet(entity_id, self._select_list_tags)
+            else:
+                self._entity_manager.learningNeuralNet(entity_id)
+        
+            
+        
+        
+    def closeEvent(self,event):
+        '''
+            переопределяем событие закрытия окна. сохранение нужной инфы.
+        '''
+        self._entity_manager.saveNeuralNet()
+        
+        
+        
+    
     def __switchTab(self,index):
         print(index)
         if self._is_open_repo:
@@ -137,7 +162,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             print(self._path_to_repo)
             self._repo_manager = RepoManager.openRepository(self._path_to_repo)
             self._repo_manager.identificationUser(self._user_repo)
-            self._entity_manager = self._repo_manager.getEntityManager()
+            self._entity_manager = self._repo_manager.getEntityManager() 
+            
+            
             self.__connnectBD()
             self._is_open_repo = True
         except RepoManager.ExceptionRepoIsNull as err:
@@ -188,11 +215,17 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         print('__createRepository')
         try:
-            self._path_to_repo = QtGui.QFileDialog.getExistingDirectory(self,'Откройте хранилище', '/')
+            self._path_to_repo = QtGui.QFileDialog.getExistingDirectory(self,'выбирете директорию хранилища', '/')
             self._user_repo.type = SystemInfo.user_type_admin
             self._repo_manager = RepoManager.initRepository(self._path_to_repo,self._user_repo)
             self._repo_manager.fillRepoFiles() # заполнение базы информацией о файлах хранилщиа.
             self._entity_manager = self._repo_manager.getEntityManager()
+            
+            #запись ифны о нейронной сети в директорию с метаданными хранилища
+            
+             
+            
+            
             self._is_open_repo = True
             self.__connnectBD()
             print(self._path_to_repo)
@@ -285,7 +318,29 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             поиск с помощью нейросети
         '''
-        print('neural net')
+        if self.lineEdit_search.text()=="":
+            self._string_request = SQLRequest # "SELECT * FROM entity"
+            self._entity_manager.searchByNeuralNet()
+        else:
+            request = cleareExtraSpace(self.lineEdit_search.text())
+            print('request after clearning extra spacing')
+            self._select_list_tags = request.split(' ')  
+            print('request afger spliting',self._select_list_tags)
+            
+            self._entity_manager.tmpPrintNeuralNet()
+            self._entity_manager.searchByNeuralNet(self._select_list_tags)
+            
+            
+            request = self._select_list_tags[0]
+            index = 1
+            while index < len(self._select_list_tags):
+                request+= " OR " + self._select_list_tags[index] 
+                index+=1
+            self._string_request = ProcessingRequest.getSQLRequest(request,True)
+        self.__settingModel()
+        print(self._string_request)
+        
+        
     def __searchByQueryLanguage(self):
         '''
             поис с помощью языка запроса
@@ -365,7 +420,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             for entity in list_entity:
                 print('adding entity-',entity)
-                self._entity_manager.saveEntity(entity)
+                entity.id = self._entity_manager.saveEntity(entity)
+                
                 if not entity.file_path == None:
                     print('file_info.file_path=',entity.file_path)
                     self._repo_manager.deleteFilesInfo(entity.file_path)
@@ -435,6 +491,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             entity = self._entity_manager.loadEntityObj(entity_id)
             self._entity_manager.markTag(entity, marking_tag)
+          
+            
 #            self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             print(error)

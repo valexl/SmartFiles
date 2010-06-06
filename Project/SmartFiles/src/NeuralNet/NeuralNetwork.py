@@ -1,9 +1,13 @@
+
 '''
 Created on 02.06.2010
 
 @author: valexl
 '''
 #import cPickle as pickle
+from RepoManager.SystemInfo import SystemInfo
+import os
+import pickle
 
 class NeuralNetwork(object):
     '''
@@ -20,24 +24,42 @@ class NeuralNetwork(object):
     class ExceptionNoExistFile(ExceptionNeuralNetwork):
         pass
     
-    
-    def __init__(self,files,tags=[]):
+#    class NeuralData(object):
+#        def __init__(self):
+#            self.tags=[]
+#            self.files=[]
+#            self.neural_net = []
+#        
+#        def load_neuralnet(repo_path,tags):
+#            '''
+#                загрузить ту часть нейросети, которая содержит данные теги
+#            '''
+#            pass
+#        
+#        def save_neuralnet(repo_path):
+#            '''
+#                сохранить текущее состояние нейросетии
+#            '''
+#            pass
+#    
+    def __init__(self):
         '''
             инициализация начальных параметров сети 
         '''
-        self.tags=tags
-        self.files=files
         
+        self.tags=[]
+        self.files=[]
+        self._selected_tags=self.tags
         self.neural_net = []
         for i in range(len(self.tags)):
             self.neural_net.append([])
             for j in range(len(self.files)):
                 self.neural_net[i].append(0)
-    
+        
         self.learning_spid = 0.3 #1\count_tag
         self.definition = 0.01
     
-    
+         
     def addTag(self,new_tag):
         '''
             добавление тега в сеть (новых входящих данных)
@@ -59,7 +81,10 @@ class NeuralNetwork(object):
         '''
         for file in self.files:
             if file==new_file:
-                raise NeuralNetwork.ExceptionExistFile('файл с таким именем существует в сети')
+                print('файл с таким именем существует в сети')
+                #raise NeuralNetwork.ExceptionExistFile('файл с таким именем существует в сети')
+                return
+                
         self.files.append(new_file)
         for i in range(len(self.tags)):
             self.neural_net[i].append(0)
@@ -105,13 +130,19 @@ class NeuralNetwork(object):
         '''
         try:
             index_file = (self.files.index(file_name))
+        except ValueError as err:
+            #raise NeuralNetwork.ExceptionNoExistFile('не найден файл или тег...')
+            self.addFile(file_name)
+            self.tagFile(file_name, tag_name)
 #            print(tag_name)
-#            print(self.tags)
+#            print(self._tags)
+        try:
             index_tag = (self.tags.index(tag_name))
-            if self.neural_net[index_tag][index_file]==0: #если сеть еще не обучена на этот тег, тогда добавляется
+            if self.neural_net[index_tag][index_file]<1: #если сеть еще не достаточно обучена на этот тег, тогда добавляется
                 self.neural_net[index_tag][index_file]=1            
         except ValueError as err:
-            raise NeuralNetwork.ExceptionNoExistFile('не найден файл или тег...')
+            self.addTag(tag_name)
+            self.tagFile(file_name, tag_name)
           
             
     def releaseFileFromTag(self,file_name,tag_name):
@@ -136,14 +167,16 @@ class NeuralNetwork(object):
         return raiting
     
     
-    def learning(self,file_name,list_tags):
+    def learning(self,file_name,list_tags=None):
         '''
             обучение сети. для конекретного файла и конкретной выборки происходит пересчет рэйтинга.
         '''
         try:
+            if list_tags==None:
+                list_tags = self.tags
             raiting = self.__sumWeightNeural(file_name, list_tags)
             new_raiting = raiting + 1
-                
+            
             print(new_raiting)
             iteration=0
             delta = new_raiting - raiting
@@ -188,13 +221,15 @@ class NeuralNetwork(object):
             
             
         print(list_sum)
-        return list_files
+        return (list_files,list_sum)
     
         
-    def search(self,list_tags):
+    def search(self,list_tags=None):
         '''
-            возращает упорядоченный по райтингу список файлов, помеченных тегами. 
+            возращает упорядоченный по рэйтингу список файлов, помеченных тегами. 
         '''
+        if list_tags== None:
+            list_tags = self.tags
         files = []
         for index_file in range(len(self.files)):
             for tag in list_tags:
@@ -207,34 +242,56 @@ class NeuralNetwork(object):
                     print('тег ',tag,' то не найден... наверное просто пропуск и не учитывать его при поиске')
                     pass
         print(files)
-        files = self.__sortByRaiting(files,list_tags)
+        files, neural_raiting = self.__sortByRaiting(files,list_tags)
         print('after sort',files)
-        return files
+        print('neural raiting',neural_raiting)
+        return (files,neural_raiting)
+class tmp(object):
+    
+    def __init__(self):
+        self.neural_net = NeuralNetwork()
         
+    def loadNet(self):
+        file_neurla_net = open(os.path.join('/tmp/tmp',SystemInfo.neural_net_file_path),'rb')
+        file_neurla_net.seek(0)
+        #self.neural_net = NeuralNetwork()
+            
+        self.neural_net = pickle.load(file_neurla_net)
+#        pickle.dump(self.neural_net, file_neurla_net, pickle.HIGHEST_PROTOCOL)
+        
+    def saveNet(self):
+        file_path = os.path.join('/tmp/tmp',SystemInfo.neural_net_file_path)
+        print('file_path',file_path)
+        file_neurla_net = open(file_path,'wb')
+        pickle.dump(self.neural_net, file_neurla_net, pickle.HIGHEST_PROTOCOL) 
         
 if __name__ == '__main__':
-    tags=['tag1','tag2','tag3']
+    obj = NeuralNetwork()
+    obj.addFile('file1')
+    obj.addFile('file2')
+    print(obj.neural_net)
+    obj.tagFile('file1', 'tag_name')
+    obj.tagFile('file1','tag')
+    print(obj.neural_net)
+    obj.learning('file2', ('tag_name','tag'))
+    obj.search(['tag_name'])
     
     
-    files=['file1','file2','file3','file4']
-    net = NeuralNetwork(files,tags)    
-   # net.addTag('tag4')
-    #net.addFile('file1')
-    net.tagFile( 'file1','tag1')
-    net.tagFile( 'file1','tag2')
-    net.tagFile( 'file2','tag2')
-    net.tagFile( 'file3','tag3')
-    net.tagFile('file4','tag1')
-    print(net.neural_net)
-
-    net.learning('file1', ['tag1'])
-#    net.search(['tag1','tag2','tag3'])
-#    net.search(['tag1'])
-    net.learning('file1', ['tag1','tag2','tag3'])
-#    net.search(['tag1','tag2','tag3'])
-#    net.learning('file3', ['tag3'])
-#    net.search(['tag1','tag2','tag3'])
-    print(net.neural_net)
-#    net.learning('file1', ['tag1','tag2'])
-   # net.releaseFileFromTag('file1','tag2')
+#    obj = tmp()
+#    obj.neural_net.addFile('file1')
+#    obj.neural_net.addFile('file2')
+#    obj.neural_net.addTag('tag')
+#    obj.neural_net.tagFile('file1', 'tag')
+#    print(obj.neural_net.neural_net)
+#    obj.saveNet()
+#    obj.neural_net.addFile('file3')
+#    obj2 = tmp()
+#    del(obj2.neural_net)
+#    obj2.loadNet()
+#    #obj2.neural_net.addFile('file4')
+#    print('obj2',obj2.neural_net.neural_net)
+#    obj.saveNet()
+#    obj2.saveNet()
+#    obj.loadNet()
+#    print(obj.neural_net.neural_net)
     

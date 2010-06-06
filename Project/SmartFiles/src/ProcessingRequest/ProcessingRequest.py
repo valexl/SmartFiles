@@ -209,7 +209,7 @@ class ProcessingRequest(object):
     #=======================
 
     @staticmethod
-    def convertToSQL(user_request_list):
+    def __convertToSQL(user_request_list):
         #index = 0
         print(user_request_list)
         item = ProcessingRequest.__isOperator(user_request_list[0])
@@ -217,18 +217,18 @@ class ProcessingRequest(object):
         
         result_string =''
         if item == '()':
-           result_string = ' (' + ProcessingRequest.convertToSQL(user_request_list[1]) +') '
+           result_string = ' (' + ProcessingRequest.__convertToSQL(user_request_list[1]) +') '
         elif item == 'and': 
             index = 2
-            result_string = ProcessingRequest.convertToSQL(user_request_list[1])    
+            result_string = ProcessingRequest.__convertToSQL(user_request_list[1])    
             while index < len(user_request_list):
-                result_string += ' AND entity.id IN ( ' + ProcessingRequest.startConvertToSQL(user_request_list[index],0) + ')'
+                result_string += ' AND entity.id IN ( ' + ProcessingRequest.__startConvertToSQL(user_request_list[index],0) + ')'
                 index+=1
         elif item=='or':
             index = 2
-            result_string = ProcessingRequest.convertToSQL(user_request_list[1])
+            result_string = ProcessingRequest.__convertToSQL(user_request_list[1])
             while index < len(user_request_list):
-                result_string +=' or ' + ProcessingRequest.convertToSQL(user_request_list[index])
+                result_string +=' or ' + ProcessingRequest.__convertToSQL(user_request_list[index])
                 index+=1
                 
  
@@ -240,20 +240,20 @@ class ProcessingRequest(object):
         return result_string
 
     @staticmethod
-    def startConvertToSQL(user_request_list, flag=1, table=''):
+    def __startConvertToSQL(user_request_list, flag=1, table=''):
         if flag:
             result = ' SELECT DISTINCT entity.* FROM entity, entity_fields, entity_tags WHERE '
         else:
             result = ' SELECT DISTINCT entity.id FROM entity, entity_fields, entity_tags WHERE '
         #print(result)
         
-        result += ProcessingRequest.convertToSQL(user_request_list)
+        result += ProcessingRequest.__convertToSQL(user_request_list)
         #print(result)
 
         return result
     #======================
     @staticmethod         
-    def getSQLRequest (user_request):
+    def getSQLRequest (user_request,is_neural_net=False):
         '''
             преобразование пользовательского запроса в SQL запрос
         '''
@@ -265,9 +265,11 @@ class ProcessingRequest(object):
         request_list = ProcessingRequest.__splitRequest(request)
         print('the user request list is',request_list)
         if len(request_list)==1:
-            result_sql_request = ProcessingRequest.startConvertToSQL(request_list[0])
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
         else:
-            result_sql_request = ProcessingRequest.startConvertToSQL(request_list)
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list)
+        if is_neural_net:
+            result_sql_request += ' ORDER BY entity.neuralnet_raiting DESC'
         return result_sql_request
 
     @staticmethod
@@ -288,7 +290,7 @@ class ProcessingRequest(object):
             проверка является ли атом полем. 
             Если не поле то возращается 0 индекс оператора +1 
         '''
-        print('is field? ---- ',atom)
+       # print('is field? ---- ',atom)
         for operator in ProcessingRequest._field_words:
             if atom.find(operator,0)>=0:
                 return operator
@@ -331,7 +333,7 @@ if __name__=='__main__':
     string='           asdfasdfasd asdf asdf asdf a          asdf adsf        '
     res= cleareExtraSpace(string)
     res = ' ' + res
-    print(res.split(' '))
+#    print(res.split(' '))
    
 
 #    

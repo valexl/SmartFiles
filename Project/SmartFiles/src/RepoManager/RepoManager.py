@@ -216,6 +216,7 @@ class RepoManager(object):
                        "file_size INTEGER,"
                        "file_date_modifired TIMESTAMP,"
                        "file_hash INTEGER,"
+                       "neuralnet_raiting INTEGER DEFAULT 0,"
                        "user_name VARCHAR2(255) NOT NULL,"
                        "date_create TIMESTAMP,"
                        "FOREIGN KEY (user_name) REFERENCES users(name))"       
@@ -472,8 +473,10 @@ class RepoManager(object):
             raise RepoManager.ExceptionRepoIsNull('не найдено хранилщие')
         dir_name = os.path.join(repo_path,SystemInfo.metadata_dir_name)
         file_name = os.path.join(repo_path,SystemInfo.metadata_file_name)
+        neural_net = os.path.join(repo_path,SystemInfo.neural_net_file_path)
         if os.path.exists(dir_name):
             os.remove(file_name)
+            os.remove(neural_net)
             os.rmdir(dir_name)
         else:
             raise RepoManager.ExceptionRepoIsNull('deleteRepository. не найден каталог с метаданными ' + repo_path)
