@@ -21,6 +21,9 @@ from RepoManager.RepoManager import RepoManager
 
         
 class EditEntityWindow(QtGui.QDialog):
+    '''
+    
+    '''
     def __init__(self,path_to_repo, user_repo,object_type,entity=None,parent=None):
         QtGui.QDialog.__init__(self,parent)
         self._object_type = object_type
@@ -104,6 +107,7 @@ class EditEntityWindow(QtGui.QDialog):
         button_cancel = QtGui.QPushButton('Отмена',self)
         
         hbox_layout = QtGui.QHBoxLayout()
+        hbox_layout.addStretch()
         hbox_layout.addWidget(button_ok)
         hbox_layout.addWidget(button_cancel)
         vbox_layout.addLayout(hbox_layout)
@@ -538,16 +542,21 @@ class EditMetadataWindow(QtGui.QWidget):
         del(self)
     
         
-class BrowseMetadataWindow(QtGui.QWidget):
+class BrowseMetadataWindow(QtGui.QMainWindow):
     def __init__ (self,user_repo,type_metadata='tag',parent=None):
         
-        QtGui.QWidget.__init__(self,parent)
+        QtGui.QMainWindow.__init__(self,parent)
         self._user_repo = user_repo
         self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata
         self._type_metadata = type_metadata
         
         self.info_window = QtGui.QMessageBox()
-        vbox_layout = QtGui.QVBoxLayout()
+        
+        
+        
+        awidget = QtGui.QWidget()
+        
+        vbox_layout = QtGui.QVBoxLayout()        
         
         button_delete = QtGui.QPushButton('Удалить',self)   
         vbox_layout.addWidget(button_delete)
@@ -555,15 +564,20 @@ class BrowseMetadataWindow(QtGui.QWidget):
         button_cancel = QtGui.QPushButton('Завершить',self)
         vbox_layout.addWidget(button_cancel)
         
+        vbox_layout.addStretch()
+        awidget.setLayout(vbox_layout)
         
-        hbox_layout = QtGui.QHBoxLayout()
+        dw = QtGui.QDockWidget()
+        dw.setWidget(awidget)
+        
+        
+        
+        
         
         self._table = QtGui.QTableView(self)
-        hbox_layout.addWidget(self._table)
-        hbox_layout.addLayout(vbox_layout)
-        vbox_layout = QtGui.QVBoxLayout()
-        vbox_layout.addLayout(hbox_layout)
-        self.setLayout(vbox_layout)
+    
+        self.setCentralWidget(self._table)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dw)
         self.refresh()
         
         self.connect(button_delete,QtCore.SIGNAL('clicked()'),self.__delete)

@@ -110,6 +110,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 command = 'xdg-open'
         #subprocess.call([command, path])
         subprocess.call([command, path])
+        #os.execv(path, args)
+        
     
     
     def __startURL(self,url):
