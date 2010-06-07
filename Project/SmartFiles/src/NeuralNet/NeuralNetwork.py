@@ -49,7 +49,7 @@ class NeuralNetwork(object):
         
         self.tags=[]
         self.files=[]
-        self._selected_tags=self.tags
+        self._level_tags=self.tags
         self.neural_net = []
         for i in range(len(self.tags)):
             self.neural_net.append([])

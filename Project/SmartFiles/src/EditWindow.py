@@ -28,6 +28,7 @@ class EditEntityWindow(QtGui.QDialog):
         self._path_to_repo = path_to_repo
         self._entity = entity
         
+        self.info_window = QtGui.QMessageBox()
         
         
         vbox_layout = QtGui.QVBoxLayout()
@@ -163,7 +164,14 @@ class EditEntityWindow(QtGui.QDialog):
                 else:
                     self.__update()
         else:
-            print('хм.. наглец однако.. ну ни чего.. файл выберишь, исправишься:)')
+            if self._object_type=='file':
+                self.info_window.setText('''хм.. наглец однако... ну ни чего.. файл выберешь, исправишься
+            ''')
+            else:
+                self.info_window.setText('''хм.. наглец однако... ну ни чего.. URL выберешь, исправишься
+            ''')
+            self.info_window.show()
+            
             
             
     def __getFields(self):
@@ -176,7 +184,10 @@ class EditEntityWindow(QtGui.QDialog):
             if len(self._edit_path.text())>0:
                 fields += ' URL=' + self._edit_path.text( )
             else:
-                raise Exception('Заполнить поле URL')
+                self.info_window.setText('''Добавляемый обеъкт типа URL.
+необходимо заполнить поле URL.''')
+                self.info_window.show()
+                #raise Exception('Заполнить поле URL')
         fields = cleareExtraSpace(fields)
         print('fields',fields)
         if not fields=="":
@@ -263,7 +274,7 @@ class EditEntityWindow(QtGui.QDialog):
             progress_window = QtGui.QProgressDialog(self)
 #            progress_window.setWindowModality(1)
             progress_window.setMinimum(0)
-            progress_window.setMaximum(100)
+            progress_window.setMaximum(99)
             progress_window.show()
             self.connect(progress_window,QtCore.SIGNAL('canceled()'),self.__stoped)
             d_progress = 100/count_files
@@ -292,6 +303,8 @@ class EditEntityWindow(QtGui.QDialog):
     def __stoped(self):
         pass
         print('процесс копирования не выполнен до конца')
+        
+        
     def __update(self):
         '''
             модификация сущности.
@@ -320,7 +333,7 @@ class EditUserWindow(QtGui.QWidget):
         self._user = user
         vbox_layout = QtGui.QVBoxLayout()
         
-        
+        self.info_window = QtGui.QMessageBox()
         label = QtGui.QLabel('Имя пользователя',self)
         self._edit_user_name = QtGui.QLineEdit(self)
         if self._status == 'create':
@@ -395,6 +408,9 @@ class EditUserWindow(QtGui.QWidget):
         else:
             print(self._edit_password.text())
             print(self._user.password)
+            self.info_window.setText('''неправильный пароль
+            ''')
+            self.info_window.show()
             raise RepoManager.ExceptionErrorPasswordUser('не правильный пароль')
     
     def __deleteUser(self):
@@ -431,7 +447,7 @@ class EditMetadataWindow(QtGui.QWidget):
         self._entity_id = entity_id
         
         vbox_layout = QtGui.QVBoxLayout()
-        
+        self.info_window = QtGui.QMessageBox()
         hbox_layout = QtGui.QHBoxLayout()
         self._metadata_name = QtGui.QLineEdit(self)
         label = QtGui.QLabel(self)
@@ -503,9 +519,13 @@ class EditMetadataWindow(QtGui.QWidget):
                     self.emit(QtCore.SIGNAL('mark(entity_id,metadata_obj)'),self._entity_id,new_field)
                     self.__canceled()
                 else:
-                    print('введите значение для поля')
-            
+                    self.info_window.setText('''Необходимо ввести для поля значение
+            ''')
+                    self.info_window.show()
+                    
         else:
+            self.info_window.setText('поле с именем' + self._type_metadata + 'пустое') 
+            self.info_window.show()
             print('поле с именем ' + self._type_metadata + ' пустое')
         
         
@@ -526,7 +546,7 @@ class BrowseMetadataWindow(QtGui.QWidget):
         self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata
         self._type_metadata = type_metadata
         
-        
+        self.info_window = QtGui.QMessageBox()
         vbox_layout = QtGui.QVBoxLayout()
         
         button_delete = QtGui.QPushButton('Удалить',self)   
@@ -568,7 +588,10 @@ class BrowseMetadataWindow(QtGui.QWidget):
         index=self._table.model().index(row,0)
         metadata_name = self._table.model().data(index)
         if metadata_name==None:
-            print('не выбрана запись для действия')
+            self.info_window.setText('''не выбрана запись для действия
+            ''')
+            self.info_window.show()
+            
         if type_metadata=='field':
             index = self._table.model().index(row,3)
             field_type=self._table.model().data(index)
@@ -632,6 +655,9 @@ class BrowseMetadataWindow(QtGui.QWidget):
         try:
             self.refresh()
         except Exception as error:
+            self.info_window.setText('''проблемы при подключения к БД или ее настройки
+            ''')
+            self.info_window.show()
             print('проблемы при подключении к БД или ее настройки')
             print(error)   
     
@@ -642,7 +668,7 @@ class EditFilesWindow(QtGui.QWidget):
     def __init__(self, repo_path, parent=None):
         QtGui.QWidget.__init__(self,parent)
         self._path_to_repo = repo_path
-        
+        self.info_window = QtGui.QMessageBox()
         self._file_path_copy = QtGui.QLineEdit(self)
         self._dir_path_recive = QtGui.QLineEdit(self)
         self._dir_path_recive.setText(repo_path)
@@ -680,9 +706,9 @@ class EditFilesWindow(QtGui.QWidget):
         self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__saveFile)
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
         #self.closeEvent()
-        self.connect(self,QtCore.SIGNAL('closeEvent(QCloseEvent*))'),self.tmp)
+       # self.connect(self,QtCore.SIGNAL('closeEvent(QCloseEvent*))'),self.tmp)
     def closeEvent(self,event):
-        print('asdfa')
+#        print('asdfa')
         pass
         
     
@@ -712,9 +738,15 @@ class EditFilesWindow(QtGui.QWidget):
                 self.emit(QtCore.SIGNAL('copyFileInRepo(copy_info)'),(list_files_names,dir_path))
                 self.close()
             else:
-                print('епт.. файл выбери!')
+                self.info_window.setText('''епт... файл выбери!
+            ''')
+                self.info_window.show()
+            #    print('епт.. файл выбери!')
         else:
-            print('косарезик... директория куда собираешься сохранять - не хранилище то')
+            self.info_window.setText('''косарезик... директория куда собираешься сохранять - не хранилище
+            ''')
+            self.info_window.show()
+            
         
         
     def __cancel(self):
@@ -764,7 +796,7 @@ class BrowseFilesWindow(QtGui.QWidget):
         QtGui.QWidget.__init__(self,parent)
         self._user_repo = user_repo
         self._path_to_repo = path_to_repo
-        
+        self.info_window = QtGui.QMessageBox()
         vbox_layout = QtGui.QVBoxLayout()
         button_indexing = QtGui.QPushButton('Присвоить себе',self)
         button_add = QtGui.QPushButton('Скопировать в хранилище',self)
@@ -868,6 +900,9 @@ class BrowseFilesWindow(QtGui.QWidget):
             entity = EntityManager.createEntity(entity_type=SystemInfo.entity_file_type, user_name=self._user_repo, file_path=file_path)
             self.emit(QtCore.SIGNAL('indexingFile(entity)'),entity)
         else:
+            self.info_window.setText('''не забываем выбирать файл
+            ''')
+            self.info_window.show()
             print('не забываем выбирать файл')
         #self.__cancel()
             
