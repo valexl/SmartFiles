@@ -257,6 +257,7 @@ class EditEntityWindow(QtGui.QDialog):
             print('dir_name=',dir_name)
             print('part_dirs[',index,']=',part_dirs[index])
             if not dir_name == part_dirs[index]:
+                    self._new_files.append(file_name)
                     shutil.copyfile(file_path, self._path_to_repo + os.path.sep + file_name)
                     return file_name                
             index+=1 

@@ -229,6 +229,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         progress_dialog.setWindowModality(1)
         d_progress = 100/len(list_file_name)
         progress = 0
+        list_file_infs = []
         for copy_file_path in list_file_name:
             #file_name = os.path.split(file_name[0])[1]
             QtGui.QApplication.processEvents()
@@ -239,12 +240,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             file_path = os.path.join(copy_info[1],file_name)
             print('file_path-',file_path)
             shutil.copyfile(copy_file_path, file_path)
-            file_path_to_BD = self.__splitDirPath(file_path)
-            self._repo_manager.addFileInfo(file_path_to_BD)
+            new_file_info = self.__splitDirPath(file_path)
+            list_file_infs.append(new_file_info)
+            
             
             progress+=d_progress
             progress_dialog.setValue(int(progress))
             QtGui.QApplication.processEvents()
+        self._repo_manager.addFileInfo(list_file_infs)
         self.__settingModel()
     
     def __splitDirPath(self,file_path):
@@ -709,6 +712,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self.edit_window.setWindowTitle('Окно редактирования файлов')
                 self.edit_window.show()
                 self.connect(self.edit_window,QtCore.SIGNAL('createEntity(list_entityes)'),self.__addingEntity)
+                                                            #indexingFile(list_new_files)
                 self.connect(self.edit_window,QtCore.SIGNAL("indexingFile(list_new_files)"),self._repo_manager.addFileInfo)
 
                 #отлавливание сигнала на добавление нового файла       
@@ -765,8 +769,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 добавление объекта Entity в базу данных
         '''
         try:
-#            for entity in list_entity:
-            #print('adding entity-',entity)
+         
             self._entity_manager.saveEntityes(list_entity)
             
             list_files=[]
@@ -774,10 +777,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 if not entity.file_path == None:
                     print('file_info.file_path=',entity.file_path)
                     list_files.append(entity.file_path)
+            print('deleting from fils_info list_files is-',list_files)
             self._repo_manager.deleteFilesInfo(list_files)
             self.__settingModel()
-            if not self.browse_window ==None:
-                self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''Не найден файл с метаданными
             ''')
@@ -785,10 +787,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             print('__addingEntity проблемы:')
             print(error)
         except EntityManager.ExceptionEntityIsExist as error:
-            self.info_window.setText('''добавляемая сущность уже существует
-            ''')
+            self.info_window.setText('''не удалось добавить файлы. Среди ни есть уже добавленные в хранилище.
+Проверьте список добавляемых файлов            ''')
             self.info_window.show()
+            self.__settingModel()
             print(error)
+            
         except Exception as error:
             self.info_window.setText('''Какие то не учтенные траблы в EntityManager
             ''')
@@ -1020,7 +1024,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             entity = self._entity_manager.loadEntityObj(entity_id)
             if entity.object_type == SystemInfo.entity_file_type:
                 #добавление только что удаленный обеъкт в таблицу непроиндексированных объектов
-                self._repo_manager.addFileInfo(entity.file_path)
+                self._repo_manager.addFileInfo((entity.file_path,))
             self._entity_manager.deleteEntity(entity)
             self.__settingModel()
         except EntityManager.ExceptionNotFoundFileBD as error:

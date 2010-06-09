@@ -128,11 +128,14 @@ class RepoManager(object):
             и еще не проиндексированы
         '''
         
+        print('addFileInfooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo')
+        print('list_file_names',list_file_names)
         repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
         if os.path.exists(repo_metadata_file):
             connect = sqlite.connect(repo_metadata_file)
             cursor = connect.cursor()
             for file_name in list_file_names:
+                print(file_name)
                 RepoManager.__insertFileInfoIntoBD(cursor, file_name)
             connect.commit()
         else:
