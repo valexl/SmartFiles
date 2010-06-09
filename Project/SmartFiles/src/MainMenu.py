@@ -14,21 +14,20 @@ from PyQt4 import QtGui,QtCore,QtSql
 
 from RepoManager.SystemInfo import SystemInfo
 from RepoManager.User import User
-from RepoManager.InstallUser import InstallUser
-from EntityManager.Field import Field
-from EntityManager.Tag import Tag
-from EntityManager.Entity import Entity
+#from RepoManager.InstallUser import InstallUser
+#from EntityManager.Field import Field
+#from EntityManager.Tag import Tag
+#from EntityManager.Entity import Entity
 from EntityManager.EntityManager import EntityManager
 from RepoManager.RepoManager import RepoManager
 from ProcessingRequest.ProcessingRequest import ProcessingRequest,\
     cleareExtraSpace
-from NeuralNet.NeuralNetwork import NeuralNetwork
+#from NeuralNet.NeuralNetwork import NeuralNetwork
 
 from Ui_MainWindow import Ui_MainWindow
-from newUI_MainWindow import Ui_MainWindow as NewMainWindow
 from EditWindows.EditEtntityWindow import EditEntityWindow
 from EditWindows.EditUserWindow import EditUserWindow
-from EditWindows.BrowseFilesWindow import BrowseFilesWindow
+#from EditWindows.BrowseFilesWindow import BrowseFilesWindow
 from EditWindows.BrowseMetadataWindow import  BrowseMetadataWindow
 from EditWindows.EditMetadataWindow import EditMetadataWindow
 from EditWindows.EditFilesWindow import EditFilesWindow
@@ -130,7 +129,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
        
         #self.connect(self.action_view_repo_files,QtCore.SIGNAL('triggered()'),self.__workingRepoFiles)
         #для работы с метаданными
-        self.connect(self.action_view_metadata,QtCore.SIGNAL('triggered()'),self.__settingTag)
+        self.connect(self.action_setting_tags,QtCore.SIGNAL('triggered()'),self.__settingTag)
         self.connect(self.action_setting_fields,QtCore.SIGNAL('triggered()'),self.__settingField)
         #поиск
         self.connect(self.pushButton_search,QtCore.SIGNAL('clicked()'),self.__searchEntity)
@@ -160,26 +159,39 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         if not self._path_to_repo ==None:
             self.__openingRrepository()
             
-        # настройка docwidget_files_info
-    
+        # настройка dockwidget_files_info
         self.connect(self.pushButton_indexing_files,QtCore.SIGNAL('clicked()'),self.__indexFile)
         self.connect(self.pushButton_add_files,QtCore.SIGNAL('clicked()'),self.__copyFile)
         self.connect(self.pushButton_delete_files,QtCore.SIGNAL('clicked()'),self.__deleteFile)
         
-       # self.connect(self.treeView_metadata,QtCore.SIGNAL('clicked(QModelIndex)'),self.__selectTags)
-        self.selected_tags=[]
+        # настройка отображение и скрывание dockwidget-ов
+        self.connect(self.action_view_metadata,QtCore.SIGNAL('triggered()'),self.__dockWidget_metadataView)
+        self.connect(self.action_view_repo_files,QtCore.SIGNAL('triggered()'),self.__dockWidget_repo_filesView)
         
         
-#    def __selectTags(self,index):
-#        
-#        try:
-#            rm_index = self.selected_tags.index(index.row())
-#            self.selected_tags.pop(rm_index)
-#        except ValueError:
-#            self.selected_tags.append(index.row())
-#        #print(self.selected_tags)
+        #в дальнейшем, когда будут сохраняться внешний вид окна, нужно будет каждый раз перед открытием окна 
+        #вызывать эти функции
+        self.__dockWidget_metadataView()
+        self.__dockWidget_repo_filesView()
         
-  
+
+    def __dockWidget_metadataView(self):
+        '''
+            скрывает октрывает окно с метаданными
+        '''
+        if self.action_view_metadata.isChecked():
+            self.dockWidget_tag.show()
+        else:
+            self.dockWidget_tag.close()
+        
+    
+    def __dockWidget_repo_filesView(self):
+        if self.action_view_repo_files.isChecked():
+            self.dockWidget_repo_files.show()
+        else:
+            self.dockWidget_repo_files.close()
+    
+    
     def __indexFile(self):
         '''
             пометка файла метоинформацией. создается запись о файле в БД

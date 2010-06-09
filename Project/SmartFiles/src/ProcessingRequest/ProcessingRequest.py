@@ -41,16 +41,16 @@ class ProcessingRequest(object):
         преобразование пользовательского запроса в SQL (В данный момент не учтены пользователи, path)
     '''
    
-    _operators = ['or','and','not','()'] # операции языка запроса
+    _operators = [' or ',' and ',' not ','()'] # операции языка запроса
         
     _table_objs = 'entity'
     _table_objs_tags = 'entity_tags'
     _table_objs_fields = 'entity_fields'
     _table_fields = 'fields'   
     _SQLtables = [_table_objs,_table_objs_tags,_table_objs_fields] # имена таблиц которые учавствуют в запросе Базе Данных
-        
-    _index_using_tables = [0]
+    _using_table = []
     _field_words = ['<>','<=', '>=','>' , '=', ':', '<'] 
+    
         
         #>, >=, <>, =, :, <=, <     - знаки которые указывают поиск по полям
         #path="путь к директории"   - path указывает поиск по директории
@@ -86,6 +86,7 @@ class ProcessingRequest(object):
                                                     
         '''
         list_result = ProcessingRequest.__getSplitingList(request,operator_index)
+        print(list_result)
         operator_index +=1
         while operator_index <3:
             index = 0
@@ -209,46 +210,47 @@ class ProcessingRequest(object):
     #=======================
 
     @staticmethod
-    def __convertToSQL(user_request_list):
+    def __convertToSQL(user_request_list,flag=True):
         #index = 0
-        print(user_request_list)
+        print('convertToSQL user_request_list',user_request_list)
         item = ProcessingRequest.__isOperator(user_request_list[0])
         print('operator is',item)
         
         result_string =''
         if item == '()':
-           result_string = ' (' + ProcessingRequest.__convertToSQL(user_request_list[1]) +') '
-        elif item == 'and': 
+           result_string = ' (' + ProcessingRequest.__convertToSQL(user_request_list[1],False) +') '
+        elif item == ' and ': 
             index = 2
-            result_string = ProcessingRequest.__convertToSQL(user_request_list[1])    
+            result_string = ProcessingRequest.__convertToSQL(user_request_list[1],False)    
             while index < len(user_request_list):
                 result_string += ' AND entity.id IN ( ' + ProcessingRequest.__startConvertToSQL(user_request_list[index],0) + ')'
                 index+=1
-        elif item=='or':
+        elif item==' or ':
             index = 2
-            result_string = ProcessingRequest.__convertToSQL(user_request_list[1])
+            result_string = ProcessingRequest.__convertToSQL(user_request_list[1],False)
             while index < len(user_request_list):
-                result_string +=' or ' + ProcessingRequest.__convertToSQL(user_request_list[index])
+                result_string +=' or ' + ProcessingRequest.__convertToSQL(user_request_list[index],False)
                 index+=1
-                
- 
         else:
             result_string=ProcessingRequest.__typeDefinition(user_request_list)
-           
-#            result_string=ProcessingRequest.__typeDefinition(item)
-        
+            #result_string=ProcessingRequest.__typeDefinition(item)
+        print('используемые таблицы', ProcessingRequest._using_table)
+        if flag:
+            print(ProcessingRequest._using_table)
+            tables=''
+            for table in ProcessingRequest._using_table:
+                tables+= ', ' + table             
+            result_string = tables + " WHERE " + result_string 
         return result_string
 
     @staticmethod
     def __startConvertToSQL(user_request_list, flag=1):
-        table = 'entity_fields,'
+        
         if flag:
-            #result = ' SELECT DISTINCT entity.* FROM entity,' + table + 'entity_tags WHERE '
-            result = ' SELECT entity.* FROM entity,' + table + 'entity_tags WHERE '
+            result = ' SELECT entity.* FROM entity'
         else:
-            #result = ' SELECT DISTINCT entity.id FROM entity, entity_fields, entity_tags WHERE '
-            result = ' SELECT entity.* FROM entity,' + table + 'entity_tags WHERE '
-        #print(result)
+            result = ' SELECT entity.id FROM entity '
+        
         
         result += ProcessingRequest.__convertToSQL(user_request_list)
         #print(result)
@@ -267,12 +269,9 @@ class ProcessingRequest(object):
             request = cleareSpaceAboutOperator(request,operator)
         
         request_list = ProcessingRequest.__splitRequest(request)
+        print('the user request is ---',user_request)
         print('the user request list is',request_list)
         
-        if is_neural_net:
-            table = ''
-        else:
-            table='entity_fields,'
             
         if len(request_list)==1:
             result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
@@ -301,7 +300,7 @@ class ProcessingRequest(object):
             проверка является ли атом полем. 
             Если не поле то возращается 0 индекс оператора +1 
         '''
-       # print('is field? ---- ',atom)
+        print('is field? ---- ',atom)
         for operator in ProcessingRequest._field_words:
             if atom.find(operator,0)>=0:
                 return operator
@@ -318,9 +317,17 @@ class ProcessingRequest(object):
         if field_operator:
             field_name, field_value = atom.split(field_operator)
             field_name = field_name.strip()
+            try:
+                ProcessingRequest._using_table.index(ProcessingRequest._table_objs_fields)
+            except ValueError:
+                ProcessingRequest._using_table.append(ProcessingRequest._table_objs_fields)
             return  ' '+ ProcessingRequest._table_objs_fields + ".field_name = '" + field_name + "' AND "+ ProcessingRequest._table_objs_fields + '.value ' + field_operator + " '" + field_value + "'" + ' AND ' + ProcessingRequest._table_objs +".id=" + ProcessingRequest._table_objs_fields + ".entity_id"
         else:
             atom = atom.strip()
+            try:
+                ProcessingRequest._using_table.index(ProcessingRequest._table_objs_tags)
+            except ValueError:
+                ProcessingRequest._using_table.append(ProcessingRequest._table_objs_tags)
             return ' '+ ProcessingRequest._table_objs_tags + ".tag_name = '" + atom + "'" + ' AND ' + ProcessingRequest._table_objs +".id=" + ProcessingRequest._table_objs_tags + ".entity_id"        
 
     
@@ -328,31 +335,10 @@ class ProcessingRequest(object):
   
 if __name__=='__main__':
                 
-#    str_request = 'field1=значение and tag1 or tag2 and (tag3 or tag4 and not (tag9 or tag10)) and (tag5 or tag6) or not (tag7 or tag8)'
-#    str_request = 'суперполе>суперзначение and tag1' 
-#    str_request = 'field   <>    a  or g>d   and ( f            =               a or s        <>          d ) or                e            =           3'
-#    str_request = 'aa and (bb and (cc or ee))'
-#    
-#    str_request = 'aa'
-#  #  str_request = 'field       <> s' 
-##    str_request = '      tag   =                 "asdfasdf" tag tag tag field=       "asdfasd"     field2    =      "asdfas"'
-##    str_request ="п1=з1 and п2=  з2 or п3  =з3 and п4  =  з4"
-#    
-#    per=ProcessingRequest.getSQLRequest(str_request)
-#    print('the result is ----')
-#    print(per)
-    string='           asdfasdfasd asdf asdf asdf a          asdf adsf        '
-    res= cleareExtraSpace(string)
-    res = ' ' + res
-#    print(res.split(' '))
-   
-
-#    
-#    per=ProcessingRequest.getSQLRequest(str_request)
-#    print('the result is ----')
-#    print(per)
-     
+    str_request = 'aa and (torion and (cc or ee) or field=value)'
+    per=ProcessingRequest.getSQLRequest(str_request)
     
-  
+    print('the result is ----')
+    print(per)
     
 

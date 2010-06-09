@@ -65,7 +65,7 @@ class BrowseMetadataWindow(QtGui.QMainWindow):
         '''
         row=self._table.currentIndex().row()
         index=self._table.model().index(row,0)
-        metadata_name = self._table.model().item_data(index)
+        metadata_name = self._table.model().data(index)
         if metadata_name==None:
             self.info_window.setText('''не выбрана запись для действия
             ''')
@@ -73,7 +73,7 @@ class BrowseMetadataWindow(QtGui.QMainWindow):
             
         if type_metadata=='field':
             index = self._table.model().index(row,3)
-            field_type=self._table.model().item_data(index)
+            field_type=self._table.model().data(index)
             return (metadata_name,field_type)
         return metadata_name
             

@@ -121,7 +121,7 @@ class BrowseFilesWindow(QtGui.QWidget):
         print('addFile')
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        file_path = self._table.model().item_data(index)
+        file_path = self._table.model().data(index)
         if not file_path==None:
             file_path = self._path_to_repo + os.path.sep + file_path 
             entity = EntityManager.createEntity(entity_type=SystemInfo.entity_file_type, user_name=self._user_repo, file_path=file_path)
@@ -150,7 +150,7 @@ class BrowseFilesWindow(QtGui.QWidget):
         
         row=self._table.currentIndex().row()
         index=self._table.model().index(row,0)
-        file_path=self._table.model().item_data(index)
+        file_path=self._table.model().data(index)
         print('row',row)
         print('index',index)
         print('id',id)

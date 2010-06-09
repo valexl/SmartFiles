@@ -93,13 +93,14 @@
      <addaction name="action_create_repo"/>
      <addaction name="action_open_repo"/>
      <addaction name="action_delete_repo"/>
+     <addaction name="separator"/>
+     <addaction name="action_delete_user_from_repo"/>
     </widget>
     <widget class="QMenu" name="menu_users">
      <property name="title">
       <string>&amp;Пользователь</string>
      </property>
      <addaction name="action_update_user"/>
-     <addaction name="action_delete_user_from_repo"/>
      <addaction name="separator"/>
      <addaction name="action_switch_user"/>
     </widget>
@@ -146,7 +147,6 @@
     </property>
     <addaction name="action_setting_tags"/>
     <addaction name="action_setting_fields"/>
-    <addaction name="action_setting_repo_files"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_objects"/>
@@ -196,7 +196,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget_2">
+  <widget class="QDockWidget" name="dockWidget_repo_files">
    <property name="contextMenuPolicy">
     <enum>Qt::ActionsContextMenu</enum>
    </property>
@@ -293,12 +293,12 @@
   </action>
   <action name="action_delete_user_from_repo">
    <property name="text">
-    <string>Удалить из хранилища</string>
+    <string>Удалиться из хранилища</string>
    </property>
   </action>
   <action name="action_switch_user">
    <property name="text">
-    <string>Переключить</string>
+    <string>Сменить пользователя</string>
    </property>
   </action>
   <action name="action_add_file">
@@ -361,11 +361,6 @@
   <action name="action_setting_fields">
    <property name="text">
     <string>Полями</string>
-   </property>
-  </action>
-  <action name="action_setting_repo_files">
-   <property name="text">
-    <string>Хранилищем</string>
    </property>
   </action>
  </widget>
