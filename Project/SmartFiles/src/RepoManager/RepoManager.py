@@ -109,27 +109,68 @@ class RepoManager(object):
                                                   repo_metadata_file + 
                                                   ' с метаданными' )
         
+    
+    @staticmethod
+    def __checkingFileInfo(cursor,file_name,check_value=1):
+        '''
+            меняет значение checked в таблице о файлах хранилища 
+        '''
+        cursor.execute(" UPDATE files_info  "
+                       " SET checked = ? "
+                       " WHERE path=? ",
+                       (check_value,file_name)
+                       )
+        
+    def checkedFileInfo(self,list_file_names):
+        '''
+            помечает файлы хранилища, как проиндексированные (польователь определил их как свои)
+        '''
+        repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
+        if os.path.exists(repo_metadata_file):
+            connect = sqlite.connect(repo_metadata_file)
+            cursor = connect.cursor()
+            for file_name in list_file_names:
+                RepoManager.__checkingFileInfo(cursor,file_name,1)
+            connect.commit()
+        else:
+            raise RepoManager.ExceptionRepoIsNull('checkedFileInfo. Не найден файл ' + 
+                                                  repo_metadata_file + 
+                                                  ' с метаданными' )
+    def unCheckedFileInfo(self,list_file_names):
+        '''
+            помечает файлы хранилища, как свободные (пользователь отказался от них)
+        '''
+        repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
+        if os.path.exists(repo_metadata_file):
+            connect = sqlite.connect(repo_metadata_file)
+            cursor = connect.cursor()
+            for file_name in list_file_names:
+                RepoManager.__checkingFileInfo(cursor,file_name,0)
+            connect.commit()
+        else:
+            raise RepoManager.ExceptionRepoIsNull('checkedFileInfo. Не найден файл ' + 
+                                                  repo_metadata_file + 
+                                                  ' с метаданными' )
+    
+
     @staticmethod
     def __insertFileInfoIntoBD(cursor,file_name):
         '''
             запись информации о файлах в базу данных
         '''
         cursor.execute( "INSERT INTO files_info "
-                            " (path) "
-                            " VALUES (?) ",
-                            (file_name,)
-                           )
-        
-        
-            
+                            " (path,checked) "
+                            " VALUES (?,?) ",
+                            (file_name,0)
+                           )    
     def addFileInfo(self,list_file_names):
         '''
             добавление инфомрации о файлах, которые находятся в хранилище 
             и еще не проиндексированы
         '''
         
-        print('addFileInfooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo')
-        print('list_file_names',list_file_names)
+        
+        
         repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
         if os.path.exists(repo_metadata_file):
             connect = sqlite.connect(repo_metadata_file)
@@ -195,7 +236,8 @@ class RepoManager(object):
         
         #таблица с файлами хранилища
         cursor.execute("CREATE TABLE files_info ("
-                       " path VARCHAR2(255) PRIMARY KEY )"
+                       " path VARCHAR2(255) PRIMARY KEY, "
+                       " checked INTEGER)"
                        )
         #таблица пользователей
         cursor.execute("CREATE TABLE users ("

@@ -207,7 +207,7 @@ class Ui_MainWindow(object):
         self.menu_add_entity.setTitle(QtGui.QApplication.translate("MainWindow", "&Добавить", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_mark.setTitle(QtGui.QApplication.translate("MainWindow", "&Пометить", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_views.setTitle(QtGui.QApplication.translate("MainWindow", "&Вид", None, QtGui.QApplication.UnicodeUTF8))
-        self.menu_setting.setTitle(QtGui.QApplication.translate("MainWindow", "&Управление", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_setting.setTitle(QtGui.QApplication.translate("MainWindow", "&Метаданные", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
       #  self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Теги и поля хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.label_metadata.setText(QtGui.QApplication.translate("MainWindow", "Метаданные", None, QtGui.QApplication.UnicodeUTF8))
@@ -235,6 +235,6 @@ class Ui_MainWindow(object):
         self.action_delete_entity.setText(QtGui.QApplication.translate("MainWindow", "Удалить", None, QtGui.QApplication.UnicodeUTF8))
         self.action_view_repo_files.setText(QtGui.QApplication.translate("MainWindow", "Управление файлами", None, QtGui.QApplication.UnicodeUTF8))
         self.action_view_metadata.setText(QtGui.QApplication.translate("MainWindow", "Метаданные", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_setting_tags.setText(QtGui.QApplication.translate("MainWindow", "Тегами", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_setting_fields.setText(QtGui.QApplication.translate("MainWindow", "Полями", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_setting_tags.setText(QtGui.QApplication.translate("MainWindow", "Теги", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_setting_fields.setText(QtGui.QApplication.translate("MainWindow", "Поля", None, QtGui.QApplication.UnicodeUTF8))
 

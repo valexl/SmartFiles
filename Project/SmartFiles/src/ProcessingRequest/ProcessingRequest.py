@@ -247,9 +247,9 @@ class ProcessingRequest(object):
     def __startConvertToSQL(user_request_list, flag=1):
         
         if flag:
-            result = ' SELECT entity.id, entity.title, entity.neuralnet_raiting, entity.object_type, entity.file_path FROM entity'
+            result = ' SELECT DISTINCT entity.id, entity.title, entity.neuralnet_raiting, entity.object_type, entity.file_path FROM entity'
         else:
-            result = ' SELECT entity.id FROM entity '
+            result = ' SELECT DISTINCT entity.id FROM entity '
         
         
         result += ProcessingRequest.__convertToSQL(user_request_list)

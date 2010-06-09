@@ -143,7 +143,7 @@
    </widget>
    <widget class="QMenu" name="menu_setting">
     <property name="title">
-     <string>&amp;Управление</string>
+     <string>&amp;Метаданные</string>
     </property>
     <addaction name="action_setting_tags"/>
     <addaction name="action_setting_fields"/>
@@ -173,7 +173,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidget_tag">
    <property name="windowTitle">
-    <string>Теги и поля хранилища</string>
+    <string>Метаданные</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -181,17 +181,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <widget class="QLabel" name="label_metadata">
-       <property name="text">
-        <string>Метаданные</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignHCenter|Qt::AlignTop</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QListView" name="treeView_metadata"/>
+      <widget class="QTableView" name="treeView_metadata"/>
      </item>
     </layout>
    </widget>
@@ -212,20 +202,9 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Файлы хранилища</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QTreeView" name="treeView_file_info">
-         <property name="whatsThis">
-          <string>Список файлов не принадлежащих ни какому пользователю и не имеющие ни какие метаданные.</string>
-         </property>
-        </widget>
+        <widget class="QTreeView" name="treeView_repo_files"/>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -355,12 +334,12 @@
   </action>
   <action name="action_setting_tags">
    <property name="text">
-    <string>Тегами</string>
+    <string>Теги</string>
    </property>
   </action>
   <action name="action_setting_fields">
    <property name="text">
-    <string>Полями</string>
+    <string>Поля</string>
    </property>
   </action>
  </widget>

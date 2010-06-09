@@ -339,7 +339,6 @@ class EditEntityWindow(QtGui.QDialog):
         
         
         self.emit(QtCore.SIGNAL("indexingFile(list_new_files)"),self._new_files)
-    
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
         self.__canceled()
     def __stoped(self):
