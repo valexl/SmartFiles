@@ -349,7 +349,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     
                 self.__startFile(file_path)
             elif type_entity==SystemInfo.entity_link_type:
-                self.__startURL('www.manutd.ru')
+                entity = self._entity_manager.createEntity(entity_type=type_entity, user_name=self._user_repo.name,id = entity_id)
+                url = self._entity_manager.getURL(entity)
+                self.__startURL(url)
             
             
         

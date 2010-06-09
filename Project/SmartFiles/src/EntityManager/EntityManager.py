@@ -396,12 +396,27 @@ class EntityManager(object):
 #        cursor.execute(request)
 #        return cursor.fetchall()
 #        
+    def getURL(self,entity):
+        '''
+            достать значение URL
+        '''
+        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
+        if os.path.exists(path_metadata_file):
+            connect=sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+            request = "SELECT value FROM entity_fields WHERE entity_id=? AND user_name = ? AND field_name = 'url'"
+            cursor.execute(request,(entity.id,entity.user_name))
+            return cursor.fetchone()[0]
+            #return EntityManager.__getListTags(cursor,request)
+            
+    
+        else:
+            raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
     
     def getListTags(self,tag_name):
         '''
             возвращает список всех тегов в хранилище
         '''
-        print('что то тут начал делать')
         path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
         if os.path.exists(path_metadata_file):
             connect=sqlite.connect(path_metadata_file)
