@@ -165,7 +165,21 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.connect(self.pushButton_indexing_files,QtCore.SIGNAL('clicked()'),self.__indexFile)
         self.connect(self.pushButton_add_files,QtCore.SIGNAL('clicked()'),self.__copyFile)
         self.connect(self.pushButton_delete_files,QtCore.SIGNAL('clicked()'),self.__deleteFile)
-    
+        
+       # self.connect(self.treeView_metadata,QtCore.SIGNAL('clicked(QModelIndex)'),self.__selectTags)
+        self.selected_tags=[]
+        
+        
+#    def __selectTags(self,index):
+#        
+#        try:
+#            rm_index = self.selected_tags.index(index.row())
+#            self.selected_tags.pop(rm_index)
+#        except ValueError:
+#            self.selected_tags.append(index.row())
+#        #print(self.selected_tags)
+        
+  
     def __indexFile(self):
         '''
             пометка файла метоинформацией. создается запись о файле в БД
@@ -244,7 +258,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             удаления файла из хранилища
         '''    
         print('deleteFile')
-        
+        self.treeView_files_info.selectedIndexes()
         row=self.treeView_files_info.currentIndex().row()
         index=self.treeView_files_info.model().index(row,0)
         file_path=self.treeView_files_info.model().data(index)
@@ -252,6 +266,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             os.remove(self._path_to_repo + os.sep + file_path)
             self._repo_manager.deleteFilesInfo((file_path,))
         self.__settingModel()
+        
     
     def saveNeuralNet(self):
         
@@ -361,7 +376,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
 
         self._model.setQuery(self._string_request)
-        self._model_metadata.setQuery("SELECT * FROM tag WHERE user_name='" + self._user_repo.name + "'")
+        self._model_metadata.setQuery("SELECT name FROM tag WHERE user_name='" + self._user_repo.name + "'")
         self._model_files_info.setQuery('SELECT * FROM files_info')
         if (self._model.lastError().isValid()):
             print('eroro in model where connecting BD file')
@@ -377,7 +392,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         self.treeView_metadata.setModel(self._model_metadata)
         self.treeView_metadata.show()
-        
+        #self.treeView_metadata.selectAll()
         print('table is showing')
         
     def __openingRrepository(self):
@@ -446,6 +461,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._path_to_repo = None
             self.__disconnectBD()
             self._is_open_repo = False
+            self.__settingModel()
         except RepoManager.ExceptionRepoIsNull as error:
             #print('не возможно удалить хранилище')
             self.info_window.show()
@@ -643,11 +659,22 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             начала поиск объекта
         '''
+        list_tags = []
+        for index in self.treeView_metadata.selectedIndexes(): 
+            list_tags.append(self.treeView_metadata.model().data(index))
+            
+        
         if self.radioButton_neural_net.isChecked():
+            request = " ".join(list_tags)
+            self.lineEdit_search.setText(request)
             self.__searchByNeuralNet()
         else:
+            request = ' AND '.join(list_tags)
+            self.lineEdit_search.setText(request)
             self.__searchByQueryLanguage()
-    
+        
+        
+        
     
     
     def __addFile(self):
@@ -662,7 +689,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self.edit_window.setWindowTitle('Окно редактирования файлов')
                 self.edit_window.show()
                 self.connect(self.edit_window,QtCore.SIGNAL('createEntity(list_entityes)'),self.__addingEntity)
-                self.connect(self.edit_window,QtCore.SIGNAL("indexingFile(entity)"),self.__indexingFile)
+                self.connect(self.edit_window,QtCore.SIGNAL("indexingFile(list_new_files)"),self._repo_manager.addFileInfo)
 
                 #отлавливание сигнала на добавление нового файла       
             else:

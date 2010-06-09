@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow_ui.ui'
 #
-# Created: Wed Jun  9 01:29:29 2010
+# Created: Wed Jun  9 03:28:24 2010
 #      by: PyQt4 UI code generator 4.6.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,6 +13,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(765, 729)
+        MainWindow.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -83,7 +84,7 @@ class Ui_MainWindow(object):
         self.label_metadata.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.label_metadata.setObjectName("label_metadata")
         self.verticalLayout_5.addWidget(self.label_metadata)
-        self.treeView_metadata = QtGui.QTreeView(self.dockWidgetContents)
+        self.treeView_metadata = QtGui.QListView(self.dockWidgetContents)
         self.treeView_metadata.setObjectName("treeView_metadata")
         self.verticalLayout_5.addWidget(self.treeView_metadata)
         self.dockWidget_tag.setWidget(self.dockWidgetContents)
@@ -101,9 +102,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.label)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.treeView = QtGui.QTreeView(self.dockWidgetContents_2)
-        self.treeView.setObjectName("treeView")
-        self.horizontalLayout_3.addWidget(self.treeView)
+        self.treeView_file_info = QtGui.QTreeView(self.dockWidgetContents_2)
+        self.treeView_file_info.setObjectName("treeView_file_info")
+        self.horizontalLayout_3.addWidget(self.treeView_file_info)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.pushButton_indexing_files = QtGui.QPushButton(self.dockWidgetContents_2)
@@ -211,10 +212,9 @@ class Ui_MainWindow(object):
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Теги и поля хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.label_metadata.setText(QtGui.QApplication.translate("MainWindow", "Метаданные", None, QtGui.QApplication.UnicodeUTF8))
-        self.treeView_metadata.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Список метаданных", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_2.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Управление файлами хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Файлы хранилища", None, QtGui.QApplication.UnicodeUTF8))
-        self.treeView.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Список файлов не принадлежащих ни какому пользователю и не имеющие ни какие метаданные.", None, QtGui.QApplication.UnicodeUTF8))
+        self.treeView_file_info.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Список файлов не принадлежащих ни какому пользователю и не имеющие ни какие метаданные.", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_indexing_files.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Пометить текущем пользователем файлы как свои", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_indexing_files.setText(QtGui.QApplication.translate("MainWindow", "Пометить", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_add_files.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Добавить файл в любую директорию хранилища.", None, QtGui.QApplication.UnicodeUTF8))

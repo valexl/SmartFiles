@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         self.label_metadata.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.label_metadata.setObjectName("label_metadata")
         self.verticalLayout_5.addWidget(self.label_metadata)
-        self.treeView_metadata = QtGui.QTreeView(self.dockWidgetContents)
+        self.treeView_metadata = QtGui.QTableView(self.dockWidgetContents)
         self.treeView_metadata.setObjectName("treeView_metadata")
         self.verticalLayout_5.addWidget(self.treeView_metadata)
         self.dockWidget_tag.setWidget(self.dockWidgetContents)

@@ -240,7 +240,8 @@ class ProcessingRequest(object):
         return result_string
 
     @staticmethod
-    def __startConvertToSQL(user_request_list, flag=1, table='entity_fields,'):
+    def __startConvertToSQL(user_request_list, flag=1):
+        table = 'entity_fields,'
         if flag:
             #result = ' SELECT DISTINCT entity.* FROM entity,' + table + 'entity_tags WHERE '
             result = ' SELECT entity.* FROM entity,' + table + 'entity_tags WHERE '
@@ -274,9 +275,9 @@ class ProcessingRequest(object):
             table='entity_fields,'
             
         if len(request_list)==1:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0],table=table) 
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
         else:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list,table=table)
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list)
         
         if is_neural_net:
             result_sql_request += ' ORDER BY entity.neuralnet_raiting DESC'

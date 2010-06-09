@@ -29,6 +29,7 @@ class EditEntityWindow(QtGui.QDialog):
         
         self.info_window = QtGui.QMessageBox()
         
+        self._new_files=[]
         
         vbox_layout = QtGui.QVBoxLayout()
         
@@ -248,8 +249,9 @@ class EditEntityWindow(QtGui.QDialog):
         for dir_name in repo_path_dirs:
             if index >= len(part_dirs): #если копируемый файл не в хранилище, но путь к нему принадлежит хранилищу
                                         # то есть на пример. /tmp/tmp/tmp - хранилище, /tmp/tmp/file - файл добаляемый.
-                entity = EntityManager.createEntity(entity_type=SystemInfo.entity_file_type,user_name=self._user_repo.name, file_path=file_name)
-                self.emit("indexingFile(entity)",entity)
+                
+                self._new_files.append(file_name)
+                #self.emit(QtCore.SIGNAL("indexingFile(entity)"),entity)
                 shutil.copyfile(file_path,self._path_to_repo+os.path.sep + file_name)
                 return file_name
             print('dir_name=',dir_name)
@@ -327,11 +329,16 @@ class EditEntityWindow(QtGui.QDialog):
                 progress+=d_progress
                 progress_window.setValue(progress)
                 QtGui.QApplication.processEvents()
-#            progress_window.setWindowModality(0)    
+#            progress_window.setWindowModality(0)
+    
             print('deleting progress window')
             progress_window.close()
             del(progress_window)
         print('the lenght outputting signal is -',len(list_entityes))
+        
+        
+        self.emit(QtCore.SIGNAL("indexingFile(list_new_files)"),self._new_files)
+    
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
         self.__canceled()
     def __stoped(self):
@@ -363,7 +370,7 @@ if __name__=='__main__':
     from RepoManager.User import User
     app = QtGui.QApplication(sys.argv)
     user = User('valexl')
-    window = EditEntityWindow('/tmp/tmp/tmp/tmp', user, SystemInfo.entity_file_type)
+    window = EditEntityWindow('/tmp/tmp', user, SystemInfo.entity_file_type)
     window.show()
     app.exec_()
     

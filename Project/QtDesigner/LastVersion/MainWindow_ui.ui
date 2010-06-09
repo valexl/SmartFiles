@@ -10,6 +10,9 @@
     <height>729</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::ActionsContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string>SmartFiles</string>
   </property>
@@ -188,11 +191,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTreeView" name="treeView_metadata">
-       <property name="whatsThis">
-        <string>Список метаданных</string>
-       </property>
-      </widget>
+      <widget class="QListView" name="treeView_metadata"/>
      </item>
     </layout>
    </widget>
@@ -222,7 +221,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QTreeView" name="treeView">
+        <widget class="QTreeView" name="treeView_file_info">
          <property name="whatsThis">
           <string>Список файлов не принадлежащих ни какому пользователю и не имеющие ни какие метаданные.</string>
          </property>

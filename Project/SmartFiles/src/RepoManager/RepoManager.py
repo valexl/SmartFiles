@@ -122,7 +122,7 @@ class RepoManager(object):
         
         
             
-    def addFileInfo(self,file_name):
+    def addFileInfo(self,list_file_names):
         '''
             добавление инфомрации о файлах, которые находятся в хранилище 
             и еще не проиндексированы
@@ -132,7 +132,8 @@ class RepoManager(object):
         if os.path.exists(repo_metadata_file):
             connect = sqlite.connect(repo_metadata_file)
             cursor = connect.cursor()
-            RepoManager.__insertFileInfoIntoBD(cursor, file_name)
+            for file_name in list_file_names:
+                RepoManager.__insertFileInfoIntoBD(cursor, file_name)
             connect.commit()
         else:
             raise RepoManager.ExceptionRepoIsNull('addFileInfo. Не найден файл ' + 
