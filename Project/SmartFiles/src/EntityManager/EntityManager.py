@@ -246,7 +246,7 @@ class EntityManager(object):
     
          
              
-    def saveEntity(self,entity):
+    def saveEntityes(self,list_entityes):
         '''
             запись entity в базу данных
         '''
@@ -256,31 +256,32 @@ class EntityManager(object):
             connect=sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
             # запись entity
-            entity.id = EntityManager.__saveEntity(cursor, entity)
-            
-            self._neural_net.addFile(entity.id)
-            
-            # запись tag   
-           
-            for tag_attributes in entity.getTagAttributes():    
-                EntityManager.__saveTag(cursor, entity.id,tag_attributes)
-                                                                    #имя тега        #имя пользователя
-                if EntityManager.__saveEntityTags(cursor, entity.id, tag_attributes[0], tag_attributes[1]):
-                    self._neural_net.tagFile(entity.id,tag_attributes[0])
+            for entity in list_entityes:
+                entity.id = EntityManager.__saveEntity(cursor, entity)
                 
-                # запись field
-            for field_attributes in entity.getFieldAttributes():
-     #               print('вот вот начнется saveField')
-                    EntityManager.__saveField(cursor, entity.id, field_attributes)
-                                                                        #имя поля                
-                    EntityManager.__saveEntityFields(cursor, entity.id, field_attributes[0][0], 
-                                                        #имя пользователя        #значение
-                                                     field_attributes[0][1], field_attributes[1][0])
+                self._neural_net.addFile(entity.id)
+                
+                # запись tag   
+               
+                for tag_attributes in entity.getTagAttributes():    
+                    EntityManager.__saveTag(cursor, entity.id,tag_attributes)
+                                                                        #имя тега        #имя пользователя
+                    if EntityManager.__saveEntityTags(cursor, entity.id, tag_attributes[0], tag_attributes[1]):
+                        self._neural_net.tagFile(entity.id,tag_attributes[0])
+                    
+                    # запись field
+                for field_attributes in entity.getFieldAttributes():
+         #               print('вот вот начнется saveField')
+                        EntityManager.__saveField(cursor, entity.id, field_attributes)
+                                                                            #имя поля                
+                        EntityManager.__saveEntityFields(cursor, entity.id, field_attributes[0][0], 
+                                                            #имя пользователя        #значение
+                                                         field_attributes[0][1], field_attributes[1][0])
             connect.commit()
             self.tmpPrintNeuralNet()
             return entity.id
         else:
-            raise EntityManager.ExceptionNotFoundFileBD('saveEntity. "Не найден файл с метаданными - '+ path_metadata_file +'"')
+            raise EntityManager.ExceptionNotFoundFileBD('saveEntityes. "Не найден файл с метаданными - '+ path_metadata_file +'"')
         
             
     @staticmethod
@@ -304,13 +305,13 @@ class EntityManager(object):
         return list_tags
         
     @staticmethod
-    def __getListFields(cursor,entity_id,user_name):
+    def __getListFields(cursor,entity_id ,user_name):
         '''
             получить список полей для entity
         '''
         list_fields = []
         
-       # print(entity_id)
+       # print(entity_id )
         
         cursor.execute(" SELECT field.name, field.user_name, t1.value, field.value_type, " 
                        " field.date_create,field.description "
@@ -319,7 +320,7 @@ class EntityManager(object):
                        " entity ON entity.id = entity_fields.entity_id AND entity.id = ? "
                        " AND entity.user_name = entity_fields.user_name) AS t1"
                        " ON t1.user_name = field.user_name AND t1.field_name = field.name ",
-                       (entity_id,)
+                       (entity_id ,)
                        )
         
         
@@ -342,6 +343,10 @@ class EntityManager(object):
             print('loadEntityObj')
             print('title=',entity_title,', type_object=',entity_type_object,' user_name=',entity_user_name,
                   'file_path=',entity_file_path)
+            print(cursor)
+            print('entity_id',entity_id)
+            print('entity_user_name',entity_user_name)
+            #EntityManager.__getListTags(cursor=cursor, user_name=entity_user_name)
             tags = EntityManager.__getListTags(cursor,entity_id, entity_user_name)
             fields = EntityManager.__getListFields(cursor, entity_id, entity_user_name)
             #print('loadEntityObj',entity_id)
@@ -385,8 +390,49 @@ class EntityManager(object):
                        "WHERE name=? AND user_name = ?",
                        (tag_name, user_name)
                        )
+    
+#    @staticmethod 
+#    def __getListTags(cursor,request):
+#        cursor.execute(request)
+#        return cursor.fetchall()
+#        
+    
+    def getListTags(self,tag_name):
+        '''
+            возвращает список всех тегов в хранилище
+        '''
+        print('что то тут начал делать')
+        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
+        if os.path.exists(path_metadata_file):
+            connect=sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+            request = 'SELECT name FROM tag,entity_tags WEHRE tag.name= entity_tags.name'
+            return EntityManager.__getListTags(cursor,request)
+            
+    
+        else:
+            raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
+
+    
         
+    def searchEntityBySQL(self,request_SQL):
+        '''
+            поиск по запросу
+        '''
+        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
+        if os.path.exists(path_metadata_file):
+            connect=sqlite.connect(path_metadata_file)
+            cursor = connect.cursor()
+            cursor.execute(request_SQL)
+            
+            return cursor.fetchall()
+            
         
+        else:
+            raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
+
+
+    
     def deleteTag(self,tag):
         '''
             удаление тега и всех записей связанных с ним в entity_tags
@@ -483,13 +529,15 @@ class EntityManager(object):
                     self._neural_net.deleteTag(tag_attributes[0])
             #удаление всех записей entity_fields и при необходимости записи из field
             for field_attributes in entity.getFieldAttributes(): 
+                field_name = field_attributes[0][0]
+                
                 EntityManager.__deleteEntityFields(cursor, entity.id, field_attributes)
                 cursor.execute(" SELECT COUNT(*) FROM entity_fields "
                                " WHERE field_name = ? AND user_name = ? ",
-                               (field_attributes[0][0], entity.user_name) 
+                               (field_name, entity.user_name) 
                                )
                 if cursor.fetchone()[0] == 0:
-                    EntityManager.__deleteField(cursor, field_attributes[0][0],entity.user_name)
+                    EntityManager.__deleteField(cursor, field_name,entity.user_name)
             #удаление записи entity
             EntityManager.__deleteEntity(cursor, entity.id)
             

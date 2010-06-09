@@ -5,10 +5,12 @@ Created on 20.04.2010
 '''
 import sqlite3 as sqlite
 import os
+import shutil
 #import User.User
 from  RepoManager.SystemInfo import SystemInfo
 #import Entity
 from EntityManager.EntityManager import EntityManager 
+
 #from EntityManager import EntityManager
 #import EntityManager
 #import EntityManager
@@ -88,7 +90,7 @@ class RepoManager(object):
         return repository
     
     
-    def deleteFilesInfo(self,file_path):
+    def deleteFilesInfo(self,list_files_path):
         '''
             удаление информации о файле
         '''
@@ -96,7 +98,8 @@ class RepoManager(object):
         if os.path.exists(repo_metadata_file):
             connect = sqlite.connect(repo_metadata_file)
             cursor = connect.cursor()
-            cursor.execute("DELETE FROM files_info "
+            for file_path in list_files_path:
+                cursor.execute("DELETE FROM files_info "
                            " WHERE path = ? ",
                            (file_path,) 
                            )
@@ -471,17 +474,22 @@ class RepoManager(object):
     def deleteRepository(repo_path):
         if repo_path == None:
             raise RepoManager.ExceptionRepoIsNull('не найдено хранилщие')
+
         dir_name = os.path.join(repo_path,SystemInfo.metadata_dir_name)
-        file_name = os.path.join(repo_path,SystemInfo.metadata_file_name)
-        neural_net = os.path.join(repo_path,SystemInfo.neural_net_file_path)
-        if os.path.exists(dir_name):
-            os.remove(file_name)
-            os.remove(neural_net)
-            os.rmdir(dir_name)
-        else:
+        try:
+            shutil.rmtree(dir_name)
+#        file_name = os.path.join(repo_path,SystemInfo.metadata_file_name)
+#        neural_net = os.path.join(repo_path,SystemInfo.neural_net_file_path)
+#        if os.path.exists(dir_name):
+#            os.remove(file_name)
+#            os.remove(neural_net)
+#            os.rmdir(dir_name)
+#        else:
+        except Exception(err):
+            print(err)
             raise RepoManager.ExceptionRepoIsNull('deleteRepository. не найден каталог с метаданными ' + repo_path)
-        
-        
+#        
+#        
 
 
     

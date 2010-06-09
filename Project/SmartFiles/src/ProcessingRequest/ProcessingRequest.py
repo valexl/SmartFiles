@@ -240,11 +240,13 @@ class ProcessingRequest(object):
         return result_string
 
     @staticmethod
-    def __startConvertToSQL(user_request_list, flag=1, table=''):
+    def __startConvertToSQL(user_request_list, flag=1, table='entity_fields,'):
         if flag:
-            result = ' SELECT DISTINCT entity.* FROM entity, entity_fields, entity_tags WHERE '
+            #result = ' SELECT DISTINCT entity.* FROM entity,' + table + 'entity_tags WHERE '
+            result = ' SELECT entity.* FROM entity,' + table + 'entity_tags WHERE '
         else:
-            result = ' SELECT DISTINCT entity.id FROM entity, entity_fields, entity_tags WHERE '
+            #result = ' SELECT DISTINCT entity.id FROM entity, entity_fields, entity_tags WHERE '
+            result = ' SELECT entity.* FROM entity,' + table + 'entity_tags WHERE '
         #print(result)
         
         result += ProcessingRequest.__convertToSQL(user_request_list)
@@ -258,16 +260,24 @@ class ProcessingRequest(object):
             преобразование пользовательского запроса в SQL запрос
         '''
         request = cleareExtraSpace(user_request); # строка запроса заданная пользователем 
-                                                           # переведена в один регистр и без двойных пробелов 
+                                                           # переведена в один регистр и без двойных пробелов
+         
         for operator in ProcessingRequest._field_words: 
             request = cleareSpaceAboutOperator(request,operator)
         
         request_list = ProcessingRequest.__splitRequest(request)
         print('the user request list is',request_list)
-        if len(request_list)==1:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
+        
+        if is_neural_net:
+            table = ''
         else:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list)
+            table='entity_fields,'
+            
+        if len(request_list)==1:
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0],table=table) 
+        else:
+            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list,table=table)
+        
         if is_neural_net:
             result_sql_request += ' ORDER BY entity.neuralnet_raiting DESC'
         return result_sql_request

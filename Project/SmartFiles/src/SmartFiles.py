@@ -517,7 +517,7 @@ class MainWindow(QtGui.QWidget):
             print('_adding Entity')
             print('the fields attributes is - ', entity.getFieldAttributes())
             
-            self._entity_manager.saveEntity(entity)
+            self._entity_manager.saveEntityes(entity)
             if not entity.file_path == None:
                 self._repo_manager.deleteFilesInfo(entity.file_path)
     #        self.__connnectBD()
@@ -539,7 +539,7 @@ class MainWindow(QtGui.QWidget):
         '''
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        entity_id = self._table.model().data(index)
+        entity_id = self._table.model().item_data(index)
         if not entity_id == None:
             try:
                 
@@ -578,7 +578,7 @@ class MainWindow(QtGui.QWidget):
         '''
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        entity_id = self._table.model().data(index)
+        entity_id = self._table.model().item_data(index)
         if not entity_id == None:
             try:
                 self.browse_window = BrowseMetadataWindow(entity_id = entity_id, user_name= self._user_repo.name,type_metadata='tag',status='release')
@@ -629,7 +629,7 @@ class MainWindow(QtGui.QWidget):
         print('__workWithField')
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        entity_id = self._table.model().data(index)
+        entity_id = self._table.model().item_data(index)
         if not entity_id==None:
             try:
                 self.browse_window = BrowseMetadataWindow(entity_id=entity_id,user_name=self._user_repo.name,type_metadata='field')
@@ -662,7 +662,7 @@ class MainWindow(QtGui.QWidget):
         '''    
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        entity_id = self._table.model().data(index)
+        entity_id = self._table.model().item_data(index)
         if not entity_id == None:
             try:
                 self.browse_window = BrowseMetadataWindow(entity_id = entity_id, user_name= self._user_repo.name,type_metadata='field',status='release')
@@ -704,11 +704,11 @@ class MainWindow(QtGui.QWidget):
         try:
                 row=self._table.currentIndex().row()
                 index = self._table.model().index(row,0)
-                entity_id = self._table.model().data(index)
+                entity_id = self._table.model().item_data(index)
                 if not entity_id==None:
                     index = self._table.model().index(row,3) # тип обеъкта
                     #замечание. еще необходима передавать дату создания, так как ее модификация не нужна.
-                    object_type=self._table.model().data(index)
+                    object_type=self._table.model().item_data(index)
                     self.edit_window = EditEntityWindow(user_name=self._user_repo.name,path_repo=self._path_to_repo,object_type=object_type,id=entity_id,status='update')
                     self.edit_window.show()
                     self.connect(self.edit_window,QtCore.SIGNAL("updateEntity(entity)"),self.__updatingEntity)
@@ -722,7 +722,7 @@ class MainWindow(QtGui.QWidget):
             модификация сущности
         '''
         try:
-            self._entity_manager.saveEntity(entity)
+            self._entity_manager.saveEntityes(entity)
             self.__settingModel()
         except EntityManager.ExceptionNotFoundFileBD as error:
             print('__updatingEntity проблемы:')
@@ -741,7 +741,7 @@ class MainWindow(QtGui.QWidget):
         print('__deleteEntity')
         row=self._table.currentIndex().row()
         index = self._table.model().index(row,0)
-        id = self._table.model().data(index)
+        id = self._table.model().item_data(index)
         if not id == None: #если объект выбран
             #print(id)
             self.__deletingEntity(id)
