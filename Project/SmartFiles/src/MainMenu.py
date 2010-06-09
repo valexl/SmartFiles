@@ -386,7 +386,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             отображение состояние базы на таблице
         '''
-
+        print('main menu')
+        print('setting model')
         self._model.setQuery(self._string_request)
         self._model_metadata.setQuery("SELECT name FROM tag WHERE user_name='" + self._user_repo.name + "'")
         self._model_files_info.setQuery('SELECT * FROM files_info')
@@ -673,18 +674,23 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         list_tags = []
         for index in self.treeView_metadata.selectedIndexes(): 
-            list_tags.append(self.treeView_metadata.model().data(index))
+                list_tags.append(self.treeView_metadata.model().data(index))
+        if len(list_tags)>0: 
+            if self.radioButton_neural_net.isChecked():
+                request = " ".join(list_tags)
+                self.lineEdit_search.setText(request)
+                self.__searchByNeuralNet()
+            else:
+                request = ' AND '.join(list_tags)
+                self.lineEdit_search.setText(request)
+                self.__searchByQueryLanguage()
             
-        
-        if self.radioButton_neural_net.isChecked():
-            request = " ".join(list_tags)
-            self.lineEdit_search.setText(request)
-            self.__searchByNeuralNet()
         else:
-            request = ' AND '.join(list_tags)
-            self.lineEdit_search.setText(request)
-            self.__searchByQueryLanguage()
-        
+            
+            if self.radioButton_neural_net.isChecked():
+                self.__searchByNeuralNet()
+            else:
+                self.__searchByQueryLanguage()
         
         
     
@@ -961,7 +967,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                     self._entity_manager.releaseEntityFromTag(new_entity, old_tag)
                     
                     
-            self._entity_manager.saveEntityes(new_entity)
+            self._entity_manager.saveEntityes((new_entity,))
             self.__settingModel()
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''не найден файл с метаданным
@@ -969,12 +975,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
             print('__updatingEntity проблемы:')
             print(error)
-        except Exception as error:
-            self.info_window.setText('''какие то неучтенные траблы с EntityManager
-            ''')
-            self.info_window.show()
-            print('__updatingEntity')
-            print(error)
+#        except Exception as error:
+#            self.info_window.setText('''какие то неучтенные траблы с EntityManager
+#            ''')
+#            self.info_window.show()
+#            print('__updatingEntity')
+#            print(error)
             
         self.disconnect(self.edit_window,QtCore.SIGNAL('"updateEntity(entity)'),self.__updatingEntity)
         
@@ -1035,6 +1041,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #       
 
 
+    def __deletingTag(self,tag):
+        '''
+            удаление тега
+        '''
+        self._entity_manager.deleteTag(tag)
+        self.__settingModel()
+        
         
     def __settingTag(self):
         '''
@@ -1044,7 +1057,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             if self._is_open_repo:
                 self.browse_window = BrowseMetadataWindow(self._user_repo, 'tag')
                 self.browse_window.show()
-                self.connect(self.browse_window,QtCore.SIGNAL('deleteTag(tag)'),self._entity_manager.deleteTag)
+                self.connect(self.browse_window,QtCore.SIGNAL('deleteTag(tag)'),self.__deletingTag)
+    
+                self.browse_window.close
             else:
                 self.info_window.setText('''Откройте хранилище.
                 ''')
@@ -1057,7 +1072,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             
                 
         
-        
+    def __deletingField(self,field):
+        '''
+            удаление поля и обновление таблцы тегов
+        '''
+        self._entity_manager.deleteField(field)
+        self.__settingModel()
+            
     def __settingField(self):
         '''
             управление полями
@@ -1066,7 +1087,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             if self._is_open_repo:
                 self.browse_window = BrowseMetadataWindow(self._user_repo, 'field')
                 self.browse_window.show()
-                self.connect(self.browse_window,QtCore.SIGNAL('deleteField(field)'),self._entity_manager.deleteField)
+                self.connect(self.browse_window,QtCore.SIGNAL('deleteField(field)'),self.__deletingField)
             else:
                 self.info_window.setText('''нужно открыть хранилище
                 ''')

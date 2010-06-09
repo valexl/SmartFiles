@@ -48,13 +48,13 @@ class BrowseMetadataWindow(QtGui.QMainWindow):
         self.connect(button_delete,QtCore.SIGNAL('clicked()'),self.__delete)
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__cancel)
         
-        
+    
     def __cancel(self):
         '''
             завершение работы с окном 
         '''
         self.close()
-        del(self)
+        
         
         
         

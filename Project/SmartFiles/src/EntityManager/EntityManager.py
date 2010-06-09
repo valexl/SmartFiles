@@ -613,7 +613,9 @@ class EntityManager(object):
             print(tag)
             atrribute = tag.getAttributes()
             self.__saveTag(cursor, entity.id, atrribute)
+            
             self.__saveEntityTags(cursor,entity_id=entity.id,user_name=entity.user_name,tag_name=tag.name,)
+            self._neural_net.tagFile(entity.id, tag.name)
             if not entity.isTagExist(tag.name):
                 entity.addTag(tag)
             connect.commit()
