@@ -33,7 +33,8 @@ class RepoManager(object):
         pass
     class ExceptionRepoIsNull(RepoException):
         pass
-    
+    class ExceptionFileInfoIsExist(RepoException):
+        pass
      
     
     def __init__(self, path_to_repo):
@@ -170,15 +171,18 @@ class RepoManager(object):
         '''
         
         
-        
+
         repo_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name)
         if os.path.exists(repo_metadata_file):
-            connect = sqlite.connect(repo_metadata_file)
-            cursor = connect.cursor()
-            for file_name in list_file_names:
-                print(file_name)
-                RepoManager.__insertFileInfoIntoBD(cursor, file_name)
-            connect.commit()
+            try:
+                connect = sqlite.connect(repo_metadata_file)
+                cursor = connect.cursor()
+                for file_name in list_file_names:
+                    print(file_name)
+                    RepoManager.__insertFileInfoIntoBD(cursor, file_name)
+                connect.commit()
+            except sqlite.IntegrityError :
+                raise RepoManager.ExceptionFileInfoIsExist('addFileInfo. Запись о добавляемом файле уже храниться в хранилище')
         else:
             raise RepoManager.ExceptionRepoIsNull('addFileInfo. Не найден файл ' + 
                                                   repo_metadata_file + 
@@ -531,7 +535,7 @@ class RepoManager(object):
 #            os.remove(neural_net)
 #            os.rmdir(dir_name)
 #        else:
-        except Exception(err):
+        except Exception as err:
             print(err)
             raise RepoManager.ExceptionRepoIsNull('deleteRepository. не найден каталог с метаданными ' + repo_path)
 #        

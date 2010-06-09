@@ -227,32 +227,41 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             сохранение файла в хранилщие  
         '''
-        
-        list_file_name = copy_info[0] 
-        progress_dialog = QtGui.QProgressDialog(self)
-        progress_dialog.setWindowModality(1)
-        d_progress = 100/len(list_file_name)
-        progress = 0
-        list_file_infs = []
-        for copy_file_path in list_file_name:
-            #file_name = os.path.split(file_name[0])[1]
-            QtGui.QApplication.processEvents()
-            print('copy_file_path',copy_file_path)
-            file_name = os.path.split(copy_file_path)[1]
-            print('file_name-',file_name)
-            print('dir_name',copy_info[1]) 
-            file_path = os.path.join(copy_info[1],file_name)
-            print('file_path-',file_path)
-            shutil.copyfile(copy_file_path, file_path)
-            new_file_info = self.__splitDirPath(file_path)
-            list_file_infs.append(new_file_info)
-            
-            
-            progress+=d_progress
-            progress_dialog.setValue(int(progress))
-            QtGui.QApplication.processEvents()
-        self._repo_manager.addFileInfo(list_file_infs)
-        self.__settingModel()
+        try:
+            list_file_name = copy_info[0] 
+            progress_dialog = QtGui.QProgressDialog(self)
+            progress_dialog.setWindowModality(1)
+            d_progress = 100/len(list_file_name)
+            progress = 0
+            list_file_infs = []
+            for copy_file_path in list_file_name:
+                #file_name = os.path.split(file_name[0])[1]
+                QtGui.QApplication.processEvents()
+                print('copy_file_path',copy_file_path)
+                file_name = os.path.split(copy_file_path)[1]
+                print('file_name-',file_name)
+                print('dir_name',copy_info[1]) 
+                file_path = os.path.join(copy_info[1],file_name)
+                print('file_path-',file_path)
+                if os.path.exists(file_path):
+                    self.info_window.setText('''файл уже существует в хранилище.
+Добавлять не будет.                    ''')
+                    self.info_window.show()
+                    continue
+                shutil.copyfile(copy_file_path, file_path)
+                new_file_info = self.__splitDirPath(file_path)
+                list_file_infs.append(new_file_info)
+                
+                
+                progress+=d_progress
+                progress_dialog.setValue(int(progress))
+                QtGui.QApplication.processEvents()
+            self._repo_manager.addFileInfo(list_file_infs)
+            self.__settingModel()
+        except RepoManager.ExceptionFileInfoIsExist as error:
+            print(error)
+            self.info_window.setText('Добавляемый файл уже существует в хранилище')
+            self.info_window.show()
     
     def __splitDirPath(self,file_path):
         '''
