@@ -94,19 +94,16 @@
      <addaction name="action_open_repo"/>
      <addaction name="action_delete_repo"/>
      <addaction name="separator"/>
-     <addaction name="action_delete_user_from_repo"/>
     </widget>
     <widget class="QMenu" name="menu_users">
      <property name="title">
       <string>&amp;Пользователь</string>
      </property>
-     <addaction name="action_update_user"/>
-     <addaction name="separator"/>
      <addaction name="action_switch_user"/>
+     <addaction name="action_delete_user_from_repo"/>
     </widget>
     <addaction name="menu_repo"/>
     <addaction name="menu_users"/>
-    <addaction name="separator"/>
     <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menu_objects">
@@ -139,7 +136,6 @@
      <string>&amp;Вид</string>
     </property>
     <addaction name="action_view_metadata"/>
-    <addaction name="action_view_repo_files"/>
    </widget>
    <widget class="QMenu" name="menu_setting">
     <property name="title">
@@ -173,7 +169,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidget_tag">
    <property name="windowTitle">
-    <string>Метаданные</string>
+    <string>                                   Метаданные</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -181,66 +177,17 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <widget class="QTableView" name="treeView_metadata"/>
+      <widget class="QLabel" name="label_users">
+       <property name="text">
+        <string>Пользователи хранилища</string>
+       </property>
+      </widget>
      </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidget_repo_files">
-   <property name="contextMenuPolicy">
-    <enum>Qt::ActionsContextMenu</enum>
-   </property>
-   <property name="acceptDrops">
-    <bool>false</bool>
-   </property>
-   <property name="windowTitle">
-    <string>Управление файлами хранилища</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QTreeView" name="treeView_repo_files"/>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_indexing_files">
-           <property name="whatsThis">
-            <string>Пометить текущем пользователем файлы как свои</string>
-           </property>
-           <property name="text">
-            <string>Пометить</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_add_files">
-           <property name="whatsThis">
-            <string>Добавить файл в любую директорию хранилища.</string>
-           </property>
-           <property name="text">
-            <string>Добавить</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_delete_files">
-           <property name="whatsThis">
-            <string>Удалить файл их хранилища. (физическое удаление, а не удаление метаданных)</string>
-           </property>
-           <property name="text">
-            <string>Удалить</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
+      <widget class="QComboBox" name="comboBox_repo_users_metadata"/>
+     </item>
+     <item>
+      <widget class="QTableView" name="treeView_metadata"/>
      </item>
     </layout>
    </widget>
@@ -263,11 +210,6 @@
   <action name="action_delete_repo">
    <property name="text">
     <string>Удалить</string>
-   </property>
-  </action>
-  <action name="action_update_user">
-   <property name="text">
-    <string>Изменить</string>
    </property>
   </action>
   <action name="action_delete_user_from_repo">
@@ -308,17 +250,6 @@
   <action name="action_delete_entity">
    <property name="text">
     <string>Удалить</string>
-   </property>
-  </action>
-  <action name="action_view_repo_files">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Управление файлами</string>
    </property>
   </action>
   <action name="action_view_metadata">

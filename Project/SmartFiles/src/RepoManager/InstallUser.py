@@ -32,23 +32,15 @@ class InstallUser(object):
             инициализация домашней директории
         '''
         
-        dir_userinfo_path = os.path.join( SystemInfo.home_dir,SystemInfo.metadata_dir_name)
-        file_userinfo_path = os.path.join(SystemInfo.home_dir,SystemInfo.file_user_info)
         
-        if  not os.path.exists(dir_userinfo_path):
-            os.mkdir(dir_userinfo_path) 
-            if not os.path.exists(file_userinfo_path):
-                connect = sqlite.connect(file_userinfo_path)
-                cursor = connect.cursor()
-                InstallUser.__initTables(cursor)
-                connect.commit()
-                
-                
-        connect = sqlite.connect(file_userinfo_path)
-        cursor = connect.cursor()        
-        cursor.execute( "SELECT COUNT (*) FROM users ")
-        if cursor.fetchone()[0]==0:
-            raise InstallUser.ExceptionNoUsers('не зарегестрировано ни одного пользователя')
+        if not os.path.exists(SystemInfo.home_dir): 
+           os.mkdir(SystemInfo.home_dir)
+           os.mkdir(os.path.join(SystemInfo.home_dir,SystemInfo.metadata_dir_name))
+           file_info_bd_path = os.path.join(os.path.join(SystemInfo.home_dir,SystemInfo.metadata_dir_name),SystemInfo.file_user_info)
+           connect = sqlite.connect(file_info_bd_path)
+           cursor=connect.cursor()
+           InstallUser.__initTables(cursor)
+           raise InstallUser.ExceptionNoUsers('не зарегестрировано ни одного пользователя')
         
         
     @staticmethod
@@ -87,29 +79,42 @@ class InstallUser(object):
         '''
             добавление пользователя в домашнюю директорию
         '''
-        file_userinfo_path = os.path.join(SystemInfo.home_dir,SystemInfo.file_user_info)
+        home_dir = os.path.join(SystemInfo.home_dir,user_system.name)
+        if os.path.exists(home_dir):
+            raise Exception('домашняя директория уже существует')
+           # pass
+        else:
+            os.mkdir(home_dir)  
+        dir_users_info = os.path.join(SystemInfo.home_dir,SystemInfo.metadata_dir_name) 
+       # print(dir_users_info)       
+        file_userinfo_path = os.path.join(dir_users_info,SystemInfo.file_user_info)
+        #print(file_userinfo_path)
+        
         if os.path.exists(file_userinfo_path):
             connect = sqlite.connect(file_userinfo_path)
             cursor=connect.cursor()
-            
             InstallUser.__saveUser(cursor, user_system)
-            connect.commit()
+            connect.commit()         
+        else:
+            InstallUser.ExceptionRepoIsNull('addUser. не найден файл ' + 
+                                                  file_userinfo_path +
+                                                   ' с метаданными' )
+            
     
     @staticmethod
     def identificationUser(user_name,password):
         '''
             Идентификация пользователя
         '''
-        passw = password #преобразования с str в int (пароль должен быть зашифрованный)
-        return InstallUser.__scaningUserRepo(user_name,passw)
+        return InstallUser.__scaningUserRepo(user_name,password)
     
     @staticmethod
     def __scaningUserRepo(user_name,password):
         '''
             поиск пользователя по логингу и паролю
         '''
-        
-        file_userinfo_path = os.path.join(SystemInfo.home_dir,SystemInfo.file_user_info)
+        home_dir = os.path.join(SystemInfo.home_dir,SystemInfo.metadata_dir_name)
+        file_userinfo_path = os.path.join(home_dir,SystemInfo.file_user_info)
         if not os.path.exists(file_userinfo_path):
             raise InstallUser.ExceptionRepoIsNull('__scaningUserRepo. файл с метаданными' + 
                                                    file_userinfo_path + 'не найден')
@@ -122,7 +127,6 @@ class InstallUser(object):
         user_attributes = cursor.fetchone()
         if  not user_attributes == None:
             description,date_create = user_attributes
-            
             return User(user_name = user_name, password = password,description = description,date_time=date_create)
         else:
             raise InstallUser.ExceptionUserNotFound('error in login or password')    

@@ -22,10 +22,10 @@ class SystemInfo(object):
     user_type_admin='admin'
     user_type_other='user'     
 
-    home_dir = "/tmp"
-    file_user_info = os.path.join(metadata_dir_name,'data_base.bd')
+    home_dir = "/tmp/smart_files"
+    file_user_info = 'data_base.bd'
     
-    last_repo_info = os.path.join(home_dir,'last_repo.info')
+    last_repo_info = 'last_repo.info'
     
     
     neural_net_file_path = os.path.join(metadata_dir_name,'neural_net.sm') 

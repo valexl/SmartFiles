@@ -86,8 +86,7 @@ class EditFilesWindow(QtGui.QWidget):
                 self.info_window.show()
             #    print('епт.. файл выбери!')
         else:
-            self.info_window.setText('''косарезик... директория куда собираешься сохранять - не хранилище
-            ''')
+            self.info_window.setText('''Выбранная директория не является хранилищем''')
             self.info_window.show()
             
         
