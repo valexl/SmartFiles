@@ -10,6 +10,7 @@ import shutil
 from  RepoManager.SystemInfo import SystemInfo
 #import Entity
 from EntityManager.EntityManager import EntityManager 
+from RepoManager.User import User
 
 #from EntityManager import EntityManager
 #import EntityManager
@@ -492,9 +493,11 @@ class RepoManager(object):
             cursor = connect.cursor()
                 
             cursor.execute("SELECT name,password FROM users")
-            users = cursor.fetchall()
-            
-            return users
+            users_attributes = cursor.fetchall()
+            list_users=[]
+            for user_name,password in users_attributes:
+                list_users.append(User(user_name,password))
+            return list_users
         else:
             raise RepoManager.ExceptionRepoIsNull('_getRepoUsers. Не найден файл ' + 
                                                   path_metadata_file + 
@@ -506,15 +509,20 @@ class RepoManager(object):
             иначе вызывается исключение RepoManager.ExceptionUserGuest
         '''
         for user in self._list_users:
-            if (user[0]==user_repo.name):
+            if (user.name==user_repo.name):
                 flag = 0
-                if (int(user_repo.password)==int(user[1])):
+                if (int(user_repo.password)==int(user.password)):
                     return 1
                 else:
                     raise RepoManager.ExceptionUserExist('не верный пароль пользователя')            
         raise RepoManager.ExceptionUserGuest("Текущий пользователь не зарегестирован в хранилище")
     
-    
+    def getUsersList(self):
+        result = []
+        for user in self._list_users:
+            result.append(user.name)
+        self._list_users
+        return result
     @staticmethod    
     def openRepository(repo_path):
         '''

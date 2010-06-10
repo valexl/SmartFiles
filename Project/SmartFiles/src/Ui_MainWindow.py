@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow_ui.ui'
 #
-# Created: Wed Jun  9 12:42:18 2010
+# Created: Thu Jun 10 15:34:36 2010
 #      by: PyQt4 UI code generator 4.6.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -80,10 +80,18 @@ class Ui_MainWindow(object):
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
-        self.label_metadata = QtGui.QLabel(self.dockWidgetContents)
-        self.label_metadata.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-        self.label_metadata.setObjectName("label_metadata")
-        self.verticalLayout_5.addWidget(self.label_metadata)
+        self.label_users = QtGui.QLabel(self.dockWidgetContents)
+        self.label_users.setObjectName("label_users")
+        self.verticalLayout_5.addWidget(self.label_users)
+        
+#        hlayout_box = QtGui.QHBoxLayout()
+#        hlayout_box.addWidget(self.comboBox_repo_users_metadata)
+#        hlayout_box.addStretch()
+#        self.verticalLayout_5.addLayout(hlayout_box) 
+        
+        self.comboBox_repo_users_metadata = QtGui.QComboBox(self.dockWidgetContents)
+        self.comboBox_repo_users_metadata.setObjectName("comboBox_repo_users_metadata")
+        self.verticalLayout_5.addWidget(self.comboBox_repo_users_metadata)
         self.treeView_metadata = QtGui.QTableView(self.dockWidgetContents)
         self.treeView_metadata.setObjectName("treeView_metadata")
         self.verticalLayout_5.addWidget(self.treeView_metadata)
@@ -97,9 +105,6 @@ class Ui_MainWindow(object):
         self.dockWidgetContents_2.setObjectName("dockWidgetContents_2")
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.dockWidgetContents_2)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.label = QtGui.QLabel(self.dockWidgetContents_2)
-        self.label.setObjectName("label")
-        self.verticalLayout_6.addWidget(self.label)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.treeView_files_info = QtGui.QTreeView(self.dockWidgetContents_2)
@@ -120,6 +125,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
         self.verticalLayout_6.addLayout(self.horizontalLayout_3)
         self.dockWidget_repo_files.setWidget(self.dockWidgetContents_2)
+        
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_repo_files)
         self.action_exit = QtGui.QAction(MainWindow)
         self.action_exit.setObjectName("action_exit")
@@ -129,8 +135,6 @@ class Ui_MainWindow(object):
         self.action_open_repo.setObjectName("action_open_repo")
         self.action_delete_repo = QtGui.QAction(MainWindow)
         self.action_delete_repo.setObjectName("action_delete_repo")
-        self.action_update_user = QtGui.QAction(MainWindow)
-        self.action_update_user.setObjectName("action_update_user")
         self.action_delete_user_from_repo = QtGui.QAction(MainWindow)
         self.action_delete_user_from_repo.setObjectName("action_delete_user_from_repo")
         self.action_switch_user = QtGui.QAction(MainWindow)
@@ -159,17 +163,16 @@ class Ui_MainWindow(object):
         self.action_setting_tags.setObjectName("action_setting_tags")
         self.action_setting_fields = QtGui.QAction(MainWindow)
         self.action_setting_fields.setObjectName("action_setting_fields")
+        self.action_update_user = QtGui.QAction(MainWindow)
+        self.action_update_user.setObjectName("action_update_user")
         self.menu_repo.addAction(self.action_create_repo)
         self.menu_repo.addAction(self.action_open_repo)
         self.menu_repo.addAction(self.action_delete_repo)
         self.menu_repo.addSeparator()
-        self.menu_repo.addAction(self.action_delete_user_from_repo)
-        self.menu_users.addAction(self.action_update_user)
-        self.menu_users.addSeparator()
         self.menu_users.addAction(self.action_switch_user)
+        self.menu_users.addAction(self.action_delete_user_from_repo)
         self.menu_file.addAction(self.menu_repo.menuAction())
         self.menu_file.addAction(self.menu_users.menuAction())
-        self.menu_file.addSeparator()
         self.menu_file.addAction(self.action_exit)
         self.menu_add_entity.addAction(self.action_add_file)
         self.menu_add_entity.addAction(self.action_add_URL)
@@ -209,11 +212,9 @@ class Ui_MainWindow(object):
         self.menu_views.setTitle(QtGui.QApplication.translate("MainWindow", "&Вид", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_setting.setTitle(QtGui.QApplication.translate("MainWindow", "&Метаданные", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
-      #  self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Теги и поля хранилища", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_metadata.setText(QtGui.QApplication.translate("MainWindow", "Метаданные", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "                                   Метаданные", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_users.setText(QtGui.QApplication.translate("MainWindow", "Пользователи хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_repo_files.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Управление файлами хранилища", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "Файлы хранилища", None, QtGui.QApplication.UnicodeUTF8))
-        self.treeView_files_info.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Список файлов не принадлежащих ни какому пользователю и не имеющие ни какие метаданные.", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_indexing_files.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Пометить текущем пользователем файлы как свои", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_indexing_files.setText(QtGui.QApplication.translate("MainWindow", "Пометить", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_add_files.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Добавить файл в любую директорию хранилища.", None, QtGui.QApplication.UnicodeUTF8))
@@ -224,7 +225,6 @@ class Ui_MainWindow(object):
         self.action_create_repo.setText(QtGui.QApplication.translate("MainWindow", "Создать", None, QtGui.QApplication.UnicodeUTF8))
         self.action_open_repo.setText(QtGui.QApplication.translate("MainWindow", "Открыть", None, QtGui.QApplication.UnicodeUTF8))
         self.action_delete_repo.setText(QtGui.QApplication.translate("MainWindow", "Удалить", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_update_user.setText(QtGui.QApplication.translate("MainWindow", "Изменить", None, QtGui.QApplication.UnicodeUTF8))
         self.action_delete_user_from_repo.setText(QtGui.QApplication.translate("MainWindow", "Удалиться из хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.action_switch_user.setText(QtGui.QApplication.translate("MainWindow", "Сменить пользователя", None, QtGui.QApplication.UnicodeUTF8))
         self.action_add_file.setText(QtGui.QApplication.translate("MainWindow", "Файл", None, QtGui.QApplication.UnicodeUTF8))
@@ -237,4 +237,5 @@ class Ui_MainWindow(object):
         self.action_view_metadata.setText(QtGui.QApplication.translate("MainWindow", "Метаданные", None, QtGui.QApplication.UnicodeUTF8))
         self.action_setting_tags.setText(QtGui.QApplication.translate("MainWindow", "Теги", None, QtGui.QApplication.UnicodeUTF8))
         self.action_setting_fields.setText(QtGui.QApplication.translate("MainWindow", "Поля", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_update_user.setText(QtGui.QApplication.translate("MainWindow", "Изменить", None, QtGui.QApplication.UnicodeUTF8))
 

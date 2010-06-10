@@ -31,6 +31,7 @@ class InstallUser(object):
         '''
             инициализация домашней директории
         '''
+        
         dir_userinfo_path = os.path.join( SystemInfo.home_dir,SystemInfo.metadata_dir_name)
         file_userinfo_path = os.path.join(SystemInfo.home_dir,SystemInfo.file_user_info)
         

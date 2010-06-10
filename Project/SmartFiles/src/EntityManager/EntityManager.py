@@ -277,7 +277,7 @@ class EntityManager(object):
                                                          field_attributes[0][1], field_attributes[1][0])
             connect.commit()
             self.tmpPrintNeuralNet()
-            return entity.id
+            #return entity.id
         else:
             raise EntityManager.ExceptionNotFoundFileBD('saveEntityes. "Не найден файл с метаданными - '+ path_metadata_file +'"')
         
@@ -338,17 +338,9 @@ class EntityManager(object):
                            (entity_id,)
                            )
             entity_title,entity_type_object,entity_user_name,entity_file_path = cursor.fetchone()
-#            print('loadEntityObj')
-#            print('title=',entity_title,', type_object=',entity_type_object,' user_name=',entity_user_name,
-#                  'file_path=',entity_file_path)
-#            print(cursor)
-#            print('entity_id',entity_id)
-#            print('entity_user_name',entity_user_name)
-            #EntityManager.__getListTags(cursor=cursor, user_name=entity_user_name)
             tags = EntityManager.__getListTags(cursor,entity_id, entity_user_name)
             fields = EntityManager.__getListFields(cursor, entity_id, entity_user_name)
-            #print('loadEntityObj',entity_id)
-            
+
             entity = Entity(title=entity_title,entity_type=entity_type_object,
                              user_name=entity_user_name,file_path=entity_file_path,
                              list_tags=tags,list_fields = fields, id = entity_id)     

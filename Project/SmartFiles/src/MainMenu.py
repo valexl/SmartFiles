@@ -37,15 +37,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     '''
     главное окно программы
     '''
-    SQLRequest = "SELECT id,title,neuralnet_raiting,object_type,file_path FROM entity"
+    SQLRequest = "SELECT id,title,neuralnet_raiting,object_type,file_path FROM entity"# WHERE "
     def __init__(self,user_connect,parent = None):
  
         super(SmartFilesMainWindow,self).__init__(parent)
         self.setupUi(self)
-        
-#        label = QtGui.
-#        self._scaning_tables = QtGui.QLineEdit(self)
-        
+ 
         
         self._user_repo=user_connect
         
@@ -174,6 +171,16 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.__dockWidget_metadataView()
         self.__dockWidget_repo_filesView()
         
+        self.connect(self.comboBox_repo_users_metadata,QtCore.SIGNAL('currentIndexChanged(int)'),self.__selectedUserForView)
+        
+        
+    def __selectedUserForView(self,index):
+        if index == 0:
+            self.__settingModel('%')
+        else:
+            self.__settingModel(self.comboBox_repo_users_metadata.itemText(index))
+        
+        
     def __clickNeuralnetRaioButton(self):
         '''
             при нажатие на радиокнопку Neuralnet обнуляется поле поиска
@@ -244,19 +251,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             d_progress = 100/len(list_file_name)
             progress = 0
             list_file_infs = []
+            list_error=[]
             for copy_file_path in list_file_name:
-                #file_name = os.path.split(file_name[0])[1]
-                QtGui.QApplication.processEvents()
-#                print('copy_file_path',copy_file_path)
+
+                QtGui.QApplication.processEvents()               
                 file_name = os.path.split(copy_file_path)[1]
-#                print('file_name-',file_name)
-#                print('dir_name',copy_info[1]) 
                 file_path = os.path.join(copy_info[1],file_name)
-#                print('file_path-',file_path)
                 if os.path.exists(file_path):
-                    self.info_window.setText('''файл уже существует в хранилище.
-Добавлять не будет.                    ''')
-                    self.info_window.show()
+                    list_error.append(file_path)
                     continue
                 shutil.copyfile(copy_file_path, file_path)
                 new_file_info = self.__splitDirPath(file_path)
@@ -267,7 +269,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 progress_dialog.setValue(int(progress))
                 QtGui.QApplication.processEvents()
             self._repo_manager.addFileInfo(list_file_infs)
-            self.__settingModel()
+            if len(list_error)>0:
+                string_error = ''
+                for err in list_error:
+                    string_error+=err + '\n'
+                self.info_window.setText('файлы:' + string_error + '''  
+уже существует в хранилище. выбирите другую директорию для них или откажитись от добавления.''')
+                self.info_window.show()
+            self.__settingModel('%')
         except RepoManager.ExceptionFileInfoIsExist as error:
             print(error)
             self.info_window.setText('Добавляемый файл уже существует в хранилище')
@@ -303,7 +312,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 list_files.append(file_path)
                 os.remove(self._path_to_repo + os.sep + file_path)
             self._repo_manager.deleteFilesInfo(list_files)
-            self.__settingModel()
+            self.__settingModel('%')
         else:        
             self.info_window.setText('''не забываем выбирать файл
             ''')
@@ -396,7 +405,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         file_last_repo_info = open(SystemInfo.last_repo_info,'wb')
         pickle.dump(self._path_to_repo, file_last_repo_info, pickle.HIGHEST_PROTOCOL)
         
-        del(self)
+#        self.emit(QtCore.SIGNAL('exitSmartFile()'))
         
         
         
@@ -409,20 +418,20 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             self._db.setDatabaseName(os.path.join(self._path_to_repo,SystemInfo.metadata_file_name))
             self._db.open()
-            self.__settingModel()
+            self.__settingModel('%')
         except Exception as error:
             print('проблемы при подключении к БД или ее настройки')
             print(error)
             
             
-    def __settingModel(self):
+    def __settingModel(self,user):
         '''
             отображение состояние базы на таблице
         '''
 #        print('main menu')
-#        print('setting model')
-        self._model.setQuery(self._string_request)
-        self._model_metadata.setQuery("SELECT name FROM tag WHERE user_name='" + self._user_repo.name + "'")
+     #   print(self._string_request)
+        self._model.setQuery(self._string_request)# + " entity.user_name LIKE '" + user + "'" )
+        self._model_metadata.setQuery("SELECT DISTINCT name FROM tag WHERE user_name LIKE '" + user + "'")
         self._model_files_info.setQuery('SELECT path FROM files_info WHERE checked=0')
         if (self._model.lastError().isValid()):
             self.info_window.setText('Какие то проблемы при подключения модели')
@@ -446,16 +455,27 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.treeView_metadata.show()
         #self.treeView_metadata.selectAll()
 #        print('table is showing')
-        
+    def __settingComboBoxUsers(self):
+        self.comboBox_repo_users_metadata.clear()
+        self.comboBox_repo_users_metadata.insertItem(0,'все пользователи')
+        self.comboBox_repo_users_metadata.insertItem(1,self._user_repo.name)
+        for user in self._repo_manager.getUsersList():
+            if user == self._user_repo.name:
+                continue
+            self.comboBox_repo_users_metadata.insertItem(2,user)
+            
     def __openingRrepository(self):
         '''
             октрывает хранилище. парметр self._path_to_repo должен указывать на открываемое хранилище.
         '''
         try:
-            #self._path_to_repo = path_to_repo
-#            print(self._path_to_repo)
             self._repo_manager = RepoManager.openRepository(self._path_to_repo)
             self._repo_manager.identificationUser(self._user_repo)
+            
+            self.__settingComboBoxUsers()
+                
+            
+            
             self._entity_manager = self._repo_manager.getEntityManager() 
             
             self.__connnectBD()
@@ -483,12 +503,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #            print('автоматически регестрируется в хранилище')
             self._repo_manager.addUserRepo(self._user_repo)
             self.__openingRrepository()
-#        except Exception as error:
-#            self.info_window.setText('''
-#            какие то не учтенные траблы
-#            ''')
-#            self.info_window.show()
-#            print(error)
+        except Exception as error:
+            self.info_window.setText('''
+            какие то не учтенные траблы
+            ''')
+            self.info_window.show()
+            print(error)
         
     
     def __openRepository(self):
@@ -518,7 +538,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._path_to_repo = None
             self.__disconnectBD()
             self._is_open_repo = False
-            self.__settingModel()
+            self.__settingModel('%')
         except RepoManager.ExceptionRepoIsNull as error:
             #print('не возможно удалить хранилище')
             self.info_window.show()
@@ -565,7 +585,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self._entity_manager = self._repo_manager.getEntityManager()     
                 #запись ифны о нейронной сети в директорию с метаданными хранилища
                 self._is_open_repo = True
+                
                 self.__connnectBD()
+                self.__settingComboBoxUsers()
 #                print(self._path_to_repo)
         except RepoManager.ExceptionRepoIsExist as error:
 #            print('не удается создать хранилище.')
@@ -601,19 +623,19 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         
     def __deleteUserFromRepo(self):
-#        '''
-#            подготовка к удалению пользователя
-#        '''
-#        try:
+        '''
+            подготовка к удалению пользователя
+        '''
+        try:
             self.__deletingUser(self._user_repo)
             #self.__disconnectBD()
             self.__closeRepository()
-#        except Exception as error:    
-##            print('__deleteUserFromRepo')
-#            self.info_window.setText('''Проблемы при удалении пользователя
-#            ''')
-#            self.info_window.show()        
-#            print(error)
+        except Exception as error:    
+#            print('__deleteUserFromRepo')
+            self.info_window.setText('''Проблемы при удалении пользователя
+            ''')
+            self.info_window.show()        
+            print(error)
             
             
     def __deletingUser(self,user):
@@ -622,19 +644,19 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             self._repo_manager.deleteUser(user)
-            self.__settingModel()
+            self.__settingModel('%')
         except RepoManager.ExceptionUserNotFound as error:    
 #            print('__deletingUser')
             self.info_window.setText('''Удаляемый пользователь не найден.
             ''')
             self.info_window.show()        
             print(error)        
-#        except Exception as error:    
-##            print('__deletingUser')
-#            self.info_window.setText('''неучтенные траблы в RepoManager
-#            ''')
-#            self.info_window.show()        
-#            print(error)
+        except Exception as error:    
+#            print('__deletingUser')
+            self.info_window.setText('''неучтенные траблы в RepoManager
+            ''')
+            self.info_window.show()        
+            print(error)
         
                     
     def __updateUser(self):
@@ -668,7 +690,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             self._repo_manager.updateUser(user)
-            self.__settingModel()
+            self.__settingModel('%')
             self.emit(QtCore.SIGNAL('updateUser(user)'),user)
         except RepoManager.ExceptionUserNotFound as error:    
 #            print('__updatingUser')
@@ -713,7 +735,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 request+= " OR " + self._select_list_tags[index] 
                 index+=1
             self._string_request = ProcessingRequest.getSQLRequest(request,True)
-        self.__settingModel()
+        self.__settingModel('%')
 #        print(self._string_request)
         
         
@@ -728,7 +750,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._string_request = ProcessingRequest.getSQLRequest(self.lineEdit_search.text())
 #            self._string_request = self.lineEdit_search.text()
 #        print('SQL SEARCH',self._string_request)
-        self.__settingModel()
+        self.__settingModel('%')
         
     def __searchEntity(self):
         '''
@@ -844,7 +866,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                     list_files.append(file_path)
 #            print('список путей файлов',list_files)
             self._repo_manager.checkedFileInfo(list_files)
-            self.__settingModel()
+            self.__settingModel('%')
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''Не найден файл с метаданными
             ''')
@@ -852,18 +874,17 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             print('__addingEntity проблемы:')
             print(error)
         except EntityManager.ExceptionEntityIsExist as error:
-            self.info_window.setText('''Среди добавляемых файлов есть уже существующие в хранилище.
-Обратитесь к "управлениями файлами" для гибкого добавления''')
+            self.info_window.setText('''Среди добавляемых файлов есть файлы уже присвоиные какому-то пользовтелю ''')
             self.info_window.show()
-            self.__settingModel()
+            self.__settingModel('%')
             print(error)
             
-        except Exception as error:
-            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
-            ''')
-            self.info_window.show()
-            print('__addingEntity')
-            print(error)
+#        except Exception as error:
+#            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
+#            ''')
+#            self.info_window.show()
+#            print('__addingEntity')
+#            print(error)
             
             
     
@@ -909,7 +930,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             entity = self._entity_manager.loadEntityObj(entity_id)
             self._entity_manager.markTag(entity, marking_tag)  
-            self.__settingModel()
+            self.__settingModel('%')
 #            self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''не найден файл с метаданными
@@ -1036,19 +1057,19 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                     
                     
             self._entity_manager.saveEntityes((new_entity,))
-            self.__settingModel()
+            self.__settingModel('%')
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''не найден файл с метаданным
             ''')
             self.info_window.show()
 #            print('__updatingEntity проблемы:')
             print(error)
-#        except Exception as error:
-#            self.info_window.setText('''какие то неучтенные траблы с EntityManager
-#            ''')
-#            self.info_window.show()
-#            print('__updatingEntity')
-#            print(error)
+        except Exception as error:
+            self.info_window.setText('''какие то неучтенные траблы с EntityManager
+            ''')
+            self.info_window.show()
+            print('__updatingEntity')
+            print(error)
             
         self.disconnect(self.edit_window,QtCore.SIGNAL('"updateEntity(entity)'),self.__updatingEntity)
         
@@ -1111,7 +1132,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             progress_dialog.close()
             self._entity_manager.deleteEntity(list_entity)
             self._repo_manager.unCheckedFileInfo(list_file_path)
-            self.__settingModel()
+            self.__settingModel('%')
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''не найден файл с метаданными
             ''')
@@ -1136,7 +1157,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             удаление тега
         '''
         self._entity_manager.deleteTag(tag)
-        self.__settingModel()
+        self.__settingModel('%')
         
         
     def __settingTag(self):
@@ -1167,7 +1188,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             удаление поля и обновление таблцы тегов
         '''
         self._entity_manager.deleteField(field)
-        self.__settingModel()
+        self.__settingModel('%')
             
     def __settingField(self):
         '''

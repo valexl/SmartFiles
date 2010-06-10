@@ -21,6 +21,9 @@ class EditEntityWindow(QtGui.QDialog):
     '''
         окно редактирования сущности
     '''
+    class ExceptionFileIsExist(Exception):
+        pass
+    
     def __init__(self,path_to_repo, user_repo,object_type,entity=None,parent=None):
         QtGui.QDialog.__init__(self,parent)
         self._object_type = object_type
@@ -251,16 +254,25 @@ class EditEntityWindow(QtGui.QDialog):
             if index >= len(part_dirs): #если копируемый файл не в хранилище, но путь к нему принадлежит хранилищу
                                         # то есть на пример. /tmp/tmp/tmp - хранилище, /tmp/tmp/file - файл добаляемый.
                 
-                self._new_files.append(file_name)
-                #self.emit(QtCore.SIGNAL("indexingFile(entity)"),entity)
-                shutil.copyfile(file_path,self._path_to_repo+os.path.sep + file_name)
-                return file_name
-#            print('dir_name=',dir_name)
-#            print('part_dirs[',index,']=',part_dirs[index])
-            if not dir_name == part_dirs[index]:
+                
+                
+                path_to_copy = self._path_to_repo + os.path.sep + file_name
+                if not os.path.exists(path_to_copy):
+                    shutil.copyfile(file_path, path_to_copy)
                     self._new_files.append(file_name)
-                    shutil.copyfile(file_path, self._path_to_repo + os.path.sep + file_name)
-                    return file_name                
+                    return file_name
+                else:
+                    raise EditEntityWindow.ExceptionFileIsExist(path_to_copy)
+            if not dir_name == part_dirs[index]:
+                    
+                    path_to_copy=self._path_to_repo + os.path.sep + file_name
+                    if not os.path.exists(path_to_copy):
+                        shutil.copyfile(file_path, path_to_copy)
+                        self._new_files.append(file_name)
+                        return file_name
+                    else:
+                        raise EditEntityWindow.ExceptionFileIsExist(path_to_copy)
+                                 
             index+=1 
         result_path = os.path.sep
      
@@ -316,10 +328,15 @@ class EditEntityWindow(QtGui.QDialog):
          
             d_progress = 100/count_files
             progress = 0
+            list_errors=[]
             for file_path in list_files_names:
                 progress_window.setValue(progress)
                 QtGui.QApplication.processEvents()
-                file_repo_path = self.__splitFileByRepo(file_path)
+                try:
+                    file_repo_path = self.__splitFileByRepo(file_path)
+                except EditEntityWindow.ExceptionFileIsExist as err:
+                    list_errors.append(err)
+                    continue
 #                print(self._path_to_repo)
 #                print('file_repo_path',file_repo_path)
                 list_entityes.append(EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_repo.name,
@@ -336,7 +353,14 @@ class EditEntityWindow(QtGui.QDialog):
 #            print('deleting progress window')
             progress_window.close()
             del(progress_window)
-#        print('the lenght outputting signal is -',len(list_entityes))
+            if len(list_errors)>0:
+                string_error=''
+                for err in list_errors:
+                    string_error+=str(err)+'/n'
+                self.info_window.setText('''Не все файлы удалось скопировать в хранилище.
+Файлы:''' + string_error + ''' уже существуют в хранилище ''')
+                self.info_window.show()
+                    
         
         
         self.emit(QtCore.SIGNAL("indexingFile(list_new_files)"),self._new_files)
