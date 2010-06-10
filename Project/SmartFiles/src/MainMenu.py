@@ -14,10 +14,7 @@ from PyQt4 import QtGui,QtCore,QtSql
 
 from RepoManager.SystemInfo import SystemInfo
 from RepoManager.User import User
-#from RepoManager.InstallUser import InstallUser
-#from EntityManager.Field import Field
-#from EntityManager.Tag import Tag
-#from EntityManager.Entity import Entity
+
 from EntityManager.EntityManager import EntityManager
 from RepoManager.RepoManager import RepoManager
 from ProcessingRequest.ProcessingRequest import ProcessingRequest,\
@@ -35,12 +32,12 @@ from EditWindows.EditFilesWindow import EditFilesWindow
 
 
 
-SQLRequest = "SELECT id,title,neuralnet_raiting,object_type,file_path FROM entity"
+
 class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     '''
     главное окно программы
     '''
-    
+    SQLRequest = "SELECT id,title,neuralnet_raiting,object_type,file_path FROM entity"
     def __init__(self,user_connect,parent = None):
  
         super(SmartFilesMainWindow,self).__init__(parent)
@@ -54,7 +51,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         self._repo_manager = None
         self._db = None
-        self._string_request = SQLRequest
+        self._string_request = SmartFilesMainWindow.SQLRequest
         self._model = QtSql.QSqlQueryModel()
         self._model_files_info = QtSql.QSqlQueryModel()
         self._model_metadata = QtSql.QSqlQueryModel()
@@ -482,7 +479,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             print(err)
 #            print('автоматически регестрируется в хранилище')
             self._repo_manager.addUserRepo(self._user_repo)
-            self._entity_manager = self._repo_manager.getEntityManager()
+            self.__openingRrepository()
         except Exception as error:
             self.info_window.setText('''
             какие то не учтенные траблы
@@ -678,7 +675,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             поиск с помощью нейросети
         '''
         if self.lineEdit_search.text()=="":
-            self._string_request = SQLRequest + ' ORDER BY entity.neuralnet_raiting DESC'# "SELECT * FROM entity"
+            self._string_request = SmartFilesMainWindow.SQLRequest + ' ORDER BY entity.neuralnet_raiting DESC'# "SELECT * FROM entity"
             self._entity_manager.searchByNeuralNet()
         else:
             request = cleareExtraSpace(self.lineEdit_search.text())
@@ -706,7 +703,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
 #        print('query languages finding')
         if self.lineEdit_search.text()=="":
-            self._string_request = SQLRequest # "SELECT * FROM entity"
+            self._string_request = SmartFilesMainWindow.SQLRequest 
         else:
             self._string_request = ProcessingRequest.getSQLRequest(self.lineEdit_search.text())
 #            self._string_request = self.lineEdit_search.text()
@@ -1056,7 +1053,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                     id = self._table.model().data(index)
                     list_entity_id.append(id)
                    
-                print(list_entity_id)   
+#                print(list_entity_id)   
                 self.__deletingEntity(list_entity_id)
             else:
                 self.info_window.setText('''не забываем выбирать объект хранилища

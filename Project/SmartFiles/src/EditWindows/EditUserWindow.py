@@ -3,7 +3,7 @@ Created on 07.06.2010
 
 @author: valexl
 '''
-
+import datetime
 from PyQt4 import QtGui, QtCore
 from RepoManager.User import User
 from RepoManager.RepoManager import RepoManager
@@ -19,7 +19,7 @@ class EditUserWindow(QtGui.QWidget):
         self.info_window = QtGui.QMessageBox()
         label = QtGui.QLabel('Имя пользователя',self)
         self._edit_user_name = QtGui.QLineEdit(self)
-        if self._status == 'create':
+        if not self._status == 'create':
             self._edit_user_name.setText(user.name)
         vbox_layout.addWidget(label)
         vbox_layout.addWidget(self._edit_user_name)
@@ -78,7 +78,9 @@ class EditUserWindow(QtGui.QWidget):
         
         
     def __createUser(self):
-        user = User(self._edit_user_name.text(),self._edit_password.text(),description=self._edit_description.text())
+        user_name = self._edit_user_name.text()
+        password = hash(self._edit_password.text())
+        user = User(user_name= user_name,password=password,description=self._edit_description.text(),date_time=datetime.datetime.now())
         self.emit(QtCore.SIGNAL('createUser(user)'),user)
         self.__canceled()
     

@@ -7,7 +7,7 @@ import os
 import sqlite3 as sqlite
 
 from RepoManager.SystemInfo import SystemInfo
-from RepoManager import User
+from RepoManager.User import User
 
 class InstallUser(object):
     '''
@@ -59,7 +59,8 @@ class InstallUser(object):
                 " name VARCHAR2(255) NOT NULL PRIMARY KEY,"
                 " password INTEGER,"
                 #" user_type VARCHAR2(10) NOT NULL, "
-                " description VARCHAR2(255))")
+                " description VARCHAR2(255),"
+                " date_create TIMESTAMP)")
         
         
 #        cursor.execute("CREATE TABLE reposits ("
@@ -113,14 +114,15 @@ class InstallUser(object):
                                                    file_userinfo_path + 'не найден')
         connect = sqlite.connect(file_userinfo_path)
         cursor = connect.cursor()
-        cursor.execute("SELECT * FROM users "
+        cursor.execute("SELECT description,date_create FROM users "
                        " WHERE name = ? AND password = ?",
                        (user_name, password)
                         )
         user_attributes = cursor.fetchone()
         if  not user_attributes == None:
-            user_name, password, description = user_attributes
-            return User(user_name = user_name, password = password,description = description)
+            description,date_create = user_attributes
+            
+            return User(user_name = user_name, password = password,description = description,date_time=date_create)
         else:
             raise InstallUser.ExceptionUserNotFound('error in login or password')    
         
@@ -137,9 +139,9 @@ class InstallUser(object):
         if cursor.fetchone()[0] > 0:
             raise InstallUser.ExceptionUserExist('пользователь с таким логином существует')
         cursor.execute("INSERT INTO users "
-                    " (name, password, description) "
-                    " VALUES (?,?,?) ",
-                    (user_system.name,user_system.password, user_system.description))
+                    " (name, password, description, date_create) "
+                    " VALUES (?,?,?,?) ",
+                    (user_system.name,user_system.password, user_system.description,user_system.date_create))
 #        except sqlite.IntegrityError as error:
 #            raise InstallUser.ExceptionUserExist('пользователь с таким логином существует')
 #            print(error)

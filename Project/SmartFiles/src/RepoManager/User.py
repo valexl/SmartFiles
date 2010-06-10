@@ -5,7 +5,7 @@ Created on 22.04.2010
 '''
 import sqlite3 as sqlite
 import os
-from RepoManager.SystemInfo import SystemInfo 
+from RepoManager.SystemInfo import SystemInfo
 
 
 
@@ -17,7 +17,7 @@ class User(object):
     '''
     
 
-    def __init__(self,user_name,password=None,type=SystemInfo.user_type_other,description=''):
+    def __init__(self,user_name,password=None,type=SystemInfo.user_type_other,description='',date_time=None):
         '''
             конструктор класса. инициализирует значение полей path и list_user
         '''
@@ -25,5 +25,5 @@ class User(object):
         self.password = password
         self.type = type
         self.description = description        
-        
+        self.date_create = date_time
 
