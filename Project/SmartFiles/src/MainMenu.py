@@ -110,7 +110,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         #self.connect(self._menu.add_user,QtCore.SIGNAL("triggered()"),self.__createUser)
         self.connect(self.action_switch_user,QtCore.SIGNAL("triggered()"),self.__switchUser)
-        self.connect(self.action_delete_user_from_repo,QtCore.SIGNAL("triggered()"),self.__deleteUser)
+        self.connect(self.action_delete_user_from_repo,QtCore.SIGNAL("triggered()"),self.__deleteUserFromRepo)
+        
         self.connect(self.action_update_user,QtCore.SIGNAL("triggered()"),self.__updateUser)
         self.connect(self.action_exit,QtCore.SIGNAL("triggered()"),self.__exitSmartFiles)
         
@@ -389,7 +390,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         if self._is_open_repo:
             self._entity_manager.saveNeuralNet()
-        
+            self._is_open_repo = False
+        self._repo_manager = None
+        self._entity_manager = None
         file_last_repo_info = open(SystemInfo.last_repo_info,'wb')
         pickle.dump(self._path_to_repo, file_last_repo_info, pickle.HIGHEST_PROTOCOL)
         
@@ -480,12 +483,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #            print('автоматически регестрируется в хранилище')
             self._repo_manager.addUserRepo(self._user_repo)
             self.__openingRrepository()
-        except Exception as error:
-            self.info_window.setText('''
-            какие то не учтенные траблы
-            ''')
-            self.info_window.show()
-            print(error)
+#        except Exception as error:
+#            self.info_window.setText('''
+#            какие то не учтенные траблы
+#            ''')
+#            self.info_window.show()
+#            print(error)
         
     
     def __openRepository(self):
@@ -540,6 +543,10 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self._db.close()
         self._model.clear()
         self._model.reset()
+        self._model_files_info.clear()
+        self._model_files_info.reset()
+        self._model_metadata.clear()
+        self._model_metadata.reset()
     
    
     def __createRepository(self):
@@ -552,7 +559,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             if path_to_repo:
                 self._path_to_repo = path_to_repo
                 self._user_repo.type = SystemInfo.user_type_admin
-                self._repo_manager = RepoManager.initRepository(self._path_to_repo,self._user_repo)
+                self._repo_manager = RepoManager.initRepository(self._path_to_repo)
+                self._repo_manager.addUserRepo(self._user_repo)
                 self._repo_manager.fillRepoFiles() # заполнение базы информацией о файлах хранилщиа.
                 self._entity_manager = self._repo_manager.getEntityManager()     
                 #запись ифны о нейронной сети в директорию с метаданными хранилища
@@ -574,28 +582,38 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
             print(error)
 
- 
+    def __closeRepository(self):
+        if self._is_open_repo:
+            self.__disconnectBD()
+            self._path_to_repo = None
+            self._entity_manager.saveNeuralNet()
+            self._entity_manager = None
+            self._repo_manager = None
+            self._is_open_repo = False
+    
     def __switchUser(self):
         '''
             переключение пользователя. Посылается сигнал о переключение в окно StartingWindow
         '''
+        self.__closeRepository()    
         self.emit(QtCore.SIGNAL('switchUser()'))
         
         
-    def __deleteUser(self):
-        '''
-            подготовка к удалению пользователя
-        '''
-        try:
-            self.edit_window = EditUserWindow('delete')
-            self.edit_window.show()
-            self.connect(self.edit_window,QtCore.SIGNAL("deleteUser(user_name)"),self.__deletingUser)
-        except Exception as error:    
-#            print('__deleteUser')
-            self.info_window.setText('''Проблемы при удалении пользователя
-            ''')
-            self.info_window.show()        
-            print(error)
+        
+    def __deleteUserFromRepo(self):
+#        '''
+#            подготовка к удалению пользователя
+#        '''
+#        try:
+            self.__deletingUser(self._user_repo)
+            #self.__disconnectBD()
+            self.__closeRepository()
+#        except Exception as error:    
+##            print('__deleteUserFromRepo')
+#            self.info_window.setText('''Проблемы при удалении пользователя
+#            ''')
+#            self.info_window.show()        
+#            print(error)
             
             
     def __deletingUser(self,user):
@@ -603,7 +621,6 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             удаление пользователя и всех связей с ним
         '''
         try:
-            
             self._repo_manager.deleteUser(user)
             self.__settingModel()
         except RepoManager.ExceptionUserNotFound as error:    
@@ -612,12 +629,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             ''')
             self.info_window.show()        
             print(error)        
-        except Exception as error:    
-#            print('__deletingUser')
-            self.info_window.setText('''неучтенные траблы в RepoManager
-            ''')
-            self.info_window.show()        
-            print(error)
+#        except Exception as error:    
+##            print('__deletingUser')
+#            self.info_window.setText('''неучтенные траблы в RepoManager
+#            ''')
+#            self.info_window.show()        
+#            print(error)
         
                     
     def __updateUser(self):
@@ -1174,7 +1191,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
 if __name__=='__main__':
     app = QtGui.QApplication(sys.argv)
-    user_repo = User('alexl', 1)
+    user_repo = User('alexl', hash('123'))
     myclass = SmartFilesMainWindow(user_repo)
 #    myclass = QtGui.QMessageBox()
     

@@ -61,7 +61,7 @@ class RepoManager(object):
         
     
     @staticmethod
-    def initRepository(path_to_new_repo, user_admin):        
+    def initRepository(path_to_new_repo):        
         '''Это СТАТИЧЕСКИЙ метод, который позволяет создать новое пустое хранилище.
         Если при создании хранилища какие-либо ошибки --- должно вылетать иключение.
         Возвращает экземпляр RepoManager-а, привязанный к созданному хранилищу. 
@@ -81,13 +81,13 @@ class RepoManager(object):
         cursor = connect.cursor()
         
         
-        RepoManager.__initRepository(cursor,user_admin.name)
+        RepoManager.__initRepository(cursor)
        
         
         connect.commit()
         repository = RepoManager(path_to_new_repo)
 #        print(os.path.join(repository._path_to_repo, SystemInfo.metadata_file_name))
-        repository.addUserRepo(user_admin)
+        
         return repository
     
     
@@ -230,7 +230,7 @@ class RepoManager(object):
         
         
     @staticmethod
-    def __initRepository(cursor, user_name):
+    def __initRepository(cursor):
         '''
             создание таблиц и их заполнения необходимой для работы хранилища информацией.
         '''
@@ -420,14 +420,7 @@ class RepoManager(object):
         '''
             освобождение всех записией в БД от удаляемого пользователя
         '''
-        cursor.execute("SELECT file_path FROM entity "
-                       " WHERE entity.object_type = ? AND "
-                       " entity.user_name = ?",
-                       (SystemInfo.entity_file_type,user_name)
-                       )
-        files = cursor.fetchall()
-        for file_path in files:
-            RepoManager.__insertFileInfoIntoBD(cursor, file_path[0])
+        
         
         cursor.execute(" DELETE FROM entity_fields WHERE user_name = ? ",
                            (user_name,)
@@ -445,10 +438,17 @@ class RepoManager(object):
                            (user_name,)
                            )
        
-           
+    @staticmethod
+    def __deleteUser(cursor,user_name):
+        '''
+            удаление пользователя из базы
+        '''
+        cursor.execute(" DELETE FROM users WHERE name = ?",
+                       (user_name,)
+                       )
     def deleteUser(self,user):
         '''
-            удаление пользователя
+            удаление пользователя со всеми его связями
         '''
 #        connect = sqlite.connect(os.path.join(self._path_to_repo,os.path.join(SystemInfo.metadata_dir,SystemInfo.metadata_file)))
         path_metadata_file = os.path.join(self._path_to_repo, SystemInfo.metadata_file_name )
@@ -457,7 +457,19 @@ class RepoManager(object):
 
             connect = sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
+            
+            
+            cursor.execute("SELECT file_path FROM entity "
+                       " WHERE entity.object_type = ? AND "
+                       " entity.user_name = ?",
+                       (SystemInfo.entity_file_type,user.name)
+                       )
+            files = cursor.fetchall()
+            for file_path in files:
+                RepoManager.__checkingFileInfo(cursor, file_path[0],0)
+            cursor = connect.cursor()
             RepoManager.__purgeUser(cursor,user.name)
+            RepoManager.__deleteUser(cursor,user.name)
 #            cursor.execute("DELETE FROM users WHERE name=?",
 #                    (user.name,))
             connect.commit()
@@ -481,10 +493,8 @@ class RepoManager(object):
                 
             cursor.execute("SELECT name,password FROM users")
             users = cursor.fetchall()
-            if len(users)>0:
-                return users
-            else:
-                raise Exception('в хранилище нет пользователей')
+            
+            return users
         else:
             raise RepoManager.ExceptionRepoIsNull('_getRepoUsers. Не найден файл ' + 
                                                   path_metadata_file + 
@@ -501,7 +511,7 @@ class RepoManager(object):
                 if (int(user_repo.password)==int(user[1])):
                     return 1
                 else:
-                    RepoManager.ExceptionUserExist('не верный пароль пользователя')            
+                    raise RepoManager.ExceptionUserExist('не верный пароль пользователя')            
         raise RepoManager.ExceptionUserGuest("Текущий пользователь не зарегестирован в хранилище")
     
     
