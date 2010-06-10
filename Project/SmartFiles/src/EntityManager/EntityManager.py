@@ -124,8 +124,8 @@ class EntityManager(object):
             entity.id = cursor.lastrowid
         #если объект существует, то его модификация  
         else:
-           print("entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id") 
-           print((entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id))
+#           print("entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id") 
+#           print((entity.title, entity.object_type, entity.user_name,  entity.file_size, entity.file_hash, entity.notes, entity.id))
            cursor.execute(" UPDATE  entity "
                           " SET title = ?, object_type = ?, user_name = ?,  file_size = ?, file_hash =?, notes = ?"
                           " WHERE id= ?",
@@ -143,7 +143,7 @@ class EntityManager(object):
                        (tag_attributes[0],tag_attributes[1])
                        )
         if cursor.fetchone()[0]==0:
-            print('add tag')
+#            print('add tag')
             
             #добавление новой записи
             #сохранение в таблице tag
@@ -154,8 +154,8 @@ class EntityManager(object):
                           )
             return True
         else: # модификация существующей записи
-            print('tag is exist')
-            print('do nothing')
+#            print('tag is exist')
+#            print('do nothing')
             return False
         
             
@@ -177,8 +177,8 @@ class EntityManager(object):
                                    )
             return True
         else:
-            print('entity_tags record is exist')
-            print('do nothing')
+#            print('entity_tags record is exist')
+#            print('do nothing')
             return False
     
     @staticmethod
@@ -187,18 +187,18 @@ class EntityManager(object):
             сохранения поля. если поле с таким именем существует,
             то считается что нужно обновить значение поля.
         '''
-        print('__saveField')
+#        print('__saveField')
         field_name,user_name = field_attributes[0][0],field_attributes[0][1] 
         cursor.execute("SELECT COUNT(*) FROM field "
                        " WHERE name = ? AND user_name = ? ",
                        (field_name,user_name)
                        )
         count = cursor.fetchone()[0]
-        print('count of field is - ',count)
+#        print('count of field is - ',count)
         if count ==0: 
             #добавление новой записи
             # запись в field
-            print(field_attributes)
+#            print(field_attributes)
             cursor.execute("INSERT INTO field"
                             "(name,user_name,value_type,description,date_create)"
                             "VALUES(?,?,?,?,?)",
@@ -206,8 +206,8 @@ class EntityManager(object):
             )    
         
         else: #модификация
-            print('field is exist')
-            print('updating field_value')
+#            print('field is exist')
+#            print('updating field_value')
             field_value = field_attributes[1][0]
             EntityManager.__updateFieldValue(cursor, entity_id, field_name, user_name, field_value)
         
@@ -241,9 +241,7 @@ class EntityManager(object):
                             "VALUES(?,?,?,?)",
                             (entity_id,field_name,user_name, value)
             )
-        else:
-            print(count)
-    
+      
          
              
     def saveEntityes(self,list_entityes):
@@ -340,12 +338,12 @@ class EntityManager(object):
                            (entity_id,)
                            )
             entity_title,entity_type_object,entity_user_name,entity_file_path = cursor.fetchone()
-            print('loadEntityObj')
-            print('title=',entity_title,', type_object=',entity_type_object,' user_name=',entity_user_name,
-                  'file_path=',entity_file_path)
-            print(cursor)
-            print('entity_id',entity_id)
-            print('entity_user_name',entity_user_name)
+#            print('loadEntityObj')
+#            print('title=',entity_title,', type_object=',entity_type_object,' user_name=',entity_user_name,
+#                  'file_path=',entity_file_path)
+#            print(cursor)
+#            print('entity_id',entity_id)
+#            print('entity_user_name',entity_user_name)
             #EntityManager.__getListTags(cursor=cursor, user_name=entity_user_name)
             tags = EntityManager.__getListTags(cursor,entity_id, entity_user_name)
             fields = EntityManager.__getListFields(cursor, entity_id, entity_user_name)
@@ -486,8 +484,8 @@ class EntityManager(object):
         if os.path.exists(path_metadata_file):
             connect=sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
-            print('field_name=',field.name)
-            print('field.user_name =',field.user_name)
+#            print('field_name=',field.name)
+#            print('field.user_name =',field.user_name)
             EntityManager.__deleteField(cursor, field.name, field.user_name)
             cursor.execute(" SELECT entity_id FROM entity_fields "
                            " WHERE field_name = ? AND user_name = ? ",
@@ -626,7 +624,7 @@ class EntityManager(object):
         if os.path.exists(path_metadata_file):
             connect=sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
-            print(tag)
+#            print(tag)
             atrribute = tag.getAttributes()
             self.__saveTag(cursor, entity.id, atrribute)
             

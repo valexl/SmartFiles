@@ -86,7 +86,7 @@ class RepoManager(object):
         
         connect.commit()
         repository = RepoManager(path_to_new_repo)
-        print(os.path.join(repository._path_to_repo, SystemInfo.metadata_file_name))
+#        print(os.path.join(repository._path_to_repo, SystemInfo.metadata_file_name))
         repository.addUserRepo(user_admin)
         return repository
     

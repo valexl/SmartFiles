@@ -6,7 +6,7 @@ Created on 07.06.2010
 import os
 import shutil
 from PyQt4 import QtGui, QtCore
-
+import datetime
 
 from EntityManager.EntityManager import EntityManager
 from RepoManager.SystemInfo import SystemInfo
@@ -14,7 +14,8 @@ from ProcessingRequest.ProcessingRequest import cleareExtraSpace,\
     cleareSpaceAboutOperator
 from EntityManager.Field import Field
 from EntityManager.Tag import Tag
-import datetime
+
+#from ProcessingRequest.ProcessingRequest.ProcessingRequest import ExceptionInvalidRequestSyntaxis
 
 class EditEntityWindow(QtGui.QDialog):
     '''
@@ -83,8 +84,8 @@ class EditEntityWindow(QtGui.QDialog):
          
      
         line = self._edit_fields.toPlainText()
-        print(line.split('\n'))
-        print(line)
+#        print(line.split('\n'))
+#        print(line)
         
         
         
@@ -164,11 +165,11 @@ class EditEntityWindow(QtGui.QDialog):
         #if self._object_type =='
         if not self._edit_path.text()=='':
             if self._entity == None:
-                    print('create Entity')
+#                    print('create Entity')
                     self.__create()
             else:
                 if self._entity.id ==None:
-                    print('create Entity')
+#                    print('create Entity')
                     self.__create()
                 else:
                     self.__update()
@@ -202,7 +203,7 @@ class EditEntityWindow(QtGui.QDialog):
         lines_field += self._edit_fields.toPlainText().split('\n')
         for fields in lines_field:
             fields = cleareExtraSpace(fields)
-            print('fields',fields)
+#            print('fields',fields)
             if not fields=="":
                 try:
                     fields = cleareSpaceAboutOperator(fields,'=')
@@ -214,7 +215,7 @@ class EditEntityWindow(QtGui.QDialog):
                 for field in fields:
                     field_name,field_value = field.split('=')
                     list_fields.append(Field(field_name,self._user_repo.name,field_value)) #тип поля по умолчанию стринг
-        print('list_fields',list_fields)
+#        print('list_fields',list_fields)
         return list_fields
     
     
@@ -230,8 +231,8 @@ class EditEntityWindow(QtGui.QDialog):
                 tags = tags.split(' ')
                 for tag_name in tags:
                     list_tags.append(Tag(tag_name,self._user_repo.name))
-        for tag in list_tags: 
-            print(tag.name)
+#        for tag in list_tags: 
+#            print(tag.name)
         return list_tags
     
     
@@ -239,12 +240,12 @@ class EditEntityWindow(QtGui.QDialog):
         '''
             отделение от пути файла путь к хранилищу. Если файл не принадлежит хранилищу, то копируется в корень хранилища.
         '''
-        print('splitFileByRepo')
+#        print('splitFileByRepo')
         part_dirs, file_name = os.path.split(file_path)
         part_dirs = part_dirs.split(os.path.sep)
-        print('путь к файлу который будет копирваться',part_dirs)
+#        print('путь к файлу который будет копирваться',part_dirs)
         repo_path_dirs = self._path_to_repo.split(os.path.sep)
-        print('путь хранилищу',repo_path_dirs)
+#        print('путь хранилищу',repo_path_dirs)
         index = 0
         for dir_name in repo_path_dirs:
             if index >= len(part_dirs): #если копируемый файл не в хранилище, но путь к нему принадлежит хранилищу
@@ -254,8 +255,8 @@ class EditEntityWindow(QtGui.QDialog):
                 #self.emit(QtCore.SIGNAL("indexingFile(entity)"),entity)
                 shutil.copyfile(file_path,self._path_to_repo+os.path.sep + file_name)
                 return file_name
-            print('dir_name=',dir_name)
-            print('part_dirs[',index,']=',part_dirs[index])
+#            print('dir_name=',dir_name)
+#            print('part_dirs[',index,']=',part_dirs[index])
             if not dir_name == part_dirs[index]:
                     self._new_files.append(file_name)
                     shutil.copyfile(file_path, self._path_to_repo + os.path.sep + file_name)
@@ -265,10 +266,10 @@ class EditEntityWindow(QtGui.QDialog):
      
         for pos in range(index,len(part_dirs)):
             result_path+= part_dirs[pos] + os.path.sep
-        print('result_path',result_path)
+#        print('result_path',result_path)
         result_path = result_path +  file_name
         result_path = result_path[1:]
-        print('aaaaaaaaaaaaaaaaaaaaa-',result_path)
+#        print('aaaaaaaaaaaaaaaaaaaaa-',result_path)
         return result_path 
     
     
@@ -296,7 +297,7 @@ class EditEntityWindow(QtGui.QDialog):
                                             notes=self._edit_description.text())) #добавить дату создания
         else:
             files_names = self._edit_path.text()
-            print(files_names)
+#            print(files_names)
             #files_names = cleareExtraSpace(files_names)
             list_files = files_names.split(';')
             list_files_names=[]
@@ -312,38 +313,36 @@ class EditEntityWindow(QtGui.QDialog):
             progress_window.setMinimum(0)
             progress_window.setMaximum(99)
             progress_window.show()
-            self.connect(progress_window,QtCore.SIGNAL('canceled()'),self.__stoped)
+         
             d_progress = 100/count_files
             progress = 0
             for file_path in list_files_names:
                 progress_window.setValue(progress)
                 QtGui.QApplication.processEvents()
                 file_repo_path = self.__splitFileByRepo(file_path)
-                print(self._path_to_repo)
-                print('file_repo_path',file_repo_path)
+#                print(self._path_to_repo)
+#                print('file_repo_path',file_repo_path)
                 list_entityes.append(EntityManager.createEntity(title=self._edit_title.text(),entity_type=self._object_type,user_name=self._user_repo.name,
                                             list_tags=list_tags,list_fields=list_fields,
                                             notes=self._edit_description.text(),file_path=file_repo_path))
-                print('progress---',progress)
-                print('dprogress---',d_progress)
+#                print('progress---',progress)
+#                print('dprogress---',d_progress)
                 
                 progress+=d_progress
                 progress_window.setValue(progress)
                 QtGui.QApplication.processEvents()
 #            progress_window.setWindowModality(0)
     
-            print('deleting progress window')
+#            print('deleting progress window')
             progress_window.close()
             del(progress_window)
-        print('the lenght outputting signal is -',len(list_entityes))
+#        print('the lenght outputting signal is -',len(list_entityes))
         
         
         self.emit(QtCore.SIGNAL("indexingFile(list_new_files)"),self._new_files)
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
         self.__canceled()
-    def __stoped(self):
-        pass
-        print('процесс копирования не выполнен до конца')
+    
         
         
     def __update(self):

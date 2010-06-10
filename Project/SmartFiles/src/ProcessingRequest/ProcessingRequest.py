@@ -92,7 +92,7 @@ class ProcessingRequest(object):
                                                     
         '''
         list_result = ProcessingRequest.__getSplitingList(request,operator_index)
-        print(list_result)
+#        print(list_result)
         operator_index +=1
         while operator_index <3:
             index = 0
@@ -218,9 +218,9 @@ class ProcessingRequest(object):
     @staticmethod
     def __convertToSQL(user_request_list,flag=True):
         #index = 0
-        print('convertToSQL user_request_list',user_request_list)
+#        print('convertToSQL user_request_list',user_request_list)
         item = ProcessingRequest.__isOperator(user_request_list[0])
-        print('operator is',item)
+#        print('operator is',item)
         
         result_string =''
         if item == '()':
@@ -240,9 +240,9 @@ class ProcessingRequest(object):
         else:
             result_string=ProcessingRequest.__typeDefinition(user_request_list)
             #result_string=ProcessingRequest.__typeDefinition(item)
-        print('используемые таблицы', ProcessingRequest._using_table)
+#        print('используемые таблицы', ProcessingRequest._using_table)
         if flag:
-            print(ProcessingRequest._using_table)
+#            print(ProcessingRequest._using_table)
             tables=''
             for table in ProcessingRequest._using_table:
                 tables+= ', ' + table             
@@ -275,8 +275,8 @@ class ProcessingRequest(object):
                 request = cleareSpaceAboutOperator(request,operator)
             
             request_list = ProcessingRequest.__splitRequest(request)
-            print('the user request is ---',user_request)
-            print('the user request list is',request_list)
+#            print('the user request is ---',user_request)
+#            print('the user request list is',request_list)
             
                 
             if len(request_list)==1:
@@ -309,7 +309,7 @@ class ProcessingRequest(object):
             проверка является ли атом полем. 
             Если не поле то возращается 0 индекс оператора +1 
         '''
-        print('is field? ---- ',atom)
+#        print('is field? ---- ',atom)
         for operator in ProcessingRequest._field_words:
             if atom.find(operator,0)>=0:
                 return operator
