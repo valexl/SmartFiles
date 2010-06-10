@@ -23,24 +23,30 @@ def cleareSpaceAboutOperator(request,operator):
         '''
             убираются пробелы между полем операцией и значением
         '''
-        str_lenght = 0
-        index=0
-        len_operator=len(operator)
-        while (index>=0):
-            str_lenght = len(request)
-            index = request.find(operator,index+1)
-            if index>0:                
-                if request[index-1]==' ':
-                    request=request[:index-1] + request[index:]
-                    index-=1
-                if request[index+len(operator)]==' ':
-                    request=request[:index+len(operator)] + request[index+len(operator)+1:]
-        return request
+        try:
+            str_lenght = 0
+            index=0
+            len_operator=len(operator)
+            while (index>=0):
+                str_lenght = len(request)
+                index = request.find(operator,index+1)
+                if index>0:                
+                    if request[index-1]==' ':
+                        request=request[:index-1] + request[index:]
+                        index-=1
+                    if request[index+len(operator)]==' ':
+                        request=request[:index+len(operator)] + request[index+len(operator)+1:]
+            return request
+        except IndexError:
+            raise ProcessingRequest.ExceptionInvalidRequestSyntaxis('не найдено значение поля')
 class ProcessingRequest(object):
     '''
         преобразование пользовательского запроса в SQL (В данный момент не учтены пользователи, path)
     '''
-   
+    class ExceptionProcessingRequest(Exception):
+        pass
+    class ExceptionInvalidRequestSyntaxis(ExceptionProcessingRequest):
+        pass 
     _operators = [' or ',' and ',' not ','()'] # операции языка запроса
         
     _table_objs = 'entity'
@@ -262,25 +268,28 @@ class ProcessingRequest(object):
         '''
             преобразование пользовательского запроса в SQL запрос
         '''
-        request = cleareExtraSpace(user_request); # строка запроса заданная пользователем 
-                                                           # переведена в один регистр и без двойных пробелов
-         
-        for operator in ProcessingRequest._field_words: 
-            request = cleareSpaceAboutOperator(request,operator)
-        
-        request_list = ProcessingRequest.__splitRequest(request)
-        print('the user request is ---',user_request)
-        print('the user request list is',request_list)
-        
+        try:
+            request = cleareExtraSpace(user_request); # строка запроса заданная пользователем 
+                                                               # переведена в один регистр и без двойных пробелов
+            for operator in ProcessingRequest._field_words: 
+                request = cleareSpaceAboutOperator(request,operator)
             
-        if len(request_list)==1:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
-        else:
-            result_sql_request = ProcessingRequest.__startConvertToSQL(request_list)
-        
-        if is_neural_net:
-            result_sql_request += ' ORDER BY entity.neuralnet_raiting DESC'
-        return result_sql_request
+            request_list = ProcessingRequest.__splitRequest(request)
+            print('the user request is ---',user_request)
+            print('the user request list is',request_list)
+            
+                
+            if len(request_list)==1:
+                result_sql_request = ProcessingRequest.__startConvertToSQL(request_list[0]) 
+            else:
+                result_sql_request = ProcessingRequest.__startConvertToSQL(request_list)
+            
+            if is_neural_net:
+                result_sql_request += ' ORDER BY entity.neuralnet_raiting DESC'
+            return result_sql_request
+        except IndexError as error:
+            print(error)
+            raise ProcessingRequest.ExceptionInvalidRequestSyntaxis('не найдено значение поля')
 
     @staticmethod
     def __isOperator ( atom):

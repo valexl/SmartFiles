@@ -158,7 +158,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         if not self._path_to_repo ==None:
             self.__openingRrepository()
-            
+        
+        self.connect(self.radioButton_neural_net,QtCore.SIGNAL('clicked()'),self.__clickNeuralnetRaioButton)
+        self.connect(self.radioButton_request_language,QtCore.SIGNAL('clicked()'),self.__clickRequestLanguageRaioButton)
         # настройка dockwidget_files_info
         self.connect(self.pushButton_indexing_files,QtCore.SIGNAL('clicked()'),self.__indexFile)
         self.connect(self.pushButton_add_files,QtCore.SIGNAL('clicked()'),self.__copyFile)
@@ -174,7 +176,17 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.__dockWidget_metadataView()
         self.__dockWidget_repo_filesView()
         
-
+    def __clickNeuralnetRaioButton(self):
+        '''
+            при нажатие на радиокнопку Neuralnet обнуляется поле поиска
+        '''
+        self.radioButton_request_language.setChecked(0)
+        self.lineEdit_search.setText('')
+        
+        
+    def __clickRequestLanguageRaioButton(self):
+        self.radioButton_neural_net.setChecked(0)
+        self.lineEdit_search.setText('')
     def __dockWidget_metadataView(self):
         '''
             скрывает октрывает окно с метаданными
@@ -357,11 +369,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             if type_entity==SystemInfo.entity_file_type:
                 index = self._table.model().index(row,4)
                 file_path = self._table.model().data(index)
-                if self.radioButton_neural_net.isChecked():        
-                    if len(self._select_list_tags)>0:
-                        self._entity_manager.learningNeuralNet(entity_id, self._select_list_tags)
-                    else:
-                        self._entity_manager.learningNeuralNet(entity_id)
+                
                 file_path = os.path.join(self._path_to_repo,file_path)
                 print(file_path)
                 
@@ -372,7 +380,11 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 url = self._entity_manager.getURL(entity)
                 self.__startURL(url)
             
-            
+            if self.radioButton_neural_net.isChecked():        
+                    if len(self._select_list_tags)>0:
+                        self._entity_manager.learningNeuralNet(entity_id, self._select_list_tags)
+                    else:
+                        self._entity_manager.learningNeuralNet(entity_id)
         
     def closeEvent(self,event):
         '''
@@ -695,25 +707,34 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             начала поиск объекта
         '''
-        list_tags = []
-        for index in self.treeView_metadata.selectedIndexes(): 
-                list_tags.append(self.treeView_metadata.model().data(index))
-        if len(list_tags)>0: 
-            if self.radioButton_neural_net.isChecked():
-                request = " ".join(list_tags)
-                self.lineEdit_search.setText(request)
-                self.__searchByNeuralNet()
+        try:
+            list_tags = []
+            for index in self.treeView_metadata.selectedIndexes(): 
+                    list_tags.append(self.treeView_metadata.model().data(index))
+            if len(list_tags)>0: 
+                if self.radioButton_neural_net.isChecked():
+                    request = " ".join(list_tags)
+                    self.lineEdit_search.setText(request)
+                    self.__searchByNeuralNet()
+                else:
+                    request = ' AND '.join(list_tags)
+                    self.lineEdit_search.setText(request)
+                    self.__searchByQueryLanguage()
+                
             else:
-                request = ' AND '.join(list_tags)
-                self.lineEdit_search.setText(request)
-                self.__searchByQueryLanguage()
-            
-        else:
-            
-            if self.radioButton_neural_net.isChecked():
-                self.__searchByNeuralNet()
-            else:
-                self.__searchByQueryLanguage()
+                
+                if self.radioButton_neural_net.isChecked():
+                    self.__searchByNeuralNet()
+                else:
+                    self.__searchByQueryLanguage()
+#        except IndexError as error:
+#            print(error)
+#            self.info_window.setText('Ошибка синтаксиса языка запроса')
+#            self.info_window.show()
+        except ProcessingRequest.ExceptionInvalidRequestSyntaxis as error:
+            print(error)
+            self.info_window.setText('Ошибка синтаксиса языка запроса')
+            self.info_window.show()
         
         
     
@@ -788,7 +809,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             
-          #  self._entity_manager.saveEntityes(list_entity)
+            self._entity_manager.saveEntityes(list_entity)
             print('длина списка добавляемых объектов - ',len(list_entity))
             list_files=[]
             for entity in list_entity:
@@ -1023,13 +1044,15 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 try:
                     selected_rows.index(selected_index.row())
                 except ValueError:
-                    selected_rows.append(selected_index.row())
-            if len(selected_rows)>0:
+                    selected_rows.append(selected_index.row()) 
+            if len(selected_rows) >0:
+              
                 list_entity_id=[]
                 for row in selected_rows:
                     index = self._table.model().index(row,0)
                     id = self._table.model().data(index)
                     list_entity_id.append(id)
+                   
                 print(list_entity_id)   
                 self.__deletingEntity(list_entity_id)
             else:
@@ -1052,12 +1075,20 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         try:
             list_entity=[]
             list_file_path = []
+            progress_dialog = QtGui.QProgressDialog(self)
+            progress_dialog.setWindowModality(1)
+            d_progress = 100/len(list_entity_id)
+            progress = 0
             for entity_id in list_entity_id:
                 entity = self._entity_manager.loadEntityObj(entity_id)
                 list_entity.append(entity)
                 if entity.object_type == SystemInfo.entity_file_type:
                 #добавление только что удаленный обеъкт в таблицу непроиндексированных объектов
                     list_file_path.append(entity.file_path)
+                progress+=d_progress
+                progress_dialog.setValue(int(progress))
+                QtGui.QApplication.processEvents()
+            progress_dialog.close()
             self._entity_manager.deleteEntity(list_entity)
             self._repo_manager.unCheckedFileInfo(list_file_path)
             self.__settingModel()
@@ -1151,4 +1182,4 @@ if __name__=='__main__':
 
     myclass.show()
     app.exec_()
-#    print(os.path.split('tmp/tmp/aastelper.completions'))
+#    print(os.path.split('__clickNeuralnetRaioButton/__clickNeuralnetRaioButton/aastelper.completions'))
