@@ -641,23 +641,26 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             подготовка к модификации пользователя
         '''
-        try:
-            
-            self.edit_window = EditUserWindow('update',self._user_repo)
-            self.edit_window.show()
-            self.connect(self.edit_window,QtCore.SIGNAL("updateUser(user)"),self.__updatingUser)
-        except RepoManager.ExceptionErrorPasswordUser as error:
-            self.info_window.setText('''Не правильно введен пароль или пользователь
-            ''')
+        if self._is_open_repo:
+            try:
+                
+                self.edit_window = EditUserWindow('update',self._user_repo)
+                self.edit_window.show()
+                self.connect(self.edit_window,QtCore.SIGNAL("updateUser(user)"),self.__updatingUser)
+            except RepoManager.ExceptionErrorPasswordUser as error:
+                self.info_window.setText('''Не правильно введен пароль или пользователь
+                ''')
+                self.info_window.show()
+                print(error)
+            except Exception as error:
+                self.info_window.setText('''Неучтенные траблы при обновлении пользователя в RepoManager
+                ''')
+                self.info_window.show()
+    #            print('__updateUser')
+                print(error)
+        else:
+            self.info_window.setText('Не забываем открывать хранилище')
             self.info_window.show()
-            print(error)
-        except Exception as error:
-            self.info_window.setText('''Неучтенные траблы при обновлении пользователя в RepoManager
-            ''')
-            self.info_window.show()
-#            print('__updateUser')
-            print(error)
-        
         
     def __updatingUser(self,user):
         '''

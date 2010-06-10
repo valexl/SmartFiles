@@ -86,12 +86,13 @@ class EditUserWindow(QtGui.QWidget):
     
     
     def __updateUser(self):
-        if self._edit_password.text()==str(self._user.password):
+        old_password = hash(self._edit_old_password.text()) 
+        if old_password == self._user.password:
             user = User(user_name=self._edit_user_name.text(),password=self._edit_password.text(),description=self._edit_description.text())
             self.emit(QtCore.SIGNAL('updateUser(user)'),user)
             self.__canceled()
         else:
-            print(self._edit_password.text())
+            print(old_password)
             print(self._user.password)
             self.info_window.setText('''неправильный пароль
             ''')
