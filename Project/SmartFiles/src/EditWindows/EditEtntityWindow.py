@@ -28,7 +28,10 @@ class EditEntityWindow(QtGui.QDialog):
         QtGui.QDialog.__init__(self,parent)
         self._object_type = object_type
         self._user_repo = user_repo
-        self._path_to_repo = path_to_repo
+        if path_to_repo[-1]==os.sep:
+            self._path_to_repo = path_to_repo[0:-1]
+        else:
+            self._path_to_repo = path_to_repo
         self._entity = entity
         
         self.info_window = QtGui.QMessageBox()
@@ -319,8 +322,9 @@ class EditEntityWindow(QtGui.QDialog):
                         print(file_path
                               )
                         if not self.__isRepo(os.path.split(file_path)[0]):
+                            print('файл находится вне хранилищая... идет копирование')
                             file_path_copy = os.path.join(dir_path,os.path.split(file_path)[1])
-                            
+                            print('file_path_copy',file_path_copy)
                             if not os.path.exists(file_path_copy):
                                 try:
                                     shutil.copyfile(file_path, file_path_copy)
@@ -330,9 +334,16 @@ class EditEntityWindow(QtGui.QDialog):
                                     self.info_window.show()
                                     progress_window.close()
                                     return
+                            file_path = self.__splitDirPath(file_path_copy)
+                            print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'),file_path_copy
+                            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',file_path)    
+                            print('cccccccccccccccccccccccccccccccccccc',self._path_to_repo)
                         else:
+                            print('добавляемый файл находится в хранилище')
                             file_path_copy = file_path
-                        file_path = self.__splitDirPath(file_path_copy)
+                            file_path = self.__splitDirPath(file_path_copy)
+                            print('file_path_copy',file_path_copy)
+                        print('file_path',file_path)
                         entity = EntityManager.createEntity(title=self._edit_title.text(),
                                                    entity_type=self._object_type,
                                                    user_name=self._user_repo.name,
@@ -358,7 +369,12 @@ class EditEntityWindow(QtGui.QDialog):
             else:
                 self.info_window.setText('''Выбранная директория не является хранилищем''')
                 self.info_window.show()
-            
+#        for entity in list_entityes:
+#            print('file_path',entity.file_path)
+        index = 0
+        for entity in list_entityes:
+            print('entity file path' + str(index) + ' ',entity.file_path)
+            index +=1
         self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
         self.close()
         
@@ -391,7 +407,7 @@ if __name__=='__main__':
     from RepoManager.User import User
     app = QtGui.QApplication(sys.argv)
     user = User('valexl')
-    window = EditEntityWindow('/tmp/tmp', user, SystemInfo.entity_file_type)
+    window = EditEntityWindow('/tmp/Repository', user, SystemInfo.entity_file_type)
     window.show()
     app.exec_()
     

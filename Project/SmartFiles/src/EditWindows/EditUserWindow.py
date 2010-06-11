@@ -12,7 +12,7 @@ class EditUserWindow(QtGui.QDialog):
     def __init__(self,user=None,parent=None):
         
         QtGui.QDialog.__init__(self,parent)
-        self.setGeometry(400,500,0,0)
+#        self.setGeometry(400,500,0,0)
         self.setModal(1)
         
         self._user = user

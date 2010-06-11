@@ -874,7 +874,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             
-            self._entity_manager.saveEntityes(list_entity)
+#            self._entity_manager.saveEntityes(list_entity)
+            print('MAIN WINDOW')
+            index = 0
+            for entity in list_entity:
+                    print('entity_path' + str(index) + ' ',entity.file_path)
+                    index+=1
+            pass
 #            print('длина списка добавляемых объектов - ',len(list_entity))
             
             self.__settingModel('%')
@@ -884,18 +890,18 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
             print('__addingEntity проблемы:')
             print(error)
-        except EntityManager.ExceptionEntityIsExist as error:
-            self.info_window.setText('''Среди добавляемых файлов есть файлы уже присвоиные какому-то пользовтелю ''')
-            self.info_window.show()
-            self.__settingModel('%')
-            print(error)
-            
-        except Exception as error:
-            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
-            ''')
-            self.info_window.show()
-            print('__addingEntity')
-            print(error)
+#        except EntityManager.ExceptionEntityIsExist as error:
+#            self.info_window.setText('''Среди добавляемых файлов есть файлы уже присвоиные какому-то пользовтелю ''')
+#            self.info_window.show()
+#            self.__settingModel('%')
+#            print(error)
+#            
+#        except Exception as error:
+#            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
+#            ''')
+#            self.info_window.show()
+#            print('__addingEntity')
+#            print(error)
             
             
     
@@ -1222,7 +1228,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
 if __name__=='__main__':
     app = QtGui.QApplication(sys.argv)
-    user_repo = User('valexl', hash(-1874663864))
+    user_repo = User('valexl', hash('123'))
     myclass = SmartFilesMainWindow(user_repo)
     
     

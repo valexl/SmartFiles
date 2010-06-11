@@ -40,6 +40,7 @@ class InstallUser(object):
            connect = sqlite.connect(file_info_bd_path)
            cursor=connect.cursor()
            InstallUser.__initTables(cursor)
+           connect.commit()
            raise InstallUser.ExceptionNoUsers('не зарегестрировано ни одного пользователя')
         
         

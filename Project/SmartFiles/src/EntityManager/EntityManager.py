@@ -114,8 +114,12 @@ class EntityManager(object):
                                ' file_path = ? ',
                                (entity.file_path,) 
                                )
-                if cursor.fetchone()[0]>0:
+                count = cursor.fetchone()[0]
+                print('count entityes',count)
+                print('file_path adding entity',entity.file_path)
+                if count >0:
                     raise EntityManager.ExceptionEntityIsExist('косарезик. такой файл уже присвоин кому то')
+                
             cursor.execute("INSERT INTO entity"
                            "(title, object_type, user_name, file_path, file_size, file_hash, date_create,notes )"
                            "VALUES(?,?,?,?,?,?,?,?)",
@@ -255,6 +259,7 @@ class EntityManager(object):
             cursor = connect.cursor()
             # запись entity
             for entity in list_entityes:
+                print('entity_file_path',entity.file_path)
                 entity.id = EntityManager.__saveEntity(cursor, entity)
                 
                 self._neural_net.addFile(entity.id)

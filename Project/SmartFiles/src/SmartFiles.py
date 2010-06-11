@@ -23,7 +23,8 @@ class StartWindow(QtGui.QWidget):
     def __init__(self,parent=None):
         try:
             QtGui.QWidget.__init__(self,parent)
-            self.setGeometry(500,400,0,0)
+
+#            self.setGeometry(500,400,0,0)
             vbox_layout = QtGui.QVBoxLayout()
             
             hbox_layout = QtGui.QHBoxLayout()
@@ -141,11 +142,12 @@ class StartWindow(QtGui.QWidget):
         
         
 if __name__ == '__main__':
-    
+    print('111111')
     app = QtGui.QApplication(sys.argv)
-    
-    
+   
     main =  StartWindow()
     main.show()
-    sys.exit(app.exec_())
-    main._db.close()
+    print('start StartWindow')
+#    sys.exit(app.exec_())
+    app.exec_()
+    
