@@ -514,7 +514,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
 #            print('пользователь гость')
             print(err)
-#            print('автоматически регестрируется в хранилище')
+#            print('автоматически регИстрируется в хранилище')
             self._repo_manager.addUserRepo(self._user_repo)
             self.__openingRrepository()
         except Exception as error:

@@ -41,13 +41,13 @@ class InstallUser(object):
            cursor=connect.cursor()
            InstallUser.__initTables(cursor)
            connect.commit()
-           raise InstallUser.ExceptionNoUsers('не зарегестрировано ни одного пользователя')
+           raise InstallUser.ExceptionNoUsers('Не зарегистрировано ни одного пользователя')
         
         
     @staticmethod
     def __initTables(cursor):
         '''
-            создание пустых таблиц
+            Cоздание пустых таблиц
         '''
         cursor.execute("CREATE TABLE users ("
                 " name VARCHAR2(255) NOT NULL PRIMARY KEY,"

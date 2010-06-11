@@ -2,6 +2,9 @@
 Created on 17.05.2010
 
 @author: valexl
+
+Это главный исполняемый модуль программы SmartFiles. 
+Нужно запускать именно его, чтобы работать с программой.
 '''
 import sys
 from PyQt4 import QtGui,QtCore
@@ -35,7 +38,7 @@ class StartWindow(QtGui.QWidget):
             vbox_layout.addLayout(hbox_layout)
             
             hbox_layout = QtGui.QHBoxLayout()
-            label = QtGui.QLabel('Пароль',self)
+            label = QtGui.QLabel('Пароль', self)
             self._edit_password = QtGui.QLineEdit(self)
             self._edit_password.setEchoMode(2)
             hbox_layout.addWidget(label)
@@ -44,6 +47,7 @@ class StartWindow(QtGui.QWidget):
             
             hbox_layout = QtGui.QHBoxLayout()
             button_ok=QtGui.QPushButton('Войти')
+            button_ok.setDefault(True) #Кнопка по-умолчанию. Нажимается при нажатии Enter
             button_exit=QtGui.QPushButton('Выход')
             hbox_layout.addWidget(button_ok)
             hbox_layout.addWidget(button_exit)
@@ -65,7 +69,7 @@ class StartWindow(QtGui.QWidget):
         except InstallUser.ExceptionNoUsers as err:
             print(err)
             self.info_window.setText('''Программа запущена в первый раз.
-Для работы с программой необходимо зарегестрировать хотя бы одного пользователя.''')
+Для работы с программой необходимо зарегистрировать хотя бы одного пользователя.''')
             self.info_window.show()
             #print('добавьте пользователя для работы в системе')
         

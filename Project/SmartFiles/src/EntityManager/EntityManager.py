@@ -28,7 +28,7 @@ class EntityManager(object):
     
     def __init__(self,repo_path):
         '''
-           конструктор класса. Регестрирует EntityManager в конкретном хранилище
+           Конструктор класса. Регистрирует EntityManager в конкретном хранилище.
         '''
         self._path_to_repo = repo_path    
         if os.path.exists(os.path.join(self._path_to_repo,SystemInfo.neural_net_file_path)):

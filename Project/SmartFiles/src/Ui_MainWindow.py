@@ -169,7 +169,7 @@ class Ui_MainWindow(object):
         self.menu_views.setTitle(QtGui.QApplication.translate("MainWindow", "&Вид", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_setting.setTitle(QtGui.QApplication.translate("MainWindow", "&Метаданные", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
-        self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "                                   Теги", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget_tag.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Теги", None, QtGui.QApplication.UnicodeUTF8))
         self.label_users.setText(QtGui.QApplication.translate("MainWindow", "Пользователи хранилища", None, QtGui.QApplication.UnicodeUTF8))
         self.action_exit.setText(QtGui.QApplication.translate("MainWindow", "Выход", None, QtGui.QApplication.UnicodeUTF8))
         self.action_create_repo.setText(QtGui.QApplication.translate("MainWindow", "Создать", None, QtGui.QApplication.UnicodeUTF8))
