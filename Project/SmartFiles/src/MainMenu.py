@@ -631,9 +631,14 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             подготовка к удалению пользователя
         '''
         try:
-            self.__deletingUser(self._user_repo)
-            #self.__disconnectBD()
-            self.__closeRepository()
+            if self._is_open_repo:
+                self.__deletingUser(self._user_repo)
+                #self.__disconnectBD()
+                self.__closeRepository()
+            else:
+                self.info_window.setText('''Необходимо открыть хранилище
+            ''')
+                self.info_window.show()
         except Exception as error:    
 #            print('__deleteUserFromRepo')
             self.info_window.setText('''Проблемы при удалении пользователя
@@ -801,7 +806,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 
                 #отлавливание сигнала на добавление нового файла       
             else:
-                self.info_window.setText(''' Для начало откроем хранилище
+                self.info_window.setText(''' Для начало нужно открыть хранилище
             ''')
                 self.info_window.show()
                      
@@ -902,11 +907,11 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     
             else:
                 #print('А кто будет Entity выбирать для добавления тега?')
-                self.info_window.setText('''А кто будет Entity выбирать?
+                self.info_window.setText('''Не выбран объект для пометки тегом.
             ''')
                 self.info_window.show()
         else:
-            self.info_window.setText('''может откроешь хранилище?
+            self.info_window.setText('''Необходимо открыть хранилище.
             ''')
             self.info_window.show()
             
@@ -951,12 +956,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 except Exception as error:
                     print('__markTag')
             else:
-                self.info_window.setText('''а кто будет entity выбирать?
+                self.info_window.setText('''Не выбран объект для пометки полем.
             ''')
                 self.info_window.show()
                 #print('кто будет Entity выбирать для добавления поля')
         else:
-            self.info_window.setText('''может хранилище откроем?
+            self.info_window.setText('''Необходимо открыть хранилище.
             ''')
             self.info_window.show()
             #print('может хранилище откроем?')
@@ -1001,7 +1006,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                     self.edit_window.show()
                     self.connect(self.edit_window,QtCore.SIGNAL("updateEntity(list_entityes)"),self.__updatingEntity)
                 else:
-                    self.info_window.setText('''Товарищ, а какой собственно объект изменять?
+                    self.info_window.setText('''Необходимо выбрать изменяемый объект.
             ''')
                     self.info_window.show()
                 
@@ -1009,7 +1014,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 
                 
             else:
-                self.info_window.setText('''не забываем отрыть хранилище
+                self.info_window.setText('''Необходимо открыть хранилище
             ''')
                 self.info_window.show()
         except Exception as error:
@@ -1088,12 +1093,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #                print(list_entity_id)   
                 self.__deletingEntity(list_entity_id)
             else:
-                self.info_window.setText('''не забываем выбирать объект хранилища
+                self.info_window.setText('''Необходимо выбрать объект хранилщища
                 ''')
                 self.info_window.show()
                 
         else:
-            self.info_window.setText('''а хо хо не ху ху? открывай давай хранилище!
+            self.info_window.setText('''Необходимо открыть хранилище.
             ''')
             self.info_window.show()
             print('а хо хо не ху ху? открывай давай хранилщие')
@@ -1159,7 +1164,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
     
                 self.browse_window.close
             else:
-                self.info_window.setText('''Откройте хранилище.
+                self.info_window.setText(''' Необходимо сначало открыть хранилище.
                 ''')
                 self.info_window.show()
         except Exception as err:
@@ -1187,7 +1192,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self.browse_window.show()
                 self.connect(self.browse_window,QtCore.SIGNAL('deleteField(field)'),self.__deletingField)
             else:
-                self.info_window.setText('''нужно открыть хранилище
+                self.info_window.setText('''Необходимо сначало открыть хранилище.
                 ''')
                 self.info_window.show()
         except Exception as error:

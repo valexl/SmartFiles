@@ -320,8 +320,16 @@ class EditEntityWindow(QtGui.QDialog):
                               )
                         if not self.__isRepo(os.path.split(file_path)[0]):
                             file_path_copy = os.path.join(dir_path,os.path.split(file_path)[1])
+                            
                             if not os.path.exists(file_path_copy):
-                                shutil.copyfile(file_path, file_path_copy)
+                                try:
+                                    shutil.copyfile(file_path, file_path_copy)
+                                except IOError:
+                                    self.info_window.setText(''' не найден копируемый файл:''' + file_path+ '''
+Проверьте правильность пути к файлу.                                    ''')
+                                    self.info_window.show()
+                                    progress_window.close()
+                                    return
                         else:
                             file_path_copy = file_path
                         file_path = self.__splitDirPath(file_path_copy)
