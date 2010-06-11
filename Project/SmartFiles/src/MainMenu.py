@@ -92,8 +92,10 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
           
 #TOOLBAR
 #STATUSBAR
-        label = QtGui.QLabel('Текущий пользователь --- ' + self._user_repo.name,self)
+        label = QtGui.QLabel('Текущий пользователь --- ' + self._user_repo.name+';',self)
         self.statusbar.addWidget(label)
+        self.label_opening_repo = QtGui.QLabel(' Текущее хранилище --- ',self)
+        self.statusbar.addWidget(self.label_opening_repo)
 #STATUSBAR
 
 
@@ -171,6 +173,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
         # настройка отображение и скрывание dockwidget-ов
         self.connect(self.action_view_metadata,QtCore.SIGNAL('triggered()'),self.__dockWidget_metadataView)
+        
+        
        
         
         #TODO 
@@ -180,8 +184,17 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #            self.__dockWidget_repo_filesView()
 
 
+#SETTING DOCKWIDGET_FILES
+
+#HELPING
+        self.pushButton_search.setToolTip('Найти в хранилище')
+        self.dockWidget_tag.setToolTip('Теги хранилища')
+        self.treeView_metadata.setToolTip('Используйте ctrl+щелчек левой кнопки мыши, для выбора тегов поискового запроса')
+        self.comboBox_repo_users_metadata.setToolTip('Выберите пользователя, теги которого вы хотите увидеть')
+        self.radioButton_neural_net.setToolTip('Поиск с сортеровокой результата нейросесть. Поиск осуществляется только по тегам.')
+        self.radioButton_request_language.setToolTip('Поиск объектов хранилища по тегам, поля используя логические операции OR AND "()"')
+#HELPING
         
-#SETTING DOCKWIDGET_FILES        
     def __selectedUserForView(self,index):
         '''
             выбирает пользователя, для отображения его метаданных
@@ -478,9 +491,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._repo_manager.identificationUser(self._user_repo)
             
             self.__settingComboBoxUsers()
-                
-            
-            
+            self.label_opening_repo.setText(' Текущее хранилище --- '+self._path_to_repo)
             self._entity_manager = self._repo_manager.getEntityManager() 
             
             self.__connnectBD()
@@ -539,10 +550,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
 #        print('__deleteRepository')
         try:
-            RepoManager.deleteRepository(self._path_to_repo)
-            self._path_to_repo = None
-            self.__disconnectBD()
-            self._is_open_repo = False
+            path_deleting_repo = self._path_to_repo
+            self.__closeRepository()
+            RepoManager.deleteRepository(path_deleting_repo)
+#            self._path_to_repo = None
+#            self.__disconnectBD()
+#            self.label_opening_repo.setText('')
+#            self._is_open_repo = False
             self.__settingModel('%')
         except RepoManager.ExceptionRepoIsNull as error:
             #print('не возможно удалить хранилище')
@@ -586,9 +600,9 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self._repo_manager.addUserRepo(self._user_repo)
 #                self._repo_manager.fillRepoFiles() # заполнение базы информацией о файлах хранилщиа.
                 self._entity_manager = self._repo_manager.getEntityManager()     
-                
+
                 self._is_open_repo = True
-                
+                self.label_opening_repo.setText('Текущее хранилище ---')
                 self.__connnectBD()
                 self.__settingComboBoxUsers()
 #               
@@ -615,6 +629,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._entity_manager.saveNeuralNet()
             self._entity_manager = None
             self._repo_manager = None
+            self.label_opening_repo.setText(' Текущее хранилище ---')
             self._is_open_repo = False
     
     def __switchUser(self):
