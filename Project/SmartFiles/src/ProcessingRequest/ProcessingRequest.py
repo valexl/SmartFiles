@@ -274,9 +274,9 @@ class ProcessingRequest(object):
             for operator in ProcessingRequest._field_words: 
                 request = cleareSpaceAboutOperator(request,operator)
             
+            
+            
             request_list = ProcessingRequest.__splitRequest(request)
-#            print('the user request is ---',user_request)
-#            print('the user request list is',request_list)
             
                 
             if len(request_list)==1:

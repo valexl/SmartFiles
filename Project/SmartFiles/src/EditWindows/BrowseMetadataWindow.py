@@ -12,9 +12,9 @@ class BrowseMetadataWindow(QtGui.QMainWindow):
         
         QtGui.QMainWindow.__init__(self,parent)
         self._user_repo = user_repo
-        self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata
+        self._str_request_select = "SELECT " + type_metadata + ".* FROM " + type_metadata + " WHERE user_name = '" + user_repo.name + "'"
         if type_metadata=='field':
-            self._str_request_select += " WHERE not name='url' "
+            self._str_request_select += " AND not name='url' "
         self._type_metadata = type_metadata
         
         self.info_window = QtGui.QMessageBox()

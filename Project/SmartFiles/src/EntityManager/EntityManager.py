@@ -446,7 +446,7 @@ class EntityManager(object):
         if os.path.exists(path_metadata_file):
             connect=sqlite.connect(path_metadata_file)
             cursor = connect.cursor()
-#            EntityManager.__deleteTag(cursor, tag.name, tag.user_name)
+
             
             
             
@@ -455,15 +455,25 @@ class EntityManager(object):
                            (tag.name,tag.user_name)
                            )
             list_entity_id = cursor.fetchall()
-            
+            cursor = connect.cursor()
             for entity_id in list_entity_id:
                 EntityManager.__deleteEntityTags(cursor, entity_id[0], tag.getAttributes())
                 self._neural_net.releaseFileFromTag(entity_id[0], tag.name)
-                
+                 
             EntityManager.__deleteTag(cursor, tag.name, tag.user_name)
-            self._neural_net.deleteTag(tag.name)
-            
             connect.commit()
+            print(tag.name)
+            cursor = connect.cursor()
+            
+            cursor.execute(" SELECT COUNT(name) FROM tag "
+                           " WHERE name= ?",
+                           (tag.name,)
+                           )
+            
+            if cursor.fetchall()[0]==0:
+                self._neural_net.deleteTag(tag.name)
+            
+            
             self.tmpPrintNeuralNet()
         else:
             raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
@@ -532,7 +542,12 @@ class EntityManager(object):
                                    )
                     if cursor.fetchone()[0] == 0:
                         EntityManager.__deleteTag(cursor, tag_attributes[0],entity.user_name)
-                        self._neural_net.deleteTag(tag_attributes[0])
+                        cursor.execute(" SELECT COUNT (*) FROM tag "
+                                       " WHERE name = ? ",
+                                       (tag_attributes[0],)
+                                       )
+                        if cursor.fetchone()[0]==0:
+                            self._neural_net.deleteTag(tag_attributes[0])
                 #удаление всех записей entity_fields и при необходимости записи из field
                 for field_attributes in entity.getFieldAttributes(): 
                     field_name = field_attributes[0][0]

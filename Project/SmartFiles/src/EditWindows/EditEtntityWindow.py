@@ -318,10 +318,12 @@ class EditEntityWindow(QtGui.QDialog):
                     for file_path in list_files: # убираются лишнии пробелы в начале и конце строки. Если пользователь вводил файлы вручную
                         print(file_path
                               )
-                     
-                        file_path_copy = os.path.join(dir_path,os.path.split(file_path)[1])
-                        if not os.path.exists(file_path_copy):
-                            shutil.copyfile(file_path, file_path_copy)
+                        if not self.__isRepo(os.path.split(file_path)[0]):
+                            file_path_copy = os.path.join(dir_path,os.path.split(file_path)[1])
+                            if not os.path.exists(file_path_copy):
+                                shutil.copyfile(file_path, file_path_copy)
+                        else:
+                            file_path_copy = file_path
                         file_path = self.__splitDirPath(file_path_copy)
                         entity = EntityManager.createEntity(title=self._edit_title.text(),
                                                    entity_type=self._object_type,
@@ -340,8 +342,8 @@ class EditEntityWindow(QtGui.QDialog):
 #                    print(progress)
 #                    progress_window.setValue(int(progress))
                     self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
-                    
-                    #self.close()
+                    progress_window.close()
+                    self.close()
                 else:
                     self.info_window.setText('''Не выбрано ни одного файла для копирвоания''')
                     self.info_window.show()

@@ -18,7 +18,7 @@ from RepoManager.User import User
 from EntityManager.EntityManager import EntityManager
 from RepoManager.RepoManager import RepoManager
 from ProcessingRequest.ProcessingRequest import ProcessingRequest,\
-    cleareExtraSpace
+    cleareExtraSpace, cleareSpaceAboutOperator
 
 
 from Ui_MainWindow import Ui_MainWindow
@@ -126,6 +126,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         #для работы с метаданными
         self.connect(self.action_setting_tags,QtCore.SIGNAL('triggered()'),self.__settingTag)
         self.connect(self.action_setting_fields,QtCore.SIGNAL('triggered()'),self.__settingField)
+        self.connect(self.treeView_metadata,QtCore.SIGNAL('clicked(QModelIndex)'),self.__selecteTags)
         #поиск
         self.connect(self.pushButton_search,QtCore.SIGNAL('clicked()'),self.__searchEntity)
         
@@ -189,6 +190,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.__settingModel('%')
         else:
             self.__settingModel(self.comboBox_repo_users_metadata.itemText(index))
+        
+    def __selecteTags(self,index):
+        string_search=''
+        for index in self.treeView_metadata.selectedIndexes():
+            string_search+= ' ' + self.treeView_metadata.model().data(index)
+        self.lineEdit_search.setText(string_search)
         
         
     def __clickNeuralnetRaioButton(self):
@@ -430,6 +437,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             отображение состояние базы на таблице
         '''
+        if user==None:
+            user='%'
         self._model.setQuery(self._string_request)# + " entity.user_name LIKE '" + user + "'" )
         self._model_metadata.setQuery("SELECT DISTINCT name FROM tag WHERE user_name LIKE '" + user + "'")
 
@@ -586,7 +595,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         except RepoManager.ExceptionRepoIsExist as error:
             self.info_window.show()
             self.info_window.setText('''Не удалось создать хранилщие.
-Текущая директория уже является хранилищем''')
+выбранная директория уже является хранилищем''')
             print(error)
         except Exception as error:
             
@@ -714,9 +723,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self._entity_manager.searchByNeuralNet()
         else:
             request = cleareExtraSpace(self.lineEdit_search.text())
-#            print('request after clearning extra spacing')
             self._select_list_tags = request.split(' ')  
-#            print('request afger spliting',self._select_list_tags)
             
             self._entity_manager.tmpPrintNeuralNet()
             self._entity_manager.searchByNeuralNet(self._select_list_tags)
@@ -736,13 +743,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
             поис с помощью языка запроса
         '''
-#        print('query languages finding')
+
         if self.lineEdit_search.text()=="":
             self._string_request = SmartFilesMainWindow.SQLRequest 
-        else:
+        else: 
             self._string_request = ProcessingRequest.getSQLRequest(self.lineEdit_search.text())
-#            self._string_request = self.lineEdit_search.text()
-#        print('SQL SEARCH',self._string_request)
+            print(self._string_request)
+            
         self.__settingModel('%')
         
     def __searchEntity(self):
@@ -1195,7 +1202,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
 if __name__=='__main__':
     app = QtGui.QApplication(sys.argv)
-    user_repo = User('valexl', hash('-1874663864'))
+    user_repo = User('valexl', hash(-1874663864))
     myclass = SmartFilesMainWindow(user_repo)
     
     
