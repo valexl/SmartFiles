@@ -49,7 +49,7 @@ class StartWindow(QtGui.QWidget):
             hbox_layout.addWidget(button_exit)
             vbox_layout.addLayout(hbox_layout)
             
-            button_add_user = QtGui.QPushButton('Добавить')
+            button_add_user = QtGui.QPushButton('Создать пользователя')
             vbox_layout.addWidget(button_add_user)
             
             self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__startSF)

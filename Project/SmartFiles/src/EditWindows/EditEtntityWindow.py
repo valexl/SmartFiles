@@ -138,7 +138,7 @@ class EditEntityWindow(QtGui.QDialog):
         self.connect(button_cancel,QtCore.SIGNAL('clicked()'),self.__canceled)
         self.connect(button_ok,QtCore.SIGNAL('clicked()'),self.__pressButtonOk)
         
-        self.setGeometry(500,500,250,125)
+        self.setGeometry(300,100,550, 125)
         
         
     def __browseDir(self):

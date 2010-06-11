@@ -509,10 +509,8 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
             print(err)
         except RepoManager.ExceptionUserGuest as err:
-            self.info_window.setText('''
-            пользователь гость.
-            происходит регестрация текущего пользователя в хранилище.
-            ''')
+            self.info_window.setText('''Новый пользователь ''' + self._user_repo.name + ''' 
+будет зарегистрирован в хранилище.''')
             self.info_window.show()
 #            print('пользователь гость')
             print(err)
@@ -874,15 +872,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         try:
             
-#            self._entity_manager.saveEntityes(list_entity)
-            print('MAIN WINDOW')
-            index = 0
-            for entity in list_entity:
-                    print('entity_path' + str(index) + ' ',entity.file_path)
-                    index+=1
-            pass
-#            print('длина списка добавляемых объектов - ',len(list_entity))
-            
+            self._entity_manager.saveEntityes(list_entity)   
             self.__settingModel('%')
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''Не найден файл с метаданными
@@ -890,18 +880,18 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
             print('__addingEntity проблемы:')
             print(error)
-#        except EntityManager.ExceptionEntityIsExist as error:
-#            self.info_window.setText('''Среди добавляемых файлов есть файлы уже присвоиные какому-то пользовтелю ''')
-#            self.info_window.show()
-#            self.__settingModel('%')
-#            print(error)
-#            
-#        except Exception as error:
-#            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
-#            ''')
-#            self.info_window.show()
-#            print('__addingEntity')
-#            print(error)
+        except EntityManager.ExceptionEntityIsExist as error:
+            self.info_window.setText('''Среди добавляемых файлов есть файлы уже присвоиные какому-то пользовтелю ''')
+            self.info_window.show()
+            self.__settingModel('%')
+            print(error)
+            
+        except Exception as error:
+            self.info_window.setText('''Какие то не учтенные траблы в EntityManager
+            ''')
+            self.info_window.show()
+            print('__addingEntity')
+            print(error)
             
             
     

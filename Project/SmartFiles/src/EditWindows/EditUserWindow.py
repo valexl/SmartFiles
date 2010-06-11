@@ -29,7 +29,7 @@ class EditUserWindow(QtGui.QDialog):
         vbox_layout.addWidget(self._edit_user_name)
         
         if not self._user == None:
-            label = QtGui.QLabel('старый пароль',self)
+            label = QtGui.QLabel('Текущий пароль',self)
             self._edit_old_password = QtGui.QLineEdit(self)
             self._edit_old_password.setEchoMode(2)
             vbox_layout.addWidget(label)
@@ -41,7 +41,7 @@ class EditUserWindow(QtGui.QDialog):
         vbox_layout.addWidget(label)
         vbox_layout.addWidget(self._edit_password)
         
-        label = QtGui.QLabel('Проверка пароля',self)
+        label = QtGui.QLabel('Пароль (повтор)',self)
         self._edit_test_password = QtGui.QLineEdit(self)
         self._edit_test_password.setEchoMode(2)
         vbox_layout.addWidget(label)
