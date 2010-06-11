@@ -346,12 +346,11 @@ class EditEntityWindow(QtGui.QDialog):
                         print(progress)
                         progress_window.setValue(int(progress))
                         QtGui.QApplication.processEvents()
+                    progress_window.close()
 #                    progress+=d_progress
 #                    print(progress)
 #                    progress_window.setValue(int(progress))
-                    self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
-                    progress_window.close()
-                    self.close()
+                 
                 else:
                     self.info_window.setText('''Не выбрано ни одного файла для копирвоания''')
                     self.info_window.show()
@@ -360,8 +359,9 @@ class EditEntityWindow(QtGui.QDialog):
                 self.info_window.setText('''Выбранная директория не является хранилищем''')
                 self.info_window.show()
             
-            
-            
+        self.emit(QtCore.SIGNAL('createEntity(list_entityes)'),list_entityes)
+        self.close()
+        
             
             
 #            
