@@ -35,64 +35,64 @@ class Entity(object):
         self.list_fields = list_fields
         
            
-    def addTag (self,tag):
-        '''
-            пометка сущности тегом
-        '''
-        self.list_tags.append(tag)
-
-
-    def deleteTag(self,tag_name):
-        '''
-            тег отделяется от объекта entity
-        '''
-        index = 0
-        for tag in self.list_tags:
-            if tag.name == tag_name:
-                break
-            index+=1
-        if index <= len(self.list_tags):
-            self.list_tags.pop(index)
-
-                  
-    def isTagExist(self,tag_name):
-        '''
-            помечен ли данным тегом объект entity
-        '''
-        for tag in self.list_tags:
-            if tag.name == tag_name:
-                return 1
-        return 0 
-
-    
-    def addField(self,field):
-        '''
-            пометка полем сущности
-        '''
-        self.list_fields.append(field)
-
-        
-    def deleteField(self,field_name):
-        '''
-            особождает объект entity от данного поля
-        '''
-        index = 0
-        for field in self.list_fields:
-            if field.name == field_name:
-                break
-            index+=1
-        if index <= len(self.list_fields):
-            self.list_fields.pop(index)
-
-        
-    def isFieldExist(self,field_name):
-        '''
-            помечен ли данным полем объект entity
-        '''
-        for field in self.list_fields:
-            if field.name == field_name:
-                return 1
-        return 0
+#    def addTag (self,tag):
+#        '''
+#            пометка сущности тегом
+#        '''
+#        self.list_tags.append(tag)
+#
+#
+#    def deleteTag(self,tag_name):
+#        '''
+#            тег отделяется от объекта entity
+#        '''
+#        index = 0
+#        for tag in self.list_tags:
+#            if tag.name == tag_name:
+#                break
+#            index+=1
+#        if index <= len(self.list_tags):
+#            self.list_tags.pop(index)
+#
+#                  
+#    def isTagExist(self,tag_name):
+#        '''
+#            помечен ли данным тегом объект entity
+#        '''
+#        for tag in self.list_tags:
+#            if tag.name == tag_name:
+#                return 1
+#        return 0 
+#
+#    
+#    def addField(self,field):
+#        '''
+#            пометка полем сущности
+#        '''
+#        self.list_fields.append(field)
+#
+#        
+#    def deleteField(self,field_name):
+#        '''
+#            особождает объект entity от данного поля
+#        '''
+#        index = 0
+#        for field in self.list_fields:
+#            if field.name == field_name:
+#                break
+#            index+=1
+#        if index <= len(self.list_fields):
+#            self.list_fields.pop(index)
+#
+#        
+#    def isFieldExist(self,field_name):
+#        '''
+#            помечен ли данным полем объект entity
+#        '''
+#        for field in self.list_fields:
+#            if field.name == field_name:
+#                return 1
+#        return 0
 
     
     def getTagAttributes(self):

@@ -603,6 +603,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                 self.label_opening_repo.setText('Текущее хранилище ---')
                 self.__connnectBD()
                 self.__settingComboBoxUsers()
+                self.label_opening_repo.setText(self._path_to_repo)
 #               
         except RepoManager.ExceptionRepoIsExist as error:
             self.info_window.show()
@@ -738,13 +739,13 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         '''
         if self.lineEdit_search.text()=="":
             self._string_request = SmartFilesMainWindow.SQLRequest + ' ORDER BY entity.neuralnet_raiting DESC'# "SELECT * FROM entity"
-            self._entity_manager.searchByNeuralNet()
+            self._entity_manager.setNewNeuralRaiting()
         else:
             request = cleareExtraSpace(self.lineEdit_search.text())
             self._select_list_tags = request.split(' ')  
             
             self._entity_manager.tmpPrintNeuralNet()
-            self._entity_manager.searchByNeuralNet(self._select_list_tags)
+            self._entity_manager.setNewNeuralRaiting(self._select_list_tags)
             
             
             request = self._select_list_tags[0]
@@ -984,7 +985,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
 #        print('get signal')
         try:
             entity = self._entity_manager.loadEntityObj(entity_id)
-            self._entity_manager.addField(entity,marking_field)
+            self._entity_manager.markField(entity,marking_field)
             #self.browse_window.refresh()
         except EntityManager.ExceptionNotFoundFileBD as error:
             self.info_window.setText('''не найден файл с метаданными
@@ -1060,7 +1061,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
                         is_delete=False
                         break
                 if is_delete:
-                    self._entity_manager.releaseEntityFromTag(new_entity, old_tag)
+                    self._entity_manager.releaseEntityFromField(new_entity, old_field)
                     
                     
             self._entity_manager.saveEntityes((new_entity,))
@@ -1071,12 +1072,12 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             self.info_window.show()
 #            print('__updatingEntity проблемы:')
             print(error)
-        except Exception as error:
-            self.info_window.setText('''какие то неучтенные траблы с EntityManager
-            ''')
-            self.info_window.show()
-            print('__updatingEntity')
-            print(error)
+#        except Exception as error:
+#            self.info_window.setText('''какие то неучтенные траблы с EntityManager
+#            ''')
+#            self.info_window.show()
+#            print('__updatingEntity')
+#            print(error)
             
         self.disconnect(self.edit_window,QtCore.SIGNAL('"updateEntity(entity)'),self.__updatingEntity)
         
@@ -1218,7 +1219,7 @@ class SmartFilesMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         
 if __name__=='__main__':
     app = QtGui.QApplication(sys.argv)
-    user_repo = User('valexl', hash('123'))
+    user_repo = User('valexl', hash('vallav'))
     myclass = SmartFilesMainWindow(user_repo)
     
     

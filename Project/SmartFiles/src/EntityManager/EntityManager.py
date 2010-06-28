@@ -63,7 +63,7 @@ class EntityManager(object):
         print('the entity_id in neural_net is ----',self._neural_net.files)
         print('the net in neural_net is =======',self._neural_net.neural_net)
         
-    def searchByNeuralNet(self,list_tags=None):
+    def setNewNeuralRaiting(self,list_tags=None):
         '''
             поиск нейросетью
         '''
@@ -425,21 +425,21 @@ class EntityManager(object):
 
     
         
-    def searchEntityBySQL(self,request_SQL):
-        '''
-            поиск по запросу
-        '''
-        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
-        if os.path.exists(path_metadata_file):
-            connect=sqlite.connect(path_metadata_file)
-            cursor = connect.cursor()
-            cursor.execute(request_SQL)
-            
-            return cursor.fetchall()
-            
-        
-        else:
-            raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
+#    def searchEntityBySQL(self,request_SQL):
+#        '''
+#            поиск по запросу
+#        '''
+#        path_metadata_file = os.path.join(self._path_to_repo,SystemInfo.metadata_file_name)
+#        if os.path.exists(path_metadata_file):
+#            connect=sqlite.connect(path_metadata_file)
+#            cursor = connect.cursor()
+#            cursor.execute(request_SQL)
+#            
+#            return cursor.fetchall()
+#            
+#        
+#        else:
+#            raise EntityManager.ExceptionNotFoundFileBD('deleteTag не найден файл с метаданными ' + path_metadata_file)
 
 
     
@@ -642,8 +642,7 @@ class EntityManager(object):
             
             self.__saveEntityTags(cursor,entity_id=entity.id,user_name=entity.user_name,tag_name=tag.name,)
             self._neural_net.tagFile(entity.id, tag.name)
-            if not entity.isTagExist(tag.name):
-                entity.addTag(tag)
+            
             connect.commit()
             return entity
         else:
@@ -653,7 +652,7 @@ class EntityManager(object):
         pass
     
     
-    def addField(self,entity, field):
+    def markField(self,entity, field):
         '''
             добавление поля
         '''
@@ -667,10 +666,10 @@ class EntityManager(object):
             EntityManager.__saveEntityFields(cursor, entity.id, field.name, field.user_name, field.value)
             
             if not entity.isFieldExist(field.name):
-                entity.addField(field)
+                entity.markField(field)
             connect.commit()
         else:       
-            raise EntityManager.ExceptionNotFoundFileBD('addField не найден файл с метаданными ' + path_metadata_file)
+            raise EntityManager.ExceptionNotFoundFileBD('markField не найден файл с метаданными ' + path_metadata_file)
     
 
     

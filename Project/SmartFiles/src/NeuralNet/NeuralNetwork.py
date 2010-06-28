@@ -24,24 +24,7 @@ class NeuralNetwork(object):
     class ExceptionNoExistFile(ExceptionNeuralNetwork):
         pass
     
-#    class NeuralData(object):
-#        def __init__(self):
-#            self.tags=[]
-#            self.files=[]
-#            self.neural_net = []
-#        
-#        def load_neuralnet(repo_path,tags):
-#            '''
-#                загрузить ту часть нейросети, которая содержит данные теги
-#            '''
-#            pass
-#        
-#        def save_neuralnet(repo_path):
-#            '''
-#                сохранить текущее состояние нейросетии
-#            '''
-#            pass
-#    
+  
     def __init__(self):
         '''
             инициализация начальных параметров сети 

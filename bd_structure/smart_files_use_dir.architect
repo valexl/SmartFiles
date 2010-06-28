@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<architect-project version="1.0" appversion="0.9.14">
+<architect-project version="1.0" appversion="0.9.15">
  <project-name>smar_files_use_dir</project-name>
  <print-settings numCopies="1" zoom="1.0" pageNumbersPrinted="true" orientation="1" paperWidth="612.0" paperHeight="792.0" leftBorder="50.0" rightBorder="50.0" topBorder="50.0" bottomBorder="50.0" />
  <project-data-sources>
@@ -19,15 +19,15 @@
   </data-source>
  </project-data-sources>
  <source-databases>
-  <database id="DB0" populated="true" dbcs-ref="DS2" name="PostgreSQL smart_files" physicalName="PostgreSQL smart_files" >
-   <catalog id="CAT1" populated="true" name="smart_files" nativeTerm="database" physicalName="smart_files" >
-    <schema id="SCH2" populated="true" name="information_schema" nativeTerm="schema" physicalName="information_schema" >
+  <database id="DB0" populated="true" UUID="513df329-601e-4461-b02a-dec865bed1f1" dbcs-ref="DS2" name="PostgreSQL smart_files" physicalName="PostgreSQL smart_files" >
+   <catalog id="CAT1" populated="true" UUID="8ac1fd3e-720d-4763-8d5d-17b449096ad5" name="smart_files" nativeTerm="database" physicalName="smart_files" >
+    <schema id="SCH2" populated="true" UUID="18ff464c-5bc8-41a2-88bc-8fb069de18cf" name="information_schema" nativeTerm="schema" physicalName="information_schema" >
     </schema>
-    <schema id="SCH3" populated="true" name="pg_catalog" nativeTerm="schema" physicalName="pg_catalog" >
+    <schema id="SCH3" populated="true" UUID="66f85522-68a7-4ea4-860c-8275e5677513" name="pg_catalog" nativeTerm="schema" physicalName="pg_catalog" >
     </schema>
-    <schema id="SCH4" populated="true" name="pg_toast_temp_1" nativeTerm="schema" physicalName="pg_toast_temp_1" >
+    <schema id="SCH4" populated="true" UUID="8996d284-9844-4135-af29-c66d24687d92" name="pg_toast_temp_1" nativeTerm="schema" physicalName="pg_toast_temp_1" >
     </schema>
-    <schema id="SCH5" populated="true" name="public" nativeTerm="schema" physicalName="public" >
+    <schema id="SCH5" populated="true" UUID="7f2a3f66-08c3-47ea-be03-7edcc8fe1380" name="public" nativeTerm="schema" physicalName="public" >
     </schema>
    </catalog>
    <relationships>
@@ -35,279 +35,245 @@
   </database>
  </source-databases>
  <target-database id="ppdb" dbcs-ref="DS0">
-  <table id="TAB7" populated="true" name="entity" objectType="TABLE" physicalName="entity" remarks="Объект, который хранится в хранилище (Файл, директория или просто мета-информация сама по себе)." >
-   <folder id="FOL8" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL9" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_id_seq" defaultValue="" name="id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
-    <column id="COL10" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_name_seq" defaultValue="" name="title" nullable="1" physicalName="name" precision="255" referenceCount="1" remarks="Это просто имя объекта, его заголовок. Это НЕ ИМЯ ФАЙЛА! Просто это поле в первую очередь нужно для объектов object_type которых meta.  Конечно, можно было бы создать поле с именем &quot;title&quot;, но наличие колонки title гарантирует, что эта информация будет у каждого объекта (хотя она может и быть равна null)." scale="0" type="12" />
-    <column id="COL11" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_notes_seq" defaultValue="" name="notes" nullable="1" physicalName="notes" precision="255" referenceCount="1" remarks="Комментарии/заметки к объекту. Вобщем-то можно создать и поле &quot;notes&quot; прицепить его к файлу и написать туда все, что хочется.  Но эта колонка - она как бы для пометок о файле, которые не зависят от тегов и полей. Поэтому я думаю, колонка в будущем может пригодиться." scale="0" type="12" />
-    <column id="COL12" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_type_entity_seq" defaultValue="" name="entity_type" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Тип объекта, возможные варианты:  1) file 2) dir 3) meta  Последний тип meta - означает, что объект - это просто метаданные сами по себе." scale="0" type="12" />
-    <column id="COL13" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_file_path_seq" defaultValue="" name="file_path" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Это полный путь относительно корня хранилища к файлу. Вместе с именем файла." scale="0" type="4" />
-    <column id="COL14" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_hash_seq" defaultValue="" name="file_hash" nullable="1" physicalName="hash" precision="20" referenceCount="1" remarks="sha1 хеш от содержимого файла.  Это поле не является первичным ключом, т.к. пользователь может захотеть добавить два одинаковых файла в одно и то же хранилище (но в разные поддиректории)." scale="0" type="12" />
-    <column id="COL15" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_size_seq" defaultValue="" name="file_size" nullable="0" physicalName="size" precision="10" referenceCount="1" remarks="Размер файла в байтах." scale="0" type="4" />
-    <column id="COL16" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_date_modified_seq" defaultValue="" name="file_date_modified" nullable="0" physicalName="date_modified" precision="10" referenceCount="1" remarks="Дата последней модификации, которая была у физического файла на диске, когда вычислялся хеш hash." scale="0" type="93" />
-    <column id="COL17" populated="true" autoIncrement="false" autoIncrementSequenceName="user_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" referenceCount="1" remarks="Пользователь, который добавил файл в хранилище." scale="0" type="12" />
-    <column id="COL18" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="Дата создания объекта в базе." scale="0" type="93" />
-   </folder>
-   <folder id="FOL19" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL20" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL21" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX22" populated="true" clustered="false" name="entity_pk" physicalName="file_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC23" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL9" name="id" physicalName="id" />
+  <table id="TAB7" populated="true" UUID="fee7ae2b-d55b-478d-a901-01623059ea21" name="entity" objectType="TABLE" physicalName="entity" remarks="Объект, который хранится в хранилище (Файл, директория или просто мета-информация сама по себе)." >
+   <folder id="FOLTAB71" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL8" populated="true" UUID="3005de6b-7179-4d27-9295-286ee46b0715" autoIncrement="false" autoIncrementSequenceName="entity_id_seq" defaultValue="" name="id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL9" populated="true" UUID="e0247781-7d08-4cae-94e5-2b597996ee8c" autoIncrement="false" autoIncrementSequenceName="entity_name_seq" defaultValue="" name="title" nullable="1" physicalName="name" precision="255" referenceCount="1" remarks="Это просто имя объекта, его заголовок. Это НЕ ИМЯ ФАЙЛА! Просто это поле в первую очередь нужно для объектов object_type которых meta.  Конечно, можно было бы создать поле с именем &quot;title&quot;, но наличие колонки title гарантирует, что эта информация будет у каждого объекта (хотя она может и быть равна null)." scale="0" type="12" />
+    <column id="COL10" populated="true" UUID="e8b70596-4af9-4b50-a1c5-6496483b9737" autoIncrement="false" autoIncrementSequenceName="entity_notes_seq" defaultValue="" name="notes" nullable="1" physicalName="notes" precision="255" referenceCount="1" remarks="Комментарии/заметки к объекту. Вобщем-то можно создать и поле &quot;notes&quot; прицепить его к файлу и написать туда все, что хочется.  Но эта колонка - она как бы для пометок о файле, которые не зависят от тегов и полей. Поэтому я думаю, колонка в будущем может пригодиться." scale="0" type="12" />
+    <column id="COL11" populated="true" UUID="01757f7c-e904-4f6c-9dcf-1141fb96e370" autoIncrement="false" autoIncrementSequenceName="entity_type_entity_seq" defaultValue="" name="entity_type" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Тип объекта, возможные варианты:  1) file 2) dir 3) meta  Последний тип meta - означает, что объект - это просто метаданные сами по себе." scale="0" type="12" />
+    <column id="COL12" populated="true" UUID="6984c23f-ab82-48cb-99ad-9d1ca3df472e" autoIncrement="false" autoIncrementSequenceName="entity_file_path_seq" defaultValue="" name="file_path" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Это полный путь относительно корня хранилища к файлу. Вместе с именем файла." scale="0" type="4" />
+    <column id="COL13" populated="true" UUID="40931172-281e-45bc-beda-0af70d5b5787" autoIncrement="false" autoIncrementSequenceName="entity_hash_seq" defaultValue="" name="file_hash" nullable="1" physicalName="hash" precision="20" referenceCount="1" remarks="sha1 хеш от содержимого файла.  Это поле не является первичным ключом, т.к. пользователь может захотеть добавить два одинаковых файла в одно и то же хранилище (но в разные поддиректории)." scale="0" type="12" />
+    <column id="COL14" populated="true" UUID="ad1245e7-c1b3-4c02-a669-078dd4153592" autoIncrement="false" autoIncrementSequenceName="entity_size_seq" defaultValue="" name="file_size" nullable="0" physicalName="size" precision="10" referenceCount="1" remarks="Размер файла в байтах." scale="0" type="4" />
+    <column id="COL15" populated="true" UUID="77100cdc-0262-4761-98b4-055ad766af3f" autoIncrement="false" autoIncrementSequenceName="entity_date_modified_seq" defaultValue="" name="file_date_modified" nullable="0" physicalName="date_modified" precision="10" referenceCount="1" remarks="Дата последней модификации, которая была у физического файла на диске, когда вычислялся хеш hash." scale="0" type="93" />
+    <column id="COL16" populated="true" UUID="9a495471-d61b-4d05-bf08-2d6af110b584" autoIncrement="false" autoIncrementSequenceName="entity_neural_raiting_seq" defaultValue="" name="neural_raiting" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL17" populated="true" UUID="64d7d351-f7bf-4d30-b781-73aba75c21e9" autoIncrement="false" autoIncrementSequenceName="user_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" referenceCount="1" remarks="Пользователь, который добавил файл в хранилище." scale="0" type="12" />
+    <column id="COL18" populated="true" UUID="ee3ac93e-e352-4306-9f7c-3ea665defb47" autoIncrement="false" autoIncrementSequenceName="entity_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="Дата создания объекта в базе." scale="0" type="93" />
+    </folder>
+    <folder id="FOLTAB73" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB72" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB74" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX19" populated="true" UUID="dd0089b8-bb8b-45b9-b2ca-2440060502d0" clustered="false" name="entity_pk" physicalName="file_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC20" populated="true" UUID="3d998783-3f7c-4815-b7e0-355664384030" ascendingOrDescending="UNSPECIFIED" column-ref="COL8" name="id" physicalName="id" />
     </index>
    </folder>
   </table>
-  <table id="TAB24" populated="true" name="tag" objectType="TABLE" physicalName="tag" remarks="Тег, которым можно помечать объекты" >
-   <folder id="FOL25" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL26" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
-    <column id="COL27" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL28" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL29" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
-   </folder>
-   <folder id="FOL30" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL31" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL32" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX33" populated="true" clustered="false" name="tag_pk" physicalName="tag_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC34" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL26" name="name" physicalName="name" />
-     <index-column id="IDC35" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL27" name="user_name" physicalName="user_name" />
+  <table id="TAB21" populated="true" UUID="4f188183-11ac-4a2e-8e2f-a86ae909b5ef" name="tag" objectType="TABLE" physicalName="tag" remarks="Тег, которым можно помечать объекты" >
+   <folder id="FOLTAB211" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL22" populated="true" UUID="205d0c09-1f7c-45d2-8b9f-4654011d5680" autoIncrement="false" autoIncrementSequenceName="tag_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
+    <column id="COL23" populated="true" UUID="a8f2fbb2-961b-4b84-8df3-3c3119b2c2c6" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL24" populated="true" UUID="bf8acd94-b077-4ecd-b65f-96528901d9e4" autoIncrement="false" autoIncrementSequenceName="tag_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL25" populated="true" UUID="a22f6c10-c09f-4573-8ae0-bcacaf28dda5" autoIncrement="false" autoIncrementSequenceName="tag_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
+    </folder>
+    <folder id="FOLTAB213" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB212" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB214" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX26" populated="true" UUID="f301dc4d-3248-4cab-8291-1fd84649a1d4" clustered="false" name="tag_pk" physicalName="tag_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC27" populated="true" UUID="26b17639-445d-4c71-8b87-63c20d8902ad" ascendingOrDescending="UNSPECIFIED" column-ref="COL22" name="name" physicalName="name" />
+     <index-column id="IDC28" populated="true" UUID="2ab10eff-2918-4d69-b834-6494df4627b8" ascendingOrDescending="UNSPECIFIED" column-ref="COL23" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB36" populated="true" name="field" objectType="TABLE" physicalName="field" remarks="Поле (имя=значение), которое можно добавлять к объектам" >
-   <folder id="FOL37" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL38" populated="true" autoIncrement="false" autoIncrementSequenceName="field_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
-    <column id="COL39" populated="true" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL40" populated="true" autoIncrement="false" autoIncrementSequenceName="field_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL41" populated="true" autoIncrement="false" autoIncrementSequenceName="files_fields_value_type_seq" defaultValue="" name="value_type" nullable="0" physicalName="value_type" precision="10" referenceCount="1" remarks="Тип данных для поля value. Требуется вобщем-то всего три типа: 1) Строка 2) Целое число 3) Вещественное число  Или даже вообще два: 1) Строка 2) Вещественное число А целые ведь - подмножество вещественных." scale="0" type="12" />
-    <column id="COL42" populated="true" autoIncrement="false" autoIncrementSequenceName="field_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
-   </folder>
-   <folder id="FOL43" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL44" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL45" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX46" populated="true" clustered="false" name="field_pk" physicalName="field_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC47" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL38" name="name" physicalName="name" />
-     <index-column id="IDC48" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL39" name="user_name" physicalName="user_name" />
+  <table id="TAB29" populated="true" UUID="9f039fa0-dec7-450d-99e8-d942de6806e8" name="field" objectType="TABLE" physicalName="field" remarks="Поле (имя=значение), которое можно добавлять к объектам" >
+   <folder id="FOLTAB291" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL30" populated="true" UUID="240592b3-8a3d-4717-9ae2-8803f20d7628" autoIncrement="false" autoIncrementSequenceName="field_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
+    <column id="COL31" populated="true" UUID="3f09277f-8c0d-4b6f-8819-06fb17e589fc" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL32" populated="true" UUID="417c055c-cd92-4060-9d92-b84474093f44" autoIncrement="false" autoIncrementSequenceName="field_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL33" populated="true" UUID="c0df1fdc-1a62-47a7-b574-2c704ec69ac9" autoIncrement="false" autoIncrementSequenceName="files_fields_value_type_seq" defaultValue="" name="value_type" nullable="0" physicalName="value_type" precision="10" referenceCount="1" remarks="Тип данных для поля value. Требуется вобщем-то всего три типа: 1) Строка 2) Целое число 3) Вещественное число  Или даже вообще два: 1) Строка 2) Вещественное число А целые ведь - подмножество вещественных." scale="0" type="12" />
+    <column id="COL34" populated="true" UUID="c32be899-2c1b-4f6a-ae38-70fe8401f97a" autoIncrement="false" autoIncrementSequenceName="field_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
+    </folder>
+    <folder id="FOLTAB293" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB292" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB294" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX35" populated="true" UUID="1b54a06d-4548-4611-bfe0-1fae694c06c7" clustered="false" name="field_pk" physicalName="field_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC36" populated="true" UUID="b0225fe0-9010-44af-b654-3b2e85e7caf8" ascendingOrDescending="UNSPECIFIED" column-ref="COL30" name="name" physicalName="name" />
+     <index-column id="IDC37" populated="true" UUID="c63591a2-f6c3-4070-844c-ff7632d2ce33" ascendingOrDescending="UNSPECIFIED" column-ref="COL31" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB49" populated="true" name="group" objectType="TABLE" physicalName="group" remarks="Группа тегов/полей. Раньше это была Category. Просто имя Group более короткое." >
-   <folder id="FOL50" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL51" populated="true" autoIncrement="false" autoIncrementSequenceName="group_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
-    <column id="COL52" populated="true" autoIncrement="false" autoIncrementSequenceName="group_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL53" populated="true" autoIncrement="false" autoIncrementSequenceName="group_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL54" populated="true" autoIncrement="false" autoIncrementSequenceName="group_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
-   </folder>
-   <folder id="FOL55" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL56" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL57" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX58" populated="true" clustered="false" name="group_pk" physicalName="category_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC59" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL51" name="name" physicalName="name" />
-     <index-column id="IDC60" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL52" name="user_name" physicalName="user_name" />
+  <table id="TAB38" populated="true" UUID="4ba18610-a3dd-4601-bebe-a91750a51589" name="group" objectType="TABLE" physicalName="group" remarks="Группа тегов/полей. Раньше это была Category. Просто имя Group более короткое." >
+   <folder id="FOLTAB381" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL39" populated="true" UUID="49884964-66a3-4a5d-b449-e79e444815b9" autoIncrement="false" autoIncrementSequenceName="group_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="2" remarks="" scale="0" type="12" />
+    <column id="COL40" populated="true" UUID="9816b4c1-4926-49fc-b001-cbd453b2ad66" autoIncrement="false" autoIncrementSequenceName="group_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL41" populated="true" UUID="1d5d2f39-ee22-46f4-b6b5-e907491dc031" autoIncrement="false" autoIncrementSequenceName="group_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL42" populated="true" UUID="aee31556-8bb8-4bea-aae0-d4f78676ca37" autoIncrement="false" autoIncrementSequenceName="group_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
+    </folder>
+    <folder id="FOLTAB383" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB382" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB384" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX43" populated="true" UUID="c25a979c-fad3-4c5c-a48c-05f87b8608ab" clustered="false" name="group_pk" physicalName="category_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC44" populated="true" UUID="5ec80e78-7a18-450a-9b3a-994ca95cf1e9" ascendingOrDescending="UNSPECIFIED" column-ref="COL39" name="name" physicalName="name" />
+     <index-column id="IDC45" populated="true" UUID="a8dd8312-5163-43e1-88bc-0cb926a2d249" ascendingOrDescending="UNSPECIFIED" column-ref="COL40" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB61" populated="true" name="entity_tags" objectType="TABLE" physicalName="entity_tags" remarks="" >
-   <folder id="FOL62" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL63" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
-    <column id="COL64" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_tag_name_seq" defaultValue="" name="tag_name" nullable="0" physicalName="tag_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL65" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
-   </folder>
-   <folder id="FOL66" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL67" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL68" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX69" populated="true" clustered="false" name="entity_tags_pk" physicalName="files_tags_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC70" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL63" name="entity_id" physicalName="file_id" />
-     <index-column id="IDC71" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL64" name="tag_name" physicalName="tag_name" />
-     <index-column id="IDC72" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL65" name="user_name" physicalName="user_name" />
+  <table id="TAB46" populated="true" UUID="dfc73da5-7385-4816-af79-45ac2d18dd35" name="entity_tags" objectType="TABLE" physicalName="entity_tags" remarks="" >
+   <folder id="FOLTAB461" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL47" populated="true" UUID="71da32b2-67bf-46f0-b63d-075180be0ac6" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL48" populated="true" UUID="32572fce-0a3c-431f-abc2-64e296199b4d" autoIncrement="false" autoIncrementSequenceName="tag_tag_name_seq" defaultValue="" name="tag_name" nullable="0" physicalName="tag_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL49" populated="true" UUID="5aa46e38-9a3a-49db-a0df-700eaf9ecb53" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
+    </folder>
+    <folder id="FOLTAB463" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB462" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB464" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX50" populated="true" UUID="ad7ab08f-b42b-49f4-b184-a5f7412e5fad" clustered="false" name="entity_tags_pk" physicalName="files_tags_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC51" populated="true" UUID="2992b833-f27d-44a2-b809-9cb9e0c3546c" ascendingOrDescending="UNSPECIFIED" column-ref="COL47" name="entity_id" physicalName="file_id" />
+     <index-column id="IDC52" populated="true" UUID="23710ffd-5d60-44a6-8e6e-ee68bddca36e" ascendingOrDescending="UNSPECIFIED" column-ref="COL48" name="tag_name" physicalName="tag_name" />
+     <index-column id="IDC53" populated="true" UUID="c3db2fec-afa3-4ebc-99bd-7cb809ade8b3" ascendingOrDescending="UNSPECIFIED" column-ref="COL49" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB73" populated="true" name="entity_fields" objectType="TABLE" physicalName="entity_fields" remarks="" >
-   <folder id="FOL74" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL75" populated="true" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
-    <column id="COL76" populated="true" autoIncrement="false" autoIncrementSequenceName="field_name_seq" defaultValue="" name="field_name" nullable="0" physicalName="name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL77" populated="true" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL78" populated="true" autoIncrement="false" autoIncrementSequenceName="entity_fields_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="255" referenceCount="1" remarks="Значение поля для конкретного файла.  Хотя тип колонки и строковый, доп. поле data_type определяет как интерпретировать содержимое: как строку или как число." scale="0" type="12" />
-   </folder>
-   <folder id="FOL79" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL80" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL81" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX82" populated="true" clustered="false" name="entity_fields_pk" physicalName="files_fields_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC83" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL75" name="entity_id" physicalName="file_id" />
-     <index-column id="IDC84" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL76" name="field_name" physicalName="field_name" />
-     <index-column id="IDC85" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL77" name="user_name" physicalName="user_name" />
+  <table id="TAB54" populated="true" UUID="08158e7e-3515-45b8-ae69-79a5f940a69a" name="entity_fields" objectType="TABLE" physicalName="entity_fields" remarks="" >
+   <folder id="FOLTAB541" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL55" populated="true" UUID="963a4787-2502-4ec8-a3bd-c5ce2b3c03c1" autoIncrement="false" autoIncrementSequenceName="file_id_seq" defaultValue="" name="entity_id" nullable="0" physicalName="id" precision="10" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL56" populated="true" UUID="bb34a69e-dfa2-43fb-9244-01572f482449" autoIncrement="false" autoIncrementSequenceName="field_name_seq" defaultValue="" name="field_name" nullable="0" physicalName="name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL57" populated="true" UUID="fa8a1f9d-ec4e-45eb-bf48-d54e0a50db87" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL58" populated="true" UUID="93bf1a0e-68c8-4d48-bf5c-f50848f2a7fc" autoIncrement="false" autoIncrementSequenceName="entity_fields_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="255" referenceCount="1" remarks="Значение поля для конкретного файла.  Хотя тип колонки и строковый, доп. поле data_type определяет как интерпретировать содержимое: как строку или как число." scale="0" type="12" />
+    </folder>
+    <folder id="FOLTAB543" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB542" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB544" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX59" populated="true" UUID="051c80ee-2771-4247-991b-70519d910c05" clustered="false" name="entity_fields_pk" physicalName="files_fields_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC60" populated="true" UUID="7483bd3f-c3b4-4b53-b712-2977da5280ee" ascendingOrDescending="UNSPECIFIED" column-ref="COL55" name="entity_id" physicalName="file_id" />
+     <index-column id="IDC61" populated="true" UUID="29afcd86-44d1-4201-a05c-7f2d1fc7c973" ascendingOrDescending="UNSPECIFIED" column-ref="COL56" name="field_name" physicalName="field_name" />
+     <index-column id="IDC62" populated="true" UUID="be45eac2-fb7b-4d47-8a88-83e67b70e1a4" ascendingOrDescending="UNSPECIFIED" column-ref="COL57" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB86" populated="true" name="groups_tags" objectType="TABLE" physicalName="groups_tags" remarks="" >
-   <folder id="FOL87" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL88" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_tag_name_seq" defaultValue="" name="tag_name" nullable="0" physicalName="tag_name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL89" populated="true" autoIncrement="false" autoIncrementSequenceName="category_category_name_seq" defaultValue="" name="group_name" nullable="0" physicalName="category_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL90" populated="true" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="2" remarks="" scale="0" type="12" />
-   </folder>
-   <folder id="FOL91" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL92" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL93" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX94" populated="true" clustered="false" name="groups_tags_pk" physicalName="tags_categories_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC95" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL88" name="tag_name" physicalName="tag_name" />
-     <index-column id="IDC96" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL89" name="group_name" physicalName="category_name" />
-     <index-column id="IDC97" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL90" name="user_name" physicalName="user_name" />
+  <table id="TAB63" populated="true" UUID="823702a6-c95f-40b8-8dd4-3a7e6f3ab92d" name="groups_tags" objectType="TABLE" physicalName="groups_tags" remarks="" >
+   <folder id="FOLTAB631" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL64" populated="true" UUID="9becebac-59e6-44f3-86df-b5121dbab779" autoIncrement="false" autoIncrementSequenceName="tag_tag_name_seq" defaultValue="" name="tag_name" nullable="0" physicalName="tag_name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL65" populated="true" UUID="e88cf09a-9d72-4ba9-bbf8-28e99b93e9b3" autoIncrement="false" autoIncrementSequenceName="category_category_name_seq" defaultValue="" name="group_name" nullable="0" physicalName="category_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL66" populated="true" UUID="e6f6488c-297e-4733-91cc-b57a3a3d447c" autoIncrement="false" autoIncrementSequenceName="tag_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="2" remarks="" scale="0" type="12" />
+    </folder>
+    <folder id="FOLTAB633" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB632" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB634" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX67" populated="true" UUID="251ab1dc-9bbc-4298-9298-d481fb368879" clustered="false" name="groups_tags_pk" physicalName="tags_categories_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC68" populated="true" UUID="40ccfe6a-6ab8-4820-b371-542eeda3d80a" ascendingOrDescending="UNSPECIFIED" column-ref="COL64" name="tag_name" physicalName="tag_name" />
+     <index-column id="IDC69" populated="true" UUID="65b85c45-7f4c-464d-ab14-ed5851ddfcbd" ascendingOrDescending="UNSPECIFIED" column-ref="COL65" name="group_name" physicalName="category_name" />
+     <index-column id="IDC70" populated="true" UUID="5c669853-5080-4a03-b6a9-77734ecda3b1" ascendingOrDescending="UNSPECIFIED" column-ref="COL66" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB98" populated="true" name="groups_fields" objectType="TABLE" physicalName="groups_fields" remarks="" >
-   <folder id="FOL99" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL100" populated="true" autoIncrement="false" autoIncrementSequenceName="field_field_name_seq" defaultValue="" name="field_name" nullable="0" physicalName="field_name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL101" populated="true" autoIncrement="false" autoIncrementSequenceName="category_category_name_seq" defaultValue="" name="group_name" nullable="0" physicalName="category_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL102" populated="true" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="2" remarks="" scale="0" type="12" />
-   </folder>
-   <folder id="FOL103" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL104" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL105" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX106" populated="true" clustered="false" name="groups_fields_pk" physicalName="fields_categories_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC107" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL100" name="field_name" physicalName="field_name" />
-     <index-column id="IDC108" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL101" name="group_name" physicalName="category_name" />
-     <index-column id="IDC109" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL102" name="user_name" physicalName="user_name" />
+  <table id="TAB71" populated="true" UUID="0d14502d-6749-410e-bd1e-55d5df2dcdc6" name="groups_fields" objectType="TABLE" physicalName="groups_fields" remarks="" >
+   <folder id="FOLTAB711" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL72" populated="true" UUID="5852097f-9480-4b71-8c3b-87d1ef328c40" autoIncrement="false" autoIncrementSequenceName="field_field_name_seq" defaultValue="" name="field_name" nullable="0" physicalName="field_name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL73" populated="true" UUID="58f701d0-bde7-45e9-a434-6c9199e84a8e" autoIncrement="false" autoIncrementSequenceName="category_category_name_seq" defaultValue="" name="group_name" nullable="0" physicalName="category_name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL74" populated="true" UUID="06600533-e9e2-43fb-ac21-3edbf6bebe24" autoIncrement="false" autoIncrementSequenceName="field_user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="user_name" precision="255" primaryKeySeq="2" referenceCount="2" remarks="" scale="0" type="12" />
+    </folder>
+    <folder id="FOLTAB713" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB712" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB714" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX75" populated="true" UUID="117bc5e5-5eee-4d4f-8785-32c8e09d1e14" clustered="false" name="groups_fields_pk" physicalName="fields_categories_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC76" populated="true" UUID="54b81514-323d-48bb-8f36-1503df9deed8" ascendingOrDescending="UNSPECIFIED" column-ref="COL72" name="field_name" physicalName="field_name" />
+     <index-column id="IDC77" populated="true" UUID="d553a223-506c-4c1e-b5e7-5c9cc0019713" ascendingOrDescending="UNSPECIFIED" column-ref="COL73" name="group_name" physicalName="category_name" />
+     <index-column id="IDC78" populated="true" UUID="c60a2fd7-f742-4769-af56-b938740e529e" ascendingOrDescending="UNSPECIFIED" column-ref="COL74" name="user_name" physicalName="user_name" />
     </index>
    </folder>
   </table>
-  <table id="TAB110" populated="true" name="user" objectType="TABLE" physicalName="user" remarks="Пользователь системы" >
-   <folder id="FOL111" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL112" populated="true" autoIncrement="false" autoIncrementSequenceName="user_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="Имя (логин) пользователя." scale="0" type="12" />
-    <column id="COL113" populated="true" autoIncrement="false" autoIncrementSequenceName="user_password_seq" defaultValue="" name="password" nullable="0" physicalName="password" precision="10" referenceCount="1" remarks="" scale="0" type="4" />
-    <column id="COL114" populated="true" autoIncrement="false" autoIncrementSequenceName="user_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL115" populated="true" autoIncrement="false" autoIncrementSequenceName="user_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
-    <column id="COL116" populated="true" autoIncrement="false" autoIncrementSequenceName="user_role_seq" defaultValue="" name="role" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Определяет права пользователя. Самое простое: два значения: ADMIN и USER" scale="0" type="12" />
-   </folder>
-   <folder id="FOL117" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL118" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL119" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX120" populated="true" clustered="false" name="user_pk" physicalName="user_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC121" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL112" name="name" physicalName="name" />
-    </index>
-   </folder>
-  </table>
-  <table id="TAB122" populated="true" name="dir_usage" objectType="TABLE" physicalName="dir_usage" remarks="Таблица для отключения избранных директорий, которые нужно, чтобы не мешались конкретному пользователю при работе." >
-   <folder id="FOL123" populated="true" name="Columns" physicalName="Columns" type="1" >
-    <column id="COL124" populated="true" autoIncrement="false" autoIncrementSequenceName="dir_usage_id_seq" defaultValue="" name="path" nullable="0" physicalName="id" precision="255" primaryKeySeq="0" referenceCount="1" remarks="" scale="0" type="12" />
-    <column id="COL125" populated="true" autoIncrement="false" autoIncrementSequenceName="user_name_seq" defaultValue="" name="user_name" nullable="0" physicalName="name" precision="255" primaryKeySeq="1" referenceCount="1" remarks="Имя (логин) пользователя." scale="0" type="12" />
-    <column id="COL126" populated="true" autoIncrement="false" autoIncrementSequenceName="dir_usage_usage_status_seq" defaultValue="" name="usage_status" nullable="0" physicalName="" precision="30" referenceCount="1" remarks="используется папка в хранилище или нет. Лучше сделать строкового типа, чтобы иметь возможность задавать больше значений, чем простое true/false." scale="0" type="12" />
-   </folder>
-   <folder id="FOL127" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3" >
-   </folder>
-   <folder id="FOL128" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2" >
-   </folder>
-   <folder id="FOL129" populated="true" name="Indices" physicalName="Indices" type="4" >
-    <index id="IDX130" populated="true" clustered="false" name="dir_usage_pk" physicalName="Use-Directory_pk" primaryKeyIndex="true" unique="true" >
-     <index-column id="IDC131" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL124" name="path" physicalName="id" />
-     <index-column id="IDC132" populated="true" ascendingOrDescending="UNSPECIFIED" column-ref="COL125" name="user_name" physicalName="user_name" />
+  <table id="TAB79" populated="true" UUID="c7c54a8b-8d18-426a-a741-562ae11b5834" name="user" objectType="TABLE" physicalName="user" remarks="Пользователь системы" >
+   <folder id="FOLTAB791" populated="true" name="Columns" physicalName="Columns" type="1">
+    <column id="COL80" populated="true" UUID="7b22b3de-fe50-4b12-94d6-74e3ca49dabd" autoIncrement="false" autoIncrementSequenceName="user_name_seq" defaultValue="" name="name" nullable="0" physicalName="name" precision="255" primaryKeySeq="0" referenceCount="1" remarks="Имя (логин) пользователя." scale="0" type="12" />
+    <column id="COL81" populated="true" UUID="6c9bf2c1-e1b9-4d5b-8428-65b2b53b09dd" autoIncrement="false" autoIncrementSequenceName="user_password_seq" defaultValue="" name="password" nullable="0" physicalName="password" precision="10" referenceCount="1" remarks="" scale="0" type="4" />
+    <column id="COL82" populated="true" UUID="d52b6697-9551-4310-9dd0-eab1e5cfa076" autoIncrement="false" autoIncrementSequenceName="user_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="255" referenceCount="1" remarks="" scale="0" type="12" />
+    <column id="COL83" populated="true" UUID="20eb02fa-e47c-466b-ba56-c5208710aeba" autoIncrement="false" autoIncrementSequenceName="user_date_created_seq" defaultValue="" name="date_created" nullable="0" physicalName="date_created" precision="10" referenceCount="1" remarks="" scale="0" type="93" />
+    <column id="COL84" populated="true" UUID="ec8b645f-27ac-428e-adaf-e47d360202f8" autoIncrement="false" autoIncrementSequenceName="user_role_seq" defaultValue="" name="role" nullable="0" physicalName="" precision="10" referenceCount="1" remarks="Определяет права пользователя. Самое простое: два значения: ADMIN и USER" scale="0" type="12" />
+    </folder>
+    <folder id="FOLTAB793" populated="true" name="Exported Keys" physicalName="Exported Keys" type="3">
+    </folder>
+    <folder id="FOLTAB792" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
+    </folder>
+    <folder id="FOLTAB794" populated="true" name="Indices" physicalName="Indices" type="4">
+    <index id="IDX85" populated="true" UUID="ddfd25dd-1d05-4e51-9f22-2305e50094f8" clustered="false" name="user_pk" physicalName="user_pk" primaryKeyIndex="true" unique="true" >
+     <index-column id="IDC86" populated="true" UUID="adc70231-5088-4336-bae2-5d77add8d5da" ascendingOrDescending="UNSPECIFIED" column-ref="COL80" name="name" physicalName="name" />
     </index>
    </folder>
   </table>
   <relationships>
-   <relationship id="REL133" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB73" fkCardinality="7" identifying="true" name="file_files_fields_fk" physicalName="file_files_fields_fk" pk-table-ref="TAB7" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP134" populated="true" fk-column-ref="COL75" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+   <relationship id="REL87" populated="true" UUID="b1f1b2eb-d5d6-4f10-9547-beb9e4d8401a" deferrability="7" deleteRule="3" fk-table-ref="TAB54" fkCardinality="7" identifying="true" name="file_files_fields_fk" physicalName="file_files_fields_fk" pk-table-ref="TAB7" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP88" populated="true" UUID="ee27ee27-cf6a-4a19-9c5b-86dd51df4929" fk-column-ref="COL55" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL8" />
    </relationship>
-   <relationship id="REL135" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB61" fkCardinality="7" identifying="true" name="file_files_tags_fk" physicalName="file_files_tags_fk" pk-table-ref="TAB7" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP136" populated="true" fk-column-ref="COL63" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+   <relationship id="REL89" populated="true" UUID="9f97e5d1-3876-48cf-a975-3fb84c62560d" deferrability="7" deleteRule="3" fk-table-ref="TAB46" fkCardinality="7" identifying="true" name="file_files_tags_fk" physicalName="file_files_tags_fk" pk-table-ref="TAB7" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP90" populated="true" UUID="ef75925f-c896-4a00-8f46-df4a8970291c" fk-column-ref="COL47" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL8" />
    </relationship>
-   <relationship id="REL137" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB7" fkCardinality="7" identifying="false" name="user_file_fk" physicalName="user_file_fk" pk-table-ref="TAB110" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP138" populated="true" fk-column-ref="COL17" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL112" />
+   <relationship id="REL91" populated="true" UUID="0bac2704-afe5-4b93-9ca8-ab4901442aae" deferrability="7" deleteRule="3" fk-table-ref="TAB46" fkCardinality="7" identifying="true" name="tag_files_tags_fk" physicalName="tag_files_tags_fk" pk-table-ref="TAB21" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP92" populated="true" UUID="ff4d406f-0ff4-4cdc-a003-b463316c9365" fk-column-ref="COL48" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL22" />
+    <column-mapping id="CMP93" populated="true" UUID="a40f252f-345d-46e2-bc44-fa750b769da3" fk-column-ref="COL49" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL23" />
    </relationship>
-   <relationship id="REL139" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB61" fkCardinality="7" identifying="true" name="tag_files_tags_fk" physicalName="tag_files_tags_fk" pk-table-ref="TAB24" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP140" populated="true" fk-column-ref="COL64" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL26" />
-    <column-mapping id="CMP141" populated="true" fk-column-ref="COL65" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL27" />
+   <relationship id="REL94" populated="true" UUID="3d1edfea-267b-4f5f-9aa5-2e85d3f03726" deferrability="7" deleteRule="3" fk-table-ref="TAB63" fkCardinality="7" identifying="true" name="tag_tags_categories_fk" physicalName="tag_tags_categories_fk" pk-table-ref="TAB21" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP95" populated="true" UUID="6fe49dd1-3c74-4929-89a7-64eb8c0fcff0" fk-column-ref="COL64" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL22" />
+    <column-mapping id="CMP96" populated="true" UUID="b5a75f7f-a8b8-4f66-abd4-da35a1cd01ab" fk-column-ref="COL66" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL23" />
    </relationship>
-   <relationship id="REL142" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB86" fkCardinality="7" identifying="true" name="tag_tags_categories_fk" physicalName="tag_tags_categories_fk" pk-table-ref="TAB24" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP143" populated="true" fk-column-ref="COL88" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL26" />
-    <column-mapping id="CMP144" populated="true" fk-column-ref="COL90" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL27" />
+   <relationship id="REL97" populated="true" UUID="77712ee5-3cee-4991-80b3-5d6a09ea39d5" deferrability="7" deleteRule="3" fk-table-ref="TAB54" fkCardinality="7" identifying="true" name="field_files_fields_fk" physicalName="field_files_fields_fk" pk-table-ref="TAB29" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP98" populated="true" UUID="eebdc92e-bc5d-4c8b-b46e-6fb8950d7a0f" fk-column-ref="COL56" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL30" />
+    <column-mapping id="CMP99" populated="true" UUID="854f73b0-acf4-4e34-9c7c-00839f750708" fk-column-ref="COL57" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL31" />
    </relationship>
-   <relationship id="REL145" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB24" fkCardinality="7" identifying="true" name="user_tag_fk" physicalName="user_tag_fk" pk-table-ref="TAB110" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP146" populated="true" fk-column-ref="COL27" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL112" />
+   <relationship id="REL100" populated="true" UUID="d2bd9db1-6e2d-4de0-866a-c0027b57064e" deferrability="7" deleteRule="3" fk-table-ref="TAB71" fkCardinality="7" identifying="true" name="field_fields_categories_fk" physicalName="field_fields_categories_fk" pk-table-ref="TAB29" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP101" populated="true" UUID="81f84a1c-34f6-4b44-b6a7-52f322bec5e2" fk-column-ref="COL72" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL30" />
+    <column-mapping id="CMP102" populated="true" UUID="4ed4c158-a6f5-4240-9f77-a15a1bf1be62" fk-column-ref="COL74" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL31" />
    </relationship>
-   <relationship id="REL147" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB73" fkCardinality="7" identifying="true" name="field_files_fields_fk" physicalName="field_files_fields_fk" pk-table-ref="TAB36" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP148" populated="true" fk-column-ref="COL76" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL38" />
-    <column-mapping id="CMP149" populated="true" fk-column-ref="COL77" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL39" />
+   <relationship id="REL103" populated="true" UUID="2fe7e2d8-31d5-46b2-b298-83164153a160" deferrability="7" deleteRule="3" fk-table-ref="TAB63" fkCardinality="7" identifying="true" name="category_tags_categories_fk" physicalName="category_tags_categories_fk" pk-table-ref="TAB38" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP104" populated="true" UUID="a0683991-8243-4967-860b-031d9870b3e6" fk-column-ref="COL65" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL39" />
+    <column-mapping id="CMP105" populated="true" UUID="2191096b-5aa2-49a7-a41d-7fad6cb32957" fk-column-ref="COL66" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL40" />
    </relationship>
-   <relationship id="REL150" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB98" fkCardinality="7" identifying="true" name="field_fields_categories_fk" physicalName="field_fields_categories_fk" pk-table-ref="TAB36" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP151" populated="true" fk-column-ref="COL100" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL38" />
-    <column-mapping id="CMP152" populated="true" fk-column-ref="COL102" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL39" />
+   <relationship id="REL106" populated="true" UUID="adcbde3a-47a1-49fa-9e0d-31c767af8c7b" deferrability="7" deleteRule="3" fk-table-ref="TAB71" fkCardinality="7" identifying="true" name="category_fields_categories_fk" physicalName="category_fields_categories_fk" pk-table-ref="TAB38" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP107" populated="true" UUID="4a3c5090-91bb-4b70-a9df-831ab87a25a6" fk-column-ref="COL73" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL39" />
+    <column-mapping id="CMP108" populated="true" UUID="8a475ad3-70e7-41e8-896a-c5c16c69dc76" fk-column-ref="COL74" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL40" />
    </relationship>
-   <relationship id="REL153" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB36" fkCardinality="7" identifying="true" name="user_field_fk" physicalName="user_field_fk" pk-table-ref="TAB110" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP154" populated="true" fk-column-ref="COL39" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL112" />
+   <relationship id="REL109" populated="true" UUID="60f70b2d-31b0-4121-8f88-fae6f4f03819" deferrability="7" deleteRule="3" fk-table-ref="TAB7" fkCardinality="7" identifying="false" name="user_file_fk" physicalName="user_file_fk" pk-table-ref="TAB79" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP110" populated="true" UUID="a7724adc-cfba-4117-8638-f74c681eacd5" fk-column-ref="COL17" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL80" />
    </relationship>
-   <relationship id="REL155" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB86" fkCardinality="7" identifying="true" name="category_tags_categories_fk" physicalName="category_tags_categories_fk" pk-table-ref="TAB49" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP156" populated="true" fk-column-ref="COL89" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL51" />
-    <column-mapping id="CMP157" populated="true" fk-column-ref="COL90" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL52" />
+   <relationship id="REL111" populated="true" UUID="2e167287-80bb-4180-93fa-7d4020156d32" deferrability="7" deleteRule="3" fk-table-ref="TAB21" fkCardinality="7" identifying="true" name="user_tag_fk" physicalName="user_tag_fk" pk-table-ref="TAB79" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP112" populated="true" UUID="3f9e447d-b605-430f-ab30-a621ab366d3b" fk-column-ref="COL23" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL80" />
    </relationship>
-   <relationship id="REL158" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB98" fkCardinality="7" identifying="true" name="category_fields_categories_fk" physicalName="category_fields_categories_fk" pk-table-ref="TAB49" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP159" populated="true" fk-column-ref="COL101" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL51" />
-    <column-mapping id="CMP160" populated="true" fk-column-ref="COL102" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL52" />
+   <relationship id="REL113" populated="true" UUID="ddac8a1a-313e-4509-be8a-16aaa312c24f" deferrability="7" deleteRule="3" fk-table-ref="TAB29" fkCardinality="7" identifying="true" name="user_field_fk" physicalName="user_field_fk" pk-table-ref="TAB79" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP114" populated="true" UUID="4735343d-35f9-486b-a6dd-404490b709d2" fk-column-ref="COL31" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL80" />
    </relationship>
-   <relationship id="REL161" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB49" fkCardinality="7" identifying="true" name="user_category_fk" physicalName="user_category_fk" pk-table-ref="TAB110" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP162" populated="true" fk-column-ref="COL52" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL112" />
+   <relationship id="REL115" populated="true" UUID="5e21f054-c796-4121-89b5-7d27deb218ba" deferrability="7" deleteRule="3" fk-table-ref="TAB38" fkCardinality="7" identifying="true" name="user_category_fk" physicalName="user_category_fk" pk-table-ref="TAB79" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP116" populated="true" UUID="3947e95b-6e08-4372-b43d-4effc0e27225" fk-column-ref="COL40" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL80" />
    </relationship>
-   <reference ref-id="REL135" />
-   <reference ref-id="REL139" />
-   <reference ref-id="REL133" />
-   <reference ref-id="REL147" />
-   <reference ref-id="REL142" />
-   <reference ref-id="REL155" />
-   <reference ref-id="REL150" />
-   <reference ref-id="REL158" />
-   <reference ref-id="REL137" />
-   <reference ref-id="REL145" />
-   <reference ref-id="REL153" />
-   <reference ref-id="REL161" />
-   <relationship id="REL163" populated="true" deferrability="7" deleteRule="3" fk-table-ref="TAB122" fkCardinality="7" identifying="true" name="user_New_Table_fk" physicalName="user_New_Table_fk" pk-table-ref="TAB110" pkCardinality="2" updateRule="3" >
-    <column-mapping id="CMP164" populated="true" fk-column-ref="COL125" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL112" />
-   </relationship>
-   <reference ref-id="REL163" />
   </relationships>
  </target-database>
  <ddl-generator type="ca.sqlpower.architect.ddl.PostgresDDLGenerator" allow-connection="true" target-schema="public"> </ddl-generator>
  <create-kettle-job-settings filePath="" jobName="" schemaName="" kettleJoinType="0" savingToFile="true" />
  <play-pen zoom="1.0" viewportX="0" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
-  <table-pane table-ref="TAB7" x="29" y="103" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB24" x="582" y="207" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB36" x="509" y="342" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB49" x="865" y="228" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB61" x="303" y="198" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB73" x="231" y="330" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB86" x="740" y="387" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB98" x="901" y="514" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB110" x="439" y="43" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB122" x="721" y="88" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-link relationship-ref="REL139" pk-x="0" pk-y="33" fk-x="209" fk-y="42" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
-  <table-link relationship-ref="REL147" pk-x="0" pk-y="39" fk-x="209" fk-y="51" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
-  <table-link relationship-ref="REL133" pk-x="202" pk-y="150" fk-x="57" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="129"/>
-  <table-link relationship-ref="REL142" pk-x="183" pk-y="90" fk-x="25" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL155" pk-x="46" pk-y="90" fk-x="171" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL158" pk-x="122" pk-y="90" fk-x="86" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL150" pk-x="166" pk-y="105" fk-x="43" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL145" pk-x="157" pk-y="105" fk-x="14" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL161" pk-x="172" pk-y="31" fk-x="111" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="129"/>
-  <table-link relationship-ref="REL153" pk-x="121" pk-y="105" fk-x="51" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
-  <table-link relationship-ref="REL135" pk-x="202" pk-y="132" fk-x="0" fk-y="37" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="33"/>
-  <table-link relationship-ref="REL137" pk-x="0" pk-y="75" fk-x="202" fk-y="15" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
-  <table-link relationship-ref="REL163" pk-x="172" pk-y="67" fk-x="0" fk-y="22" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>
+  <table-pane table-ref="TAB7" x="61" y="66" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB21" x="583" y="155" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB29" x="492" y="284" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB38" x="794" y="70" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB46" x="313" y="146" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB54" x="245" y="270" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB63" x="741" y="308" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB71" x="891" y="411" bgColor="0xf0f0f0" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB79" x="394" y="18" bgColor="0xfbdabb" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-link relationship-ref="REL91" pk-x="0" pk-y="33" fk-x="209" fk-y="42" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
+  <table-link relationship-ref="REL97" pk-x="0" pk-y="39" fk-x="209" fk-y="51" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
+  <table-link relationship-ref="REL87" pk-x="203" pk-y="33" fk-x="57" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="129"/>
+  <table-link relationship-ref="REL94" pk-x="183" pk-y="90" fk-x="25" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
+  <table-link relationship-ref="REL103" pk-x="64" pk-y="90" fk-x="119" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
+  <table-link relationship-ref="REL106" pk-x="183" pk-y="90" fk-x="86" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
+  <table-link relationship-ref="REL100" pk-x="166" pk-y="105" fk-x="0" fk-y="24" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="36"/>
+  <table-link relationship-ref="REL111" pk-x="171" pk-y="24" fk-x="46" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="129"/>
+  <table-link relationship-ref="REL115" pk-x="172" pk-y="31" fk-x="111" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="129"/>
+  <table-link relationship-ref="REL113" pk-x="171" pk-y="105" fk-x="51" fk-y="0" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="132"/>
+  <table-link relationship-ref="REL89" pk-x="203" pk-y="25" fk-x="0" fk-y="37" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="33"/>
+  <table-link relationship-ref="REL109" pk-x="0" pk-y="31" fk-x="203" fk-y="15" rLineColor="0x333333" pkLabelText="" fkLabelText="" orientation="18"/>
  </play-pen>
  <profiles topNCount="10">
   </profiles>

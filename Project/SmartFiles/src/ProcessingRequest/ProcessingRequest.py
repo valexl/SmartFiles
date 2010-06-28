@@ -24,11 +24,9 @@ def cleareSpaceAboutOperator(request,operator):
             убираются пробелы между полем операцией и значением
         '''
         try:
-            str_lenght = 0
             index=0
             len_operator=len(operator)
             while (index>=0):
-                str_lenght = len(request)
                 index = request.find(operator,index+1)
                 if index>0:                
                     if request[index-1]==' ':
